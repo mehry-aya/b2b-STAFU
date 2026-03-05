@@ -16,27 +16,6 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
           <Link
-            href="/admin/products"
-            className="group p-6 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all hover:scale-[1.02] active:scale-95 flex flex-col items-center gap-3 shadow-xl shadow-slate-200"
-          >
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"
-                />
-              </svg>
-            </div>
-            Manage Products
-          </Link>
-          <Link
             href="/admin/dealers"
             className="group p-6 bg-white text-slate-900 border-2 border-slate-900 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-95 flex flex-col items-center gap-3"
           >
@@ -56,27 +35,6 @@ export default function AdminDashboard() {
               </svg>
             </div>
             Manage Dealers
-          </Link>
-          <Link
-            href="/admin/orders"
-            className="group p-6 bg-white text-slate-900 border-2 border-slate-100 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-95 flex flex-col items-center gap-3"
-          >
-            <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-slate-100">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                />
-              </svg>
-            </div>
-            Track Orders
           </Link>
           <div className="flex flex-col justify-end">
             <LogoutButton />

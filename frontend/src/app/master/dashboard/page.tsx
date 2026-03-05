@@ -43,12 +43,6 @@ export default async function MasterDashboard() {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <Link
-              href="/admin/products"
-              className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-slate-800 transition-all text-sm"
-            >
-              Manage Products
-            </Link>
             <DashboardActionWrapper />
             <LogoutButton />
           </div>
