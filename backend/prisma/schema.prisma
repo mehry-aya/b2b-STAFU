@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  dealer
+}
+
+enum ContractStatus {
+  pending
+  approved
+  rejected
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(dealer)
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  dealer    Dealer?
+}
+
+model Dealer {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  companyName    String
+  phone          String?
+  address        String?
+  contractUrl    String?
+  contractStatus ContractStatus @default(pending)
+  createdAt      DateTime       @default(now())
+  user           User           @relation(fields: [userId], references: [id])
+}
