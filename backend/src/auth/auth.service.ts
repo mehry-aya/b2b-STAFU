@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.isActive) {
+    if (!user.isActive && user.role !== 'dealer') {
       throw new ForbiddenException('Account is inactive');
     }
 
@@ -40,5 +41,34 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async register(registerDto: RegisterDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: registerDto.email },
+    });
+
+    if (existingUser) {
+      throw new UnauthorizedException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+    await this.prisma.user.create({
+      data: {
+        email: registerDto.email,
+        password: hashedPassword,
+        role: 'dealer',
+        isActive: true,
+        dealer: {
+          create: {
+            companyName: registerDto.companyName,
+            phone: registerDto.phone,
+          },
+        },
+      },
+    });
+
+    return { message: 'Account created successfully. You can now login.' };
   }
 }
