@@ -25,6 +25,17 @@ export class ProductsService {
     for (const p of productsData) {
       try {
         await this.prisma.$transaction(async (tx) => {
+          // First, ensure all collections for this product exist in our DB
+          const collectionConnections: { id: number }[] = [];
+          for (const c of p.collections) {
+            const collection = await (tx as any).collection.upsert({
+              where: { shopifyId: c.shopifyId },
+              update: { title: c.title, handle: c.handle },
+              create: { shopifyId: c.shopifyId, title: c.title, handle: c.handle },
+            });
+            collectionConnections.push({ id: collection.id });
+          }
+
           const product = await tx.product.upsert({
             where: { shopifyId: p.shopifyId },
             update: {
@@ -36,6 +47,9 @@ export class ProductsService {
               status: p.status,
               images: p.images as Prisma.JsonArray,
               syncedAt,
+              collections: {
+                set: collectionConnections,
+              },
             },
             create: {
               shopifyId: p.shopifyId,
@@ -47,6 +61,9 @@ export class ProductsService {
               status: p.status,
               images: p.images as Prisma.JsonArray,
               syncedAt,
+              collections: {
+                connect: collectionConnections,
+              },
             },
           } as any);
 
@@ -98,7 +115,11 @@ export class ProductsService {
     };
   }
 
-  async getActiveProducts(search?: string, productType?: string, allStatuses: boolean = false) {
+  async getCategories() {
+    return this.shopifyService.getCategories();
+  }
+
+  async getActiveProducts(search?: string, productType?: string, allStatuses: boolean = false, categoryHandle?: string) {
     const whereClause: any = {};
 
     if (!allStatuses) {
@@ -115,6 +136,17 @@ export class ProductsService {
 
     if (productType) {
       whereClause.productType = productType;
+    }
+
+    if (categoryHandle) {
+      whereClause.collections = {
+        some: {
+          handle: {
+            equals: categoryHandle,
+            mode: 'insensitive',
+          },
+        },
+      };
     }
 
     const products = await (this.prisma.product as any).findMany({

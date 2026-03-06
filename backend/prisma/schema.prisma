@@ -54,8 +54,19 @@ model Product {
   images      Json?
   syncedAt    DateTime         @default(now()) @map("synced_at")
   variants    ProductVariant[]
+  collections Collection[]     @relation("ProductToCollection")
 
   @@map("products")
+}
+
+model Collection {
+  id        Int       @id @default(autoincrement())
+  shopifyId String    @unique @map("shopify_id")
+  handle    String    @unique
+  title     String
+  products  Product[] @relation("ProductToCollection")
+
+  @@map("collections")
 }
 
 model ProductVariant {

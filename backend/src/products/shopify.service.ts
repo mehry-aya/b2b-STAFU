@@ -13,6 +13,7 @@ export interface ShopifyProductSyncPayload {
   status: string;
   images: any[];
   variants: ShopifyVariantSyncPayload[];
+  collections: { shopifyId: string; title: string; handle: string }[];
 }
 
 export interface ShopifyVariantSyncPayload {
@@ -34,6 +35,8 @@ export class ShopifyService {
   private readonly storeDomain: string;
   private readonly accessToken: string;
   private readonly apiUrl: string;
+  private readonly storefrontAccessToken: string;
+  private readonly storefrontApiUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
@@ -41,8 +44,104 @@ export class ShopifyService {
   ) {
     this.storeDomain = this.configService.get<string>('SHOPIFY_STORE_URL') || '';
     this.accessToken = this.configService.get<string>('SHOPIFY_ADMIN_API_TOKEN') || '';
+    this.storefrontAccessToken = this.configService.get<string>('NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN') || '';
+    
     const cleanDomain = this.storeDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     this.apiUrl = `https://${cleanDomain}/admin/api/2026-01/graphql.json`;
+this.storefrontApiUrl = `https://${cleanDomain}/api/2026-01/graphql.json`;
+  }
+
+  private categoryCache: { data: any[]; timestamp: number } | null = null;
+  private readonly CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+  async getCategories(): Promise<any[]> {
+    const now = Date.now();
+    if (this.categoryCache && now - this.categoryCache.timestamp < this.CACHE_TTL) {
+      this.logger.log('Returning categories from cache');
+      return this.categoryCache.data;
+    }
+
+    const query = `
+      query {
+        menu(handle: "b2b-menu") {
+          items {
+            title
+            url
+            items {
+              title
+              url
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(
+          this.storefrontApiUrl,
+          { query },
+          {
+            headers: {
+              'X-Shopify-Storefront-Access-Token': this.storefrontAccessToken,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+      const rawResponse = (response.data as any);
+      if (rawResponse.errors) {
+        this.logger.error('Shopify Storefront API Errors: ' + JSON.stringify(rawResponse.errors));
+      }
+
+      const menu = rawResponse.data?.menu;
+      if (!menu) {
+        this.logger.warn('Menu "b2b-menu" not found in Shopify Storefront API. Full Data: ' + JSON.stringify(rawResponse.data));
+        return [];
+      }
+
+      this.logger.log(`Found ${menu.items?.length || 0} top-level menu items.`);
+
+      const extractHandle = (url: string, title: string): string => {
+        // Log URL to see what we are dealing with
+        const match = url.match(/\/collections\/([^/?#]+)/);
+        const handle = match ? match[1] : '';
+        if (handle) {
+           this.logger.log(`Extracted handle "${handle}" from URL "${url}"`);
+        } else if (url.includes('/collections/')) {
+           this.logger.warn(`Failed to extract handle from collection URL: "${url}"`);
+        }
+        return handle;
+      };
+
+      const categories = (menu.items || [])
+        .map((item: any) => {
+          const handle = extractHandle(item.url, item.title);
+          const children = (item.items ?? [])
+            .map((child: any) => ({
+              title: child.title,
+              handle: extractHandle(child.url, child.title),
+              url: child.url,
+            }))
+            .filter((child: any) => child.handle !== '');
+
+          return {
+            title: item.title,
+            handle,
+            url: item.url,
+            children
+          };
+        })
+        .filter((cat: any) => cat.handle !== '' || cat.children.length > 0);
+
+      this.logger.log(`Final categories count: ${categories.length}`);
+      this.categoryCache = { data: categories, timestamp: now };
+      return categories;
+    } catch (error: any) {
+      this.logger.error(`Failed to fetch categories: ${error.message}`);
+      return this.categoryCache?.data || [];
+    }
   }
 
   async fetchAllProducts(): Promise<ShopifyProductSyncPayload[]> {
@@ -75,6 +174,15 @@ export class ShopifyService {
                   node {
                     url
                     altText
+                  }
+                }
+              }
+              collections(first: 10) {
+                edges {
+                  node {
+                    id
+                    title
+                    handle
                   }
                 }
               }
@@ -168,6 +276,11 @@ export class ShopifyService {
           status: node.status?.toLowerCase() || 'unknown',
           images,
           variants: variants || [],
+          collections: node.collections?.edges?.map((ce: any) => ({
+            shopifyId: ce.node.id,
+            title: ce.node.title,
+            handle: ce.node.handle,
+          })) || [],
         });
       }
 
