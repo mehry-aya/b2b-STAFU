@@ -41,3 +41,37 @@ model Dealer {
   createdAt      DateTime       @default(now())
   user           User           @relation(fields: [userId], references: [id])
 }
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  shopifyId   String           @unique @map("shopify_id")
+  title       String
+  description String?
+  handle      String?
+  vendor      String?
+  productType String?          @map("product_type")
+  status      String
+  images      Json?
+  syncedAt    DateTime         @default(now()) @map("synced_at")
+  variants    ProductVariant[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id                Int      @id @default(autoincrement())
+  shopifyVariantId  String   @unique @map("shopify_variant_id")
+  productId         Int      @map("product_id")
+  title             String
+  sku               String?
+  price             Decimal?
+  compareAtPrice    Decimal? @map("compare_at_price")
+  inventoryQuantity Int?     @map("inventory_quantity")
+  option1           String?
+  option2           String?
+  option3           String?
+  imageUrl          String?  @map("image_url")
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_variants")
+}
