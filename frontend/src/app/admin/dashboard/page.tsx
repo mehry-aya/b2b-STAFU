@@ -1,4 +1,3 @@
-import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
 
 export default function AdminDashboard() {
@@ -36,9 +35,6 @@ export default function AdminDashboard() {
             </div>
             Manage Dealers
           </Link>
-          <div className="flex flex-col justify-end">
-            <LogoutButton />
-          </div>
         </div>
       </div>
     </div>

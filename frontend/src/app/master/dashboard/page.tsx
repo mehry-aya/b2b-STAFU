@@ -1,6 +1,4 @@
 import { cookies } from "next/headers";
-import LogoutButton from "@/components/LogoutButton";
-import Link from "next/link";
 import { DeleteAdminButton } from "./AdminItems";
 import { ClientTrigger } from "@/app/master/dashboard/ClientTrigger";
 
@@ -44,7 +42,6 @@ export default async function MasterDashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <DashboardActionWrapper />
-            <LogoutButton />
           </div>
         </div>
 

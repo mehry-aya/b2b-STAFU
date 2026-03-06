@@ -1,5 +1,3 @@
-import LogoutButton from "@/components/LogoutButton";
-
 export default function DealerDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -11,12 +9,6 @@ export default function DealerDashboard() {
           <p className="text-slate-500 font-bold tracking-widest uppercase text-xs">
             B2B Ordering & Management
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-          <div className="flex flex-col justify-end">
-            <LogoutButton />
-          </div>
         </div>
       </div>
     </div>
