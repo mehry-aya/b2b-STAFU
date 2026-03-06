@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @Controller('api/products')
@@ -21,12 +22,26 @@ export class ProductsController {
   async getProducts(
     @Query('search') search?: string,
     @Query('productType') productType?: string,
+    @Query('all') all?: string,
+    @CurrentUser() user?: any,
   ) {
-    return this.productsService.getActiveProducts(search, productType);
+    try {
+      const isAdmin = user?.role === Role.admin || user?.role === Role.master_admin;
+      const allStatuses = isAdmin && all === 'true';
+      return await this.productsService.getActiveProducts(search, productType, allStatuses);
+    } catch (error: any) {
+      console.error('[ProductsController] getProducts error:', error.message, error.stack);
+      throw error;
+    }
   }
 
   @Get(':id')
   async getProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.productsService.getProductById(id);
+    try {
+      return await this.productsService.getProductById(id);
+    } catch (error: any) {
+      console.error('[ProductsController] getProduct error:', error.message);
+      throw error;
+    }
   }
 }

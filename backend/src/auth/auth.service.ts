@@ -71,4 +71,19 @@ export class AuthService {
 
     return { message: 'Account created successfully. You can now login.' };
   }
+
+  async getProfile(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        email: true,
+        role: true,
+        dealer: {
+          select: {
+            companyName: true,
+          },
+        },
+      },
+    });
+  }
 }

@@ -98,39 +98,62 @@ export class ProductsService {
     };
   }
 
-  async getActiveProducts(search?: string, productType?: string) {
-    const whereClause: Prisma.ProductWhereInput = {
-      status: 'active',
-    };
+  async getActiveProducts(search?: string, productType?: string, allStatuses: boolean = false) {
+    const whereClause: any = {};
+
+    if (!allStatuses) {
+      whereClause.status = 'active';
+    }
 
     if (search) {
-      whereClause.title = { contains: search, mode: 'insensitive' };
+      whereClause.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { vendor: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
     if (productType) {
-      (whereClause as any).product_type = productType;
+      whereClause.productType = productType;
     }
 
-    return this.prisma.product.findMany({
+    const products = await (this.prisma.product as any).findMany({
       where: whereClause,
+      include: {
+        variants: true,
+      },
       orderBy: { title: 'asc' },
-    } as any);
+    });
+
+    // Manually map to handle Decimal serialization issues in Server Actions
+    return products.map((p: any) => this.mapProduct(p));
   }
 
   async getProductById(id: number) {
-    const product = await this.prisma.product.findFirst({
+    const product = await (this.prisma.product as any).findFirst({
       where: { id, status: 'active' },
       include: {
         variants: {
           orderBy: { price: 'asc' },
         },
       },
-    } as any);
+    });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found or not active`);
     }
 
-    return product;
+    return this.mapProduct(product);
+  }
+
+  private mapProduct(product: any) {
+    return {
+      ...product,
+      variants: product.variants?.map((v: any) => ({
+        ...v,
+        price: v.price?.toString() || null,
+        compareAtPrice: v.compareAtPrice?.toString() || null,
+      })),
+    };
   }
 }
