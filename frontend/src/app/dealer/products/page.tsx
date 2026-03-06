@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { Product } from "@/lib/types/product";
 import { fetchProducts } from "@/lib/api/products";
 import debounce from "lodash.debounce";
-import { Search } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function DealerProductsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get("category");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,7 +21,12 @@ export default function DealerProductsPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchProducts(searchquery);
+      const data = await fetchProducts(
+        searchquery,
+        undefined,
+        false,
+        currentCategory || undefined,
+      );
       setProducts(data);
     } catch (err: any) {
       setError(err.message || "Failed to load products");
@@ -27,10 +35,10 @@ export default function DealerProductsPage() {
     }
   };
 
-  // Run on mount
+  // Run on mount and when category changes
   useEffect(() => {
-    loadProducts();
-  }, []);
+    loadProducts(searchTerm);
+  }, [currentCategory]);
 
   // Debounced search
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,6 +70,24 @@ export default function DealerProductsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center text-sm text-muted-foreground mb-4">
+        <button
+          onClick={() => router.push("/dealer/products")}
+          className="hover:text-primary transition-colors"
+        >
+          Products
+        </button>
+        {currentCategory && (
+          <>
+            <ChevronRight className="h-4 w-4 mx-2" />
+            <span className="font-medium text-foreground capitalize">
+              {currentCategory.replace(/-/g, " ")}
+            </span>
+          </>
+        )}
+      </nav>
+
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
@@ -125,7 +151,7 @@ export default function DealerProductsPage() {
                 onClick={() => router.push(`/dealer/products/${product.id}`)}
                 className="group border rounded-xl bg-card overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col h-full"
               >
-                <div className="w-full aspect-[4/3] bg-muted relative overflow-hidden">
+                <div className="w-full aspect-4/3 bg-muted relative overflow-hidden">
                   {firstImage ? (
                     <img
                       src={firstImage}
@@ -139,7 +165,7 @@ export default function DealerProductsPage() {
                   )}
                 </div>
 
-                <div className="p-5 flex flex-col flex-grow">
+                <div className="p-5 flex flex-col grow">
                   <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-1">
                     {product.vendor || "Vendor"}
                   </div>

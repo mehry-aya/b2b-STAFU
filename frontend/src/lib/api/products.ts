@@ -15,11 +15,13 @@ export async function fetchProducts(
   search?: string,
   productType?: string,
   all?: boolean,
+  category?: string,
 ): Promise<Product[]> {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (productType) params.append('productType', productType);
   if (all) params.append('all', 'true');
+  if (category) params.append('category', category);
 
   const queryString = params.toString() ? `?${params.toString()}` : '';
   const url = `${API_BASE_URL}/products${queryString}`;
@@ -42,6 +44,28 @@ export async function fetchProducts(
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error(`[Server Action] fetchProducts exception:`, (error as Error).message);
+    throw error;
+  }
+}
+
+export async function fetchCategories(): Promise<any[]> {
+  const url = `${API_BASE_URL}/products/categories`;
+  console.log(`[Server Action] fetchCategories calling: ${url}`);
+
+  try {
+    const response = await fetch(url, {
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error(`[Server Action] fetchCategories failed: ${response.status} ${response.statusText}`);
+      throw new Error('Failed to fetch categories');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`[Server Action] fetchCategories exception:`, error);
     throw error;
   }
 }

@@ -3,13 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, ChevronDown, ChevronRight } from "lucide-react";
 import { logoutAction, getMeAction } from "@/app/login/actions";
 
 interface NavItem {
-  icon: React.ElementType;
+  icon?: React.ElementType;
   label: string;
   href: string;
+  children?: NavItem[];
+  active?: boolean;
+  isGroup?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 interface SidebarLayoutProps {
@@ -57,6 +62,95 @@ export default function SidebarLayout({
     }
   };
 
+  const renderNavItem = (item: NavItem, depth = 0) => {
+    const isActive =
+      item.active ??
+      (pathname === item.href ||
+        (pathname?.startsWith(item.href) &&
+          item.href !== "/dealer/dashboard" &&
+          item.href !== "/admin/dashboard" &&
+          item.href !== "/dealer/products"));
+
+    const hasChildren = item.children && item.children.length > 0;
+    const isLink = item.href !== "#";
+
+    return (
+      <li key={item.label + item.href}>
+        <div className="flex flex-col">
+          {isLink ? (
+            <div className="group relative">
+              <Link
+                href={item.href}
+                onClick={() => setIsMobileOpen(false)}
+                className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm transition-colors ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+                style={{
+                  paddingLeft:
+                    depth > 0 ? `${depth * 1.5 + 0.75}rem` : "0.75rem",
+                }}
+              >
+                {item.icon && (
+                  <item.icon
+                    className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-gray-400"}`}
+                  />
+                )}
+                <span className="flex-1 truncate">{item.label}</span>
+                {hasChildren && (
+                  <div className="w-8 h-8" /* Spacer for button */ />
+                )}
+              </Link>
+              {hasChildren && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    item.onToggle?.();
+                  }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-md transition-colors"
+                  title={item.isOpen ? "Collapse" : "Expand"}
+                >
+                  {item.isOpen ? (
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  )}
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={item.onToggle}
+              className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
+                depth > 0 ? "border-l border-gray-100 ml-4" : ""
+              }`}
+              style={{ paddingLeft: depth > 0 ? `${depth * 1}rem` : "0.75rem" }}
+            >
+              {item.icon && <item.icon className="h-5 w-5 text-gray-400" />}
+              <span className="flex-1 text-left truncate font-medium">
+                {item.label}
+              </span>
+              {hasChildren &&
+                (item.isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                ))}
+            </button>
+          )}
+
+          {hasChildren && item.isOpen && (
+            <ul className="mt-1 space-y-1 border-l border-gray-100 ml-6">
+              {item.children?.map((child) => renderNavItem(child, depth + 1))}
+            </ul>
+          )}
+        </div>
+      </li>
+    );
+  };
+
   const sidebarContent = (
     <div className="flex h-full flex-col bg-white border-r border-gray-200">
       <div className="p-6 border-b border-gray-200">
@@ -66,31 +160,7 @@ export default function SidebarLayout({
 
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-3">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (pathname?.startsWith(item.href) &&
-                item.href !== "/dealer/dashboard" &&
-                item.href !== "/admin/dashboard");
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={() => setIsMobileOpen(false)}
-                  className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm transition-colors ${
-                    isActive
-                      ? "bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  <item.icon
-                    className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-gray-400"}`}
-                  />
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
+          {navItems.map((item) => renderNavItem(item))}
         </ul>
       </nav>
 
