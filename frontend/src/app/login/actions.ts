@@ -372,3 +372,24 @@ export async function updateOrderStatusAction(id: number, status: string) {
     return { error: "Connection error" };
   }
 }
+
+export async function getMeAction() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch("http://localhost:3001/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) return { error: "Failed to fetch profile" };
+    return await response.json();
+  } catch {
+    return { error: "Connection error" };
+  }
+}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, LogOut } from "lucide-react";
-import { logoutAction } from "@/app/login/actions";
+import { logoutAction, getMeAction } from "@/app/login/actions";
 
 interface NavItem {
   icon: React.ElementType;
@@ -33,10 +33,14 @@ export default function SidebarLayout({
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          setUser({ companyName: data.companyName, email: data.email });
+        const data = await getMeAction();
+        if (data && !data.error) {
+          const companyName =
+            data.dealer?.companyName ||
+            (data.role === "admin" || data.role === "master_admin"
+              ? "Administration"
+              : "Contractor");
+          setUser({ companyName, email: data.email });
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
