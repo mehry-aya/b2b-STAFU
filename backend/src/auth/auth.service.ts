@@ -64,6 +64,7 @@ export class AuthService {
           create: {
             companyName: registerDto.companyName,
             phone: registerDto.phone,
+            address: registerDto.address,
           },
         },
       },

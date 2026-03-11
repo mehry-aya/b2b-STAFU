@@ -115,6 +115,21 @@ export default function RegisterPage() {
                   placeholder="+1 234 567 890"
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-semibold text-slate-700"
+                >
+                  Address
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  rows={2}
+                  className="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-slate-900 focus:outline-none transition-all resize-y"
+                  placeholder="123 Main St, City, Country"
+                />
+              </div>
             </div>
 
             {error && (
