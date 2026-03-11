@@ -40,6 +40,7 @@ model Dealer {
   contractStatus ContractStatus @default(pending)
   createdAt      DateTime       @default(now())
   user           User           @relation(fields: [userId], references: [id])
+  orders         Order[]
 }
 
 model Product {
@@ -69,20 +70,54 @@ model Collection {
   @@map("collections")
 }
 
+enum OrderStatus {
+  draft
+  pending_payment
+  paid
+  shipped
+  cancelled
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  dealerId    Int         @map("dealer_id")
+  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
+  status      OrderStatus @default(draft)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  dealer      Dealer      @relation(fields: [dealerId], references: [id])
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id               Int            @id @default(autoincrement())
+  orderId          Int            @map("order_id")
+  productVariantId Int            @map("product_variant_id")
+  quantity         Int
+  unitPrice        Decimal        @map("unit_price") @db.Decimal(10, 2)
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+
+  @@map("order_items")
+}
+
 model ProductVariant {
-  id                Int      @id @default(autoincrement())
-  shopifyVariantId  String   @unique @map("shopify_variant_id")
-  productId         Int      @map("product_id")
+  id                Int         @id @default(autoincrement())
+  shopifyVariantId  String      @unique @map("shopify_variant_id")
+  productId         Int         @map("product_id")
   title             String
   sku               String?
   price             Decimal?
-  compareAtPrice    Decimal? @map("compare_at_price")
-  inventoryQuantity Int?     @map("inventory_quantity")
+  compareAtPrice    Decimal?    @map("compare_at_price")
+  inventoryQuantity Int?        @map("inventory_quantity")
   option1           String?
   option2           String?
   option3           String?
-  imageUrl          String?  @map("image_url")
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageUrl          String?     @map("image_url")
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems        OrderItem[]
 
   @@map("product_variants")
 }

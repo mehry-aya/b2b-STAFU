@@ -34,6 +34,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new ForbiddenException('Account is inactive');
     }
 
-    return { id: user.id, email: user.email, role: user.role };
+    const dealer = await this.prisma.dealer.findUnique({
+      where: { userId: user.id },
+    });
+
+    return { id: user.id, email: user.email, role: user.role, dealer };
   }
 }
