@@ -26,6 +26,7 @@ export default function DealerProductsPage() {
         undefined,
         false,
         currentCategory || undefined,
+        true
       );
       setProducts(data);
     } catch (err: any) {

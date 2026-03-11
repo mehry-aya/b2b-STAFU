@@ -16,13 +16,14 @@ export async function fetchProducts(
   productType?: string,
   all?: boolean,
   category?: string,
+  inStock?: boolean
 ): Promise<Product[]> {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (productType) params.append('productType', productType);
   if (all) params.append('all', 'true');
   if (category) params.append('category', category);
-
+  if (inStock) params.append("inStock", "true");
   const queryString = params.toString() ? `?${params.toString()}` : '';
   const url = `${API_BASE_URL}/products${queryString}`;
   
