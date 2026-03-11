@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LogOut, ChevronDown, ChevronRight } from "lucide-react";
+import { Menu, LogOut, ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
 import { logoutAction, getMeAction } from "@/app/login/actions";
+import { CartSidebar } from "@/components/cart/CartSidebar";
+import { useCart } from "@/context/CartContext";
 
 interface NavItem {
   icon?: React.ElementType;
@@ -22,13 +24,14 @@ interface SidebarLayoutProps {
   navItems: NavItem[];
   brandSubtitle: React.ReactNode;
 }
-
 export default function SidebarLayout({
   children,
   navItems,
   brandSubtitle,
 }: SidebarLayoutProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { totalItems } = useCart();
   const [user, setUser] = useState<{
     companyName: string;
     email: string;
@@ -144,7 +147,7 @@ export default function SidebarLayout({
           )}
 
           {hasChildren && item.isOpen && (
-            <ul className="mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-5">
+            <ul className="mt-0.5 space-y-0.5 border-l border-white/6 ml-5">
               {item.children?.map((child) => renderNavItem(child, depth + 1))}
             </ul>
           )}
@@ -177,6 +180,24 @@ export default function SidebarLayout({
           {navItems.map((item) => renderNavItem(item))}
         </ul>
       </nav>
+
+      {/* Cart Toggle (Desktop) */}
+      <div className="px-3 py-4">
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-bold bg-zinc-800 text-white hover:bg-zinc-700 transition-all group"
+        >
+          <div className="flex items-center gap-3">
+            <ShoppingBag className="h-4 w-4 text-red-500" />
+            <span>My Cart</span>
+          </div>
+          {totalItems > 0 && (
+            <span className="bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
+              {totalItems}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* User section */}
       <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
@@ -249,12 +270,26 @@ export default function SidebarLayout({
               STAFUPRO
             </span>
           </div>
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="p-2 relative text-zinc-400 hover:text-white transition-colors"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full text-white">
+                {totalItems}
+              </span>
+            )}
+          </button>
         </header>
 
         <main className="flex-1 overflow-y-auto p-5 md:p-7 lg:p-8">
           {children}
         </main>
       </div>
+
+      {/* Global Cart Sidebar */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 }

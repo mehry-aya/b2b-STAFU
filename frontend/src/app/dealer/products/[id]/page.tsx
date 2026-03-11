@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 export default function DealerProductDetailsPage({
   params: paramsPromise,
@@ -24,6 +25,7 @@ export default function DealerProductDetailsPage({
   const params = use(paramsPromise);
   const router = useRouter();
   const { toast } = useToast();
+  const { addItem } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,7 +94,7 @@ export default function DealerProductDetailsPage({
   }, [product]);
 
   const handleAddToOrder = () => {
-    if (!selectedVariant) {
+    if (!selectedVariant || !product) {
       toast({
         title: "Cannot Add to Order",
         description: "Please select a valid combination of options.",
@@ -100,9 +102,30 @@ export default function DealerProductDetailsPage({
       });
       return;
     }
+
+    const stock = selectedVariant.inventoryQuantity || 0;
+    if (quantity > stock) {
+      toast({
+        title: "Limited Stock",
+        description: `Only ${stock} units available. Adjusting quantity to max stock.`,
+        variant: "destructive",
+      });
+    }
+
+    addItem({
+      variantId: selectedVariant.id,
+      productId: product.id,
+      title: product.title,
+      variantTitle: selectedVariant.title || "Default",
+      price: Number(selectedVariant.price) || 0,
+      quantity: quantity,
+      inventoryQuantity: stock,
+      imageUrl: selectedVariant.imageUrl || product.images?.[0]?.src,
+    });
+
     toast({
       title: "Added to Order",
-      description: `${quantity}x ${product?.title} (${selectedVariant.title || "Default Variant"}) added.`,
+      description: `${quantity}x ${product?.title} (${selectedVariant.title || "Default Variant"}) added to your cart.`,
     });
   };
 

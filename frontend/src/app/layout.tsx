@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "@/components/ui/toaster";
+import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
   children,
@@ -29,8 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <Toaster />
+        <CartProvider>
+          {children}
+          <Toaster />
+        </CartProvider>
       </body>
     </html>
   );

@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import DealerSidebar from "@/components/layouts/DealerSidebar";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Dealer Portal - STAFUPRO",
 };

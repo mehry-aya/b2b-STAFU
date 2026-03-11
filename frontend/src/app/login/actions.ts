@@ -14,7 +14,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   }
 
   try {
-    const response = await fetch("http://localhost:3001/auth/login", {
+    const response = await fetch("http://127.0.0.1:3001/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -66,7 +66,7 @@ export async function registerAction(prevState: unknown, formData: FormData) {
   const phone = formData.get("phone") as string;
 
   try {
-    const response = await fetch("http://localhost:3001/auth/register", {
+    const response = await fetch("http://127.0.0.1:3001/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, companyName, phone }),
@@ -90,7 +90,7 @@ export async function createAdminAction(email: string, password: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/users/create-admin", {
+    const response = await fetch("http://127.0.0.1:3001/api/users/create-admin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +117,7 @@ export async function deleteAdminAction(id: number) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://localhost:3001/users/${id}`, {
+    const response = await fetch(`http://127.0.0.1:3001/api/users/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -142,7 +142,7 @@ export async function getProductsAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/products", {
+    const response = await fetch("http://127.0.0.1:3001/api/products", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -167,7 +167,7 @@ export async function syncProductsAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/products/sync", {
+    const response = await fetch("http://127.0.0.1:3001/api/products/sync", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -191,7 +191,7 @@ export async function getDealerStatusAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/auth/me", {
+    const response = await fetch("http://127.0.0.1:3001/api/auth/me", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -216,7 +216,7 @@ export async function uploadContractAction(formData: FormData) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/dealers/contract", {
+    const response = await fetch("http://127.0.0.1:3001/api/dealers/contract", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -242,7 +242,7 @@ export async function getDealersAdminAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/dealers/admin/list", {
+    const response = await fetch("http://127.0.0.1:3001/api/dealers/admin/list", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -264,7 +264,7 @@ export async function approveDealerAction(id: number, status: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://localhost:3001/dealers/admin/${id}/status`, {
+    const response = await fetch(`http://127.0.0.1:3001/api/dealers/admin/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -288,7 +288,7 @@ export async function createOrderAction(items: { productId: number; variantId: n
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/orders", {
+    const response = await fetch("http://127.0.0.1:3001/api/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -315,7 +315,7 @@ export async function getOrdersAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/orders", {
+    const response = await fetch("http://127.0.0.1:3001/api/orders", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -336,7 +336,7 @@ export async function getMyOrdersAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/orders/my-orders", {
+    const response = await fetch("http://127.0.0.1:3001/api/orders/my-orders", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -357,7 +357,7 @@ export async function updateOrderStatusAction(id: number, status: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://localhost:3001/orders/${id}/status`, {
+    const response = await fetch(`http://127.0.0.1:3001/api/orders/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -380,7 +380,7 @@ export async function getMeAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://localhost:3001/auth/me", {
+    const response = await fetch("http://127.0.0.1:3001/api/auth/me", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

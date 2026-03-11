@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import AdminSidebar from "@/components/layouts/AdminSidebar";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Admin Portal - STAFUPRO",
 };
