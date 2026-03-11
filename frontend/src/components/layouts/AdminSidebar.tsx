@@ -22,13 +22,16 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
   ];
 
   const brandSubtitle = (
-    <div className="flex items-center gap-2">
-      <span className="text-sm font-medium text-gray-600">Admin Portal</span>
-      <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+    <div className="flex items-center gap-2 mt-1">
+      <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "var(--sidebar-text)" }}>
+        Admin Portal
+      </span>
+      <span className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-600/20 text-red-400 border border-red-600/20">
         Admin
       </span>
     </div>
   );
+
 
   return (
     <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle}>

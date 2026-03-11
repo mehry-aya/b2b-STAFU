@@ -62,6 +62,14 @@ export default function SidebarLayout({
     }
   };
 
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+
   const renderNavItem = (item: NavItem, depth = 0) => {
     const isActive =
       item.active ??
@@ -82,10 +90,10 @@ export default function SidebarLayout({
               <Link
                 href={item.href}
                 onClick={() => setIsMobileOpen(false)}
-                className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm transition-colors ${
+                className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 font-medium border-l-2 border-blue-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-red-600/15 text-white border-l-2 border-red-500"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-white border-l-2 border-transparent"
                 }`}
                 style={{
                   paddingLeft:
@@ -94,13 +102,11 @@ export default function SidebarLayout({
               >
                 {item.icon && (
                   <item.icon
-                    className={`h-5 w-5 ${isActive ? "text-blue-700" : "text-gray-400"}`}
+                    className={`h-4 w-4 shrink-0 ${isActive ? "text-red-400" : "text-zinc-500 group-hover:text-zinc-300"}`}
                   />
                 )}
                 <span className="flex-1 truncate">{item.label}</span>
-                {hasChildren && (
-                  <div className="w-8 h-8" /* Spacer for button */ />
-                )}
+                {hasChildren && <div className="w-6 h-6" />}
               </Link>
               {hasChildren && (
                 <button
@@ -109,13 +115,13 @@ export default function SidebarLayout({
                     e.stopPropagation();
                     item.onToggle?.();
                   }}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-200 rounded-md transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-md transition-colors"
                   title={item.isOpen ? "Collapse" : "Expand"}
                 >
                   {item.isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                    <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                    <ChevronRight className="h-3.5 w-3.5 text-zinc-400" />
                   )}
                 </button>
               )}
@@ -123,26 +129,22 @@ export default function SidebarLayout({
           ) : (
             <button
               onClick={item.onToggle}
-              className={`flex items-center gap-3 w-full rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
-                depth > 0 ? "border-l border-gray-100 ml-4" : ""
-              }`}
+              className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-150`}
               style={{ paddingLeft: depth > 0 ? `${depth * 1}rem` : "0.75rem" }}
             >
-              {item.icon && <item.icon className="h-5 w-5 text-gray-400" />}
-              <span className="flex-1 text-left truncate font-medium">
-                {item.label}
-              </span>
+              {item.icon && <item.icon className="h-4 w-4 shrink-0 text-zinc-500" />}
+              <span className="flex-1 text-left truncate">{item.label}</span>
               {hasChildren &&
                 (item.isOpen ? (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3.5 w-3.5" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 ))}
             </button>
           )}
 
           {hasChildren && item.isOpen && (
-            <ul className="mt-1 space-y-1 border-l border-gray-100 ml-6">
+            <ul className="mt-0.5 space-y-0.5 border-l border-white/[0.06] ml-5">
               {item.children?.map((child) => renderNavItem(child, depth + 1))}
             </ul>
           )}
@@ -152,49 +154,74 @@ export default function SidebarLayout({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-white border-r border-gray-200">
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-blue-700">STAFUPRO</h1>
+    <div
+      className="flex h-full flex-col"
+      style={{ background: "var(--sidebar-bg)", borderRight: "1px solid var(--sidebar-border)" }}
+    >
+      {/* Brand */}
+      <div className="px-5 py-6" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
+        {/* Red accent line */}
+        <div className="w-8 h-0.5 bg-red-600 mb-3 rounded-full" />
+        <h1
+          className="text-xl font-black tracking-widest uppercase"
+          style={{ color: "var(--sidebar-text-active)", letterSpacing: "0.15em" }}
+        >
+          STAFUPRO
+        </h1>
         <div className="mt-1">{brandSubtitle}</div>
       </div>
 
+      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-3">
+        <ul className="space-y-0.5 px-3">
           {navItems.map((item) => renderNavItem(item))}
         </ul>
       </nav>
 
-      <div className="border-t border-gray-200 p-4">
-        <div className="mb-4 px-2">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {user?.companyName || "Loading..."}
-          </p>
-          <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-        </div>
+      {/* User section */}
+      <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
+        {user && (
+          <div className="flex items-center gap-3 px-2 mb-3">
+            {/* Avatar */}
+            <div
+              className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
+            >
+              {getInitials(user.companyName)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate" style={{ color: "var(--sidebar-text-active)" }}>
+                {user.companyName}
+              </p>
+              <p className="text-xs truncate" style={{ color: "var(--sidebar-text)" }}>
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-red-600/10 hover:text-red-400 transition-all duration-150"
         >
-          <LogOut className="h-5 w-5 text-gray-400" />
-          Logout
+          <LogOut className="h-4 w-4 shrink-0" />
+          Sign Out
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Mobile Sidebar Overlay */}
+    <div className="flex h-screen" style={{ background: "var(--surface)" }}>
+      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -204,19 +231,27 @@ export default function SidebarLayout({
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:hidden">
+        <header
+          className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 lg:hidden"
+          style={{ background: "var(--sidebar-bg)", borderBottom: "1px solid var(--sidebar-border)" }}
+        >
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileOpen(true)}
-              className="rounded-md p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-md p-2 text-zinc-400 hover:bg-white/10 hover:text-white focus:outline-none"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
-            <span className="text-lg font-bold text-blue-700">STAFUPRO</span>
+            <span
+              className="text-base font-black tracking-widest uppercase"
+              style={{ color: "var(--sidebar-text-active)" }}
+            >
+              STAFUPRO
+            </span>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-5 md:p-7 lg:p-8">
           {children}
         </main>
       </div>

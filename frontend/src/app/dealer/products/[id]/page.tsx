@@ -3,9 +3,18 @@
 import { use, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Product, ProductVariant } from "@/lib/types/product";
+import { Product } from "@/lib/types/product";
 import { fetchProductById } from "@/lib/api/products";
-import { ChevronLeft, ShoppingCart, Info, Package, Hash } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronDown,
+  ShoppingCart,
+  Package,
+  Hash,
+  Layers,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 export default function DealerProductDetailsPage({
   params: paramsPromise,
@@ -19,6 +28,7 @@ export default function DealerProductDetailsPage({
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   const [selectedOptions, setSelectedOptions] = useState<{
     [key: string]: string | null;
@@ -28,14 +38,14 @@ export default function DealerProductDetailsPage({
     option3: null,
   });
   const [quantity, setQuantity] = useState<number>(1);
+  const [descOpen, setDescOpen] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
       try {
         const data = await fetchProductById(params.id);
         setProduct(data);
-
-        // Auto-select first available variant's options
+        if (data.images?.[0]?.src) setActiveImage(data.images[0].src);
         if (data.variants && data.variants.length > 0) {
           const firstVariant = data.variants[0];
           setSelectedOptions({
@@ -50,18 +60,16 @@ export default function DealerProductDetailsPage({
         setLoading(false);
       }
     };
-
     loadProduct();
   }, [params.id]);
 
   const handleOptionChange = (
     optionKey: "option1" | "option2" | "option3",
-    value: string,
+    value: string
   ) => {
     setSelectedOptions((prev) => ({ ...prev, [optionKey]: value }));
   };
 
-  // Find the exact variant matching all 3 selected options
   const selectedVariant = useMemo(() => {
     if (!product?.variants) return null;
     return (
@@ -69,25 +77,17 @@ export default function DealerProductDetailsPage({
         (v) =>
           v.option1 === selectedOptions.option1 &&
           v.option2 === selectedOptions.option2 &&
-          v.option3 === selectedOptions.option3,
+          v.option3 === selectedOptions.option3
       ) || null
     );
   }, [product, selectedOptions]);
 
-  // Extract unique non-null values for each option to render the dropdowns
   const availableOptions = useMemo(() => {
     if (!product?.variants) return { option1: [], option2: [], option3: [] };
-
     return {
-      option1: Array.from(
-        new Set(product.variants.map((v) => v.option1).filter(Boolean)),
-      ),
-      option2: Array.from(
-        new Set(product.variants.map((v) => v.option2).filter(Boolean)),
-      ),
-      option3: Array.from(
-        new Set(product.variants.map((v) => v.option3).filter(Boolean)),
-      ),
+      option1: Array.from(new Set(product.variants.map((v) => v.option1).filter(Boolean))),
+      option2: Array.from(new Set(product.variants.map((v) => v.option2).filter(Boolean))),
+      option3: Array.from(new Set(product.variants.map((v) => v.option3).filter(Boolean))),
     };
   }, [product]);
 
@@ -100,64 +100,79 @@ export default function DealerProductDetailsPage({
       });
       return;
     }
-
     toast({
-      title: "Success",
-      description: `Added ${quantity}x ${product?.title} (${selectedVariant.title || "Default Variant"}) to order.`,
+      title: "Added to Order",
+      description: `${quantity}x ${product?.title} (${selectedVariant.title || "Default Variant"}) added.`,
     });
   };
 
+  /* ─── Loading skeleton ───────────────────────────────────────── */
   if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-4 bg-muted w-32 rounded"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-muted aspect-square rounded-xl"></div>
-          <div className="space-y-4">
-            <div className="h-8 bg-muted w-3/4 rounded"></div>
-            <div className="h-4 bg-muted w-1/4 rounded"></div>
-            <div className="h-32 bg-muted w-full rounded mt-6"></div>
+      <div className="max-w-5xl mx-auto space-y-6 animate-pulse">
+        <div className="h-4 bg-zinc-100 w-32 rounded-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="aspect-square bg-zinc-100 rounded-2xl" />
+          <div className="space-y-5">
+            <div className="h-4 bg-zinc-100 rounded w-1/3" />
+            <div className="h-8 bg-zinc-100 rounded w-3/4" />
+            <div className="h-10 bg-zinc-100 rounded w-1/4" />
+            <div className="h-px bg-zinc-100 my-4" />
+            <div className="h-24 bg-zinc-100 rounded" />
+            <div className="h-12 bg-zinc-100 rounded-xl" />
           </div>
         </div>
       </div>
     );
   }
 
+  /* ─── Error state ────────────────────────────────────────────── */
   if (error || !product) {
     return (
-      <div className="p-6 bg-destructive/10 text-destructive text-center rounded-xl border border-destructive/20">
-        <p className="font-medium text-lg mb-2">Error Loading Product</p>
-        <p className="text-sm">{error || "Product not found"}</p>
+      <div className="max-w-5xl mx-auto flex flex-col items-center justify-center py-24 gap-4">
+        <XCircle className="h-12 w-12 text-red-300" />
+        <h2 className="text-lg font-bold text-zinc-900">Product Not Found</h2>
+        <p className="text-sm text-zinc-500">{error || "This product could not be loaded."}</p>
         <button
           onClick={() => router.push("/dealer/products")}
-          className="mt-4 px-4 py-2 bg-background border text-foreground rounded-md text-sm hover:bg-muted"
+          className="mt-2 flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-red-600 transition-colors"
         >
+          <ChevronLeft className="h-4 w-4" />
           Back to Products
         </button>
       </div>
     );
   }
 
-  // Choose the image: first try selected variant, then fallback to product's first image
-  const displayImage = selectedVariant?.imageUrl || product.images?.[0]?.src;
-  const isOutOfStock = selectedVariant
-    ? (selectedVariant.inventoryQuantity || 0) <= 0
-    : true;
+  const displayImage = activeImage || selectedVariant?.imageUrl || product.images?.[0]?.src;
+  const isOutOfStock = selectedVariant ? (selectedVariant.inventoryQuantity || 0) <= 0 : true;
+  const price = selectedVariant?.price ? parseFloat(selectedVariant.price).toFixed(2) : null;
+
+  // Option label names (use productOptions if available, otherwise fallback)
+  const optionLabels = (product as any).options?.map((o: any) => o.name) || ["Option 1", "Option 2", "Option 3"];
+
+  const optionPairs: [string, string[], "option1" | "option2" | "option3"][] = [
+    [optionLabels[0] || "Option 1", availableOptions.option1 as string[], "option1"],
+    [optionLabels[1] || "Option 2", availableOptions.option2 as string[], "option2"],
+    [optionLabels[2] || "Option 3", availableOptions.option3 as string[], "option3"],
+  ].filter(([, vals]) => (vals as string[]).length > 0) as any;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-10">
+    <div className="max-w-5xl mx-auto pb-12">
+      {/* Back link */}
       <button
         onClick={() => router.push("/dealer/products")}
-        className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-zinc-900 transition-colors mb-8"
       >
-        <ChevronLeft className="h-4 w-4 mr-1" />
+        <ChevronLeft className="h-4 w-4" />
         Back to Products
       </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Left Column: Image Gallery */}
-        <div className="space-y-4">
-          <div className="bg-muted rounded-xl aspect-square overflow-hidden relative border shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        {/* ── Left: Image gallery ─────────────────────────────────── */}
+        <div className="space-y-3">
+          {/* Main image */}
+          <div className="relative w-full aspect-square bg-zinc-50 rounded-2xl overflow-hidden border border-zinc-100 shadow-sm">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -165,189 +180,226 @@ export default function DealerProductDetailsPage({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Package className="h-12 w-12 mb-2 opacity-20" />
-                <span>No Image Available</span>
+              <div className="flex flex-col items-center justify-center h-full text-zinc-300">
+                <Package className="h-14 w-14 mb-2" />
+                <span className="text-sm font-medium">No Image</span>
+              </div>
+            )}
+            {/* Red price stamp */}
+            {price && (
+              <div className="absolute top-4 right-4 bg-red-600 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg">
+                ${price}
               </div>
             )}
           </div>
-          {/* Miniature gallery if multiple images */}
+
+          {/* Thumbnail strip */}
           {product.images && product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {product.images.map((img, i) => (
-                <div
+                <button
                   key={i}
-                  className="w-20 h-20 shrink-0 bg-muted rounded-md border overflow-hidden"
+                  onClick={() => setActiveImage(img.src)}
+                  className={`shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-150 ${
+                    activeImage === img.src
+                      ? "border-red-500 shadow-md shadow-red-100"
+                      : "border-transparent hover:border-zinc-300"
+                  }`}
                 >
                   <img
                     src={img.src}
-                    alt="Thumbnail"
+                    alt={`Thumbnail ${i + 1}`}
                     className="w-full h-full object-cover"
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Right Column: Details & Actions */}
-        <div className="flex flex-col">
-          <div className="text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-2">
-            {product.vendor || "Vendor"}
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">
-            {product.title}
-          </h1>
-
-          <div className="text-3xl font-bold text-primary mt-2 mb-6">
-            {selectedVariant?.price
-              ? `$${parseFloat(selectedVariant.price).toFixed(2)}`
-              : "Price Unavailable"}
+        {/* ── Right: Info & actions ───────────────────────────────── */}
+        <div className="flex flex-col gap-3">
+          {/* Vendor + title */}
+          <div>
+            <p className="text-[11px] font-bold tracking-widest text-zinc-400 uppercase mb-1.5">
+              {product.vendor || "Brand"}
+            </p>
+            <h1 className="text-2xl font-black text-zinc-900 leading-tight">
+              {product.title}
+            </h1>
           </div>
 
-          {/* Description */}
-          {product.description && (
-            <div
-              className="mt-2 mb-8 prose prose-sm dark:prose-invert text-muted-foreground"
-              dangerouslySetInnerHTML={{ __html: product.description }}
-            />
-          )}
-
-          <div className="w-full h-px bg-border mb-8"></div>
-
-          {/* Options Selectors */}
-          <div className="space-y-5 mb-8">
-            {availableOptions.option1.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Option 1
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {availableOptions.option1.map((val) => (
-                    <button
-                      key={val}
-                      onClick={() =>
-                        handleOptionChange("option1", val as string)
-                      }
-                      className={`px-4 py-2 border rounded-md text-sm transition-all
-                        ${
-                          selectedOptions.option1 === val
-                            ? "border-primary ring-1 ring-primary text-primary font-medium bg-primary/5"
-                            : "hover:border-foreground/30 text-muted-foreground"
-                        }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {availableOptions.option2.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Option 2
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {availableOptions.option2.map((val) => (
-                    <button
-                      key={val}
-                      onClick={() =>
-                        handleOptionChange("option2", val as string)
-                      }
-                      className={`px-4 py-2 border rounded-md text-sm transition-all
-                        ${
-                          selectedOptions.option2 === val
-                            ? "border-primary ring-1 ring-primary text-primary font-medium bg-primary/5"
-                            : "hover:border-foreground/30 text-muted-foreground"
-                        }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {availableOptions.option3.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Option 3
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {availableOptions.option3.map((val) => (
-                    <button
-                      key={val}
-                      onClick={() =>
-                        handleOptionChange("option3", val as string)
-                      }
-                      className={`px-4 py-2 border rounded-md text-sm transition-all
-                        ${
-                          selectedOptions.option3 === val
-                            ? "border-primary ring-1 ring-primary text-primary font-medium bg-primary/5"
-                            : "hover:border-foreground/30 text-muted-foreground"
-                        }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          {/* Price */}
+          <div>
+            {price ? (
+              <span className="text-3xl font-black text-zinc-900">${price}</span>
+            ) : (
+              <span className="text-base text-zinc-400 font-medium">Price unavailable</span>
             )}
           </div>
 
-          {/* Selected Variant Meta */}
-          <div className="bg-muted/50 rounded-lg p-4 mb-8 space-y-3 border">
+
+          {/* Options */}
+
+          {/* Variant meta */}
+          <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4 space-y-2.5">
             {selectedVariant ? (
               <>
-                <div className="flex items-center text-sm">
-                  <Hash className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground mr-2">SKU:</span>
-                  <span className="font-medium text-foreground">
+                <div className="flex items-center gap-2 text-sm">
+                  <Hash className="h-3.5 w-3.5 text-zinc-400" />
+                  <span className="text-zinc-500">SKU:</span>
+                  <span className="font-semibold text-zinc-800 font-mono text-xs">
                     {selectedVariant.sku || "N/A"}
                   </span>
                 </div>
-                <div className="flex items-center text-sm">
-                  <Info className="w-4 h-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground mr-2">Stock:</span>
+                <div className="flex items-center gap-2 text-sm">
+                  {isOutOfStock ? (
+                    <XCircle className="h-3.5 w-3.5 text-red-500" />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  )}
+                  <span className="text-zinc-500">Stock:</span>
                   <span
-                    className={`font-medium ${isOutOfStock ? "text-destructive" : "text-emerald-600"}`}
+                    className={`font-semibold ${
+                      isOutOfStock ? "text-red-600" : "text-emerald-600"
+                    }`}
                   >
                     {selectedVariant.inventoryQuantity || 0} available
                   </span>
                 </div>
               </>
             ) : (
-              <div className="text-sm text-amber-600 font-medium">
-                Selected combination is not available.
+              <div className="flex items-center gap-2 text-sm text-amber-600 font-medium">
+                <Layers className="h-4 w-4" />
+                This combination is not available
               </div>
             )}
           </div>
-
-          {/* Add to Order Actions */}
-          <div className="flex gap-4 mt-auto pt-4">
-            <div className="w-24">
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                }
-                className="w-full px-3 py-3 rounded-md border bg-background text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
+  {optionPairs.length > 0 && (
+            <div className="space-y-5">
+              {optionPairs.map(([label, values, key]) => (
+                <div key={key} className="space-y-2">
+                  <label className="text-xs font-bold tracking-widest uppercase text-zinc-500">
+                    {label}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {values.map((val: string) => {
+                      const isSelected = selectedOptions[key] === val;
+                      // Check if ALL variants containing this option value are out of stock
+                      const isValueOutOfStock = product?.variants
+                        ? product.variants
+                            .filter((v: any) => v[key] === val)
+                            .every((v: any) => (v.inventoryQuantity || 0) <= 0)
+                        : false;
+                      return (
+                        <button
+                          key={val}
+                          onClick={() => !isValueOutOfStock && handleOptionChange(key, val)}
+                          disabled={isValueOutOfStock}
+                          className={`relative px-4 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-150 ${
+                            isValueOutOfStock
+                              ? "border-zinc-100 text-zinc-300 cursor-not-allowed bg-zinc-50"
+                              : isSelected
+                              ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
+                              : "border-zinc-200 text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50"
+                          }`}
+                        >
+                          {val}
+                          {/* Diagonal strikethrough for out-of-stock */}
+                          {isValueOutOfStock && (
+                            <span
+                              aria-hidden="true"
+                              className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none"
+                            >
+                              <svg
+                                className="absolute inset-0 w-full h-full"
+                                preserveAspectRatio="none"
+                              >
+                                <line
+                                  x1="0%"
+                                  y1="100%"
+                                  x2="100%"
+                                  y2="0%"
+                                  stroke="#dc2626"
+                                  strokeWidth="1.5"
+                                  strokeOpacity="0.45"
+                                />
+                              </svg>
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+          {/* Qty + Add to Order */}
+          <div className="flex gap-3">
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-20 text-center px-3 py-3 rounded-xl border-2 border-zinc-200 bg-white text-zinc-900 font-bold text-sm focus:outline-none focus:border-zinc-900 transition-colors"
+            />
             <button
               onClick={handleAddToOrder}
               disabled={!selectedVariant || isOutOfStock}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 flex flex-row items-center justify-center px-4 py-3 rounded-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className={`flex-1 flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl font-bold text-sm transition-all duration-150 ${
+                !selectedVariant || isOutOfStock
+                  ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                  : "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-200 hover:shadow-red-300 hover:-translate-y-0.5 active:translate-y-0"
+              }`}
             >
-              <ShoppingCart className="w-5 h-5 mr-2" />
+              <ShoppingCart className="h-4 w-4" />
               {isOutOfStock ? "Out of Stock" : "Add to Order"}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Description — now below the images and info section */}
+      {product.description && (
+        <div className="mt-12 pt-12 border-t border-zinc-100">
+          <h2 className="text-xs font-bold tracking-widest uppercase text-zinc-500 mb-6">
+            Product Details
+          </h2>
+          <div className="relative">
+            <div
+              className={`overflow-hidden transition-all duration-300 ${
+                descOpen ? "max-h-[5000px]" : "max-h-48"
+              }`}
+            >
+              <div
+                className="text-base text-zinc-600 leading-relaxed prose prose-sm max-w-none prose-p:my-3 prose-strong:text-zinc-900 prose-headings:text-zinc-900"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
+            </div>
+            {/* Fade overlay — only when collapsed */}
+            {!descOpen && (
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white to-transparent pointer-events-none" />
+            )}
+          </div>
+          <button
+            onClick={() => setDescOpen((o) => !o)}
+            className="mt-4 text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2"
+          >
+            {descOpen ? (
+              <>
+                <ChevronDown className="h-4 w-4 rotate-180" />
+                Show less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4" />
+                Read full description
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

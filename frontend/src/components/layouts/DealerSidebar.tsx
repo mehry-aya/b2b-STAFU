@@ -100,8 +100,14 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
   ];
 
   const brandSubtitle = (
-    <span className="text-sm font-medium text-gray-500">Dealer Portal</span>
+    <span
+      className="text-xs font-medium tracking-widest uppercase"
+      style={{ color: "var(--sidebar-text)" }}
+    >
+      Dealer Portal
+    </span>
   );
+
 
   return (
     <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle}>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { approveDealerAction } from "@/app/login/actions";
+import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
 
 interface Dealer {
   id: number;
@@ -36,52 +37,54 @@ export default function DealerApprovalTable({
                 contractStatus: status,
                 user: { ...d.user, isActive: status === "approved" },
               }
-            : d,
-        ),
+            : d
+        )
       );
     }
     setUpdatingId(null);
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <tr className="bg-zinc-50/50 border-b border-zinc-200">
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                 Dealer Info
               </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                 Contact
               </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                 Contract
               </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                 Status
               </th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200">
+          <tbody className="divide-y divide-zinc-100">
             {dealers.map((dealer) => (
               <tr
                 key={dealer.id}
-                className="hover:bg-slate-50 transition-colors"
+                className="hover:bg-zinc-50/50 transition-colors group"
               >
                 <td className="px-6 py-4">
-                  <div className="text-sm font-bold text-slate-900">
+                  <div className="text-sm font-bold text-zinc-900 group-hover:text-red-600 transition-colors">
                     {dealer.companyName}
                   </div>
-                  <div className="text-[10px] font-medium text-slate-400 font-mono tracking-tighter">
+                  <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-zinc-400">
+                    <Mail className="h-3 w-3" />
                     {dealer.user.email}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-xs font-medium text-slate-600">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                    <Phone className="h-3 w-3 text-zinc-400" />
                     {dealer.phone || "N/A"}
                   </div>
                 </td>
@@ -91,74 +94,45 @@ export default function DealerApprovalTable({
                       href={`http://localhost:3001${dealer.contractUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:underline transition-all"
                     >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
+                      <Eye className="h-3.5 w-3.5" />
                       View Doc
                     </a>
                   ) : (
-                    <span className="text-xs font-medium text-slate-300 italic">
-                      No doc yet
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 italic">
+                      <FileText className="h-3.5 w-3.5" />
+                      No doc
                     </span>
                   )}
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${
+                    className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
                       dealer.contractStatus === "approved"
                         ? "text-emerald-600 bg-emerald-50 border-emerald-100"
                         : dealer.contractStatus === "pending"
-                          ? "text-amber-600 bg-amber-50 border-amber-100"
-                          : dealer.contractStatus === "rejected"
-                            ? "text-rose-600 bg-rose-50 border-rose-100"
-                            : "text-slate-400 bg-slate-50 border-slate-100"
+                        ? "text-amber-600 bg-amber-50 border-amber-100"
+                        : dealer.contractStatus === "rejected"
+                        ? "text-red-600 bg-red-50 border-red-100"
+                        : "text-zinc-400 bg-zinc-50 border-zinc-100"
                     }`}
                   >
                     {dealer.contractStatus}
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 justify-end">
                     <button
                       onClick={() => handleUpdate(dealer.id, "approved")}
                       disabled={
                         updatingId === dealer.id ||
                         dealer.contractStatus === "approved"
                       }
-                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 disabled:opacity-30 transition-colors"
+                      className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-30 transition-all border border-emerald-100"
                       title="Approve"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2.5}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
+                      <Check className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleUpdate(dealer.id, "rejected")}
@@ -166,22 +140,10 @@ export default function DealerApprovalTable({
                         updatingId === dealer.id ||
                         dealer.contractStatus === "rejected"
                       }
-                      className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 disabled:opacity-30 transition-colors"
+                      className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-30 transition-all border border-red-100"
                       title="Reject"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2.5}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 </td>

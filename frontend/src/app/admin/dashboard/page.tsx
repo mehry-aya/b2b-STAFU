@@ -1,41 +1,150 @@
+"use client";
+
 import Link from "next/link";
+import {
+  Users,
+  ShoppingCart,
+  Package,
+  FileText,
+  BarChart3,
+  ArrowRight,
+  Anchor,
+} from "lucide-react";
+
+const adminModules = [
+  {
+    label: "Dealer Management",
+    description: "Review, approve, and manage dealer accounts",
+    href: "/admin/dealers",
+    icon: Users,
+    primary: true,
+  },
+  {
+    label: "Orders",
+    description: "View and manage all dealer orders",
+    href: "/admin/orders",
+    icon: ShoppingCart,
+    primary: false,
+  },
+  {
+    label: "Products",
+    description: "Browse and manage the product catalog",
+    href: "/admin/products",
+    icon: Package,
+    primary: false,
+  },
+  {
+    label: "Contracts",
+    description: "Review uploaded dealer contracts",
+    href: "/admin/contracts",
+    icon: FileText,
+    primary: false,
+  },
+  {
+    label: "Export",
+    description: "Export data and generate reports",
+    href: "/admin/export",
+    icon: BarChart3,
+    primary: false,
+  },
+];
 
 export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl max-w-2xl w-full text-center space-y-8 border border-slate-100">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter">
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#0f0f0f] px-8 py-10">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-red-600 via-red-500 to-transparent" />
+
+        <div className="relative space-y-3">
+          <div className="flex items-center gap-2 text-red-400 text-xs font-semibold tracking-widest uppercase">
+            <Anchor className="h-3.5 w-3.5" />
+            <span>Admin Console</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight">
             Admin Dashboard
           </h1>
-          <p className="text-slate-500 font-bold tracking-widest uppercase text-xs">
-            STAFUPRO B2B Management
+          <p className="text-zinc-400 text-sm max-w-md">
+            Platform-wide management for STAFUPRO B2B. Approve dealers,
+            monitor orders, and oversee the full catalog.
           </p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-          <Link
-            href="/admin/dealers"
-            className="group p-6 bg-white text-slate-900 border-2 border-slate-900 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-95 flex flex-col items-center gap-3"
-          >
-            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-200">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+      {/* Modules grid */}
+      <div>
+        <h2 className="text-xs font-bold tracking-widest uppercase text-zinc-400 mb-4">
+          Management Modules
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {adminModules.map((mod) => {
+            const Icon = mod.icon;
+            return (
+              <Link
+                key={mod.href}
+                href={mod.href}
+                className={`group relative flex flex-col gap-4 rounded-2xl p-6 border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+                  mod.primary
+                    ? "bg-red-600 border-red-700 hover:bg-red-700 hover:shadow-red-900/30"
+                    : "bg-white border-zinc-100 hover:border-zinc-200 hover:shadow-zinc-100"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    mod.primary
+                      ? "bg-red-700/60 text-white"
+                      : "bg-zinc-100 text-zinc-600 group-hover:bg-zinc-200"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className={`text-sm font-bold ${mod.primary ? "text-white" : "text-zinc-900"}`}>
+                    {mod.label}
+                  </p>
+                  <p className={`text-xs mt-1 ${mod.primary ? "text-red-100/80" : "text-zinc-500"}`}>
+                    {mod.description}
+                  </p>
+                </div>
+                <ArrowRight
+                  className={`absolute right-5 top-5 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity ${
+                    mod.primary ? "text-red-200" : "text-zinc-400"
+                  }`}
                 />
-              </svg>
-            </div>
-            Manage Dealers
-          </Link>
+              </Link>
+            );
+          })}
         </div>
+      </div>
+
+      {/* Bottom strip */}
+      <div className="rounded-2xl bg-white border border-zinc-100 px-6 py-5 flex items-center justify-between gap-4 flex-wrap shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+            <Anchor className="h-5 w-5 text-red-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-zinc-900">STAFUPRO B2B Platform</p>
+            <p className="text-xs text-zinc-500">
+              Manage dealers, orders, and contracts from one place.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/dealers"
+          className="flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold rounded-xl px-4 py-2.5 hover:bg-red-600 transition-colors"
+        >
+          Manage Dealers
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

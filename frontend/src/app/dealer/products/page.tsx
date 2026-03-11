@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Product } from "@/lib/types/product";
 import { fetchProducts } from "@/lib/api/products";
 import debounce from "lodash.debounce";
-import { Search, ChevronRight } from "lucide-react";
+import { Search, ChevronRight, Package } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 export default function DealerProductsPage() {
@@ -36,18 +36,16 @@ export default function DealerProductsPage() {
     }
   };
 
-  // Run on mount and when category changes
   useEffect(() => {
     loadProducts(searchTerm);
   }, [currentCategory]);
 
-  // Debounced search
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       loadProducts(query);
     }, 300),
-    [],
+    []
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,78 +68,81 @@ export default function DealerProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center text-sm text-muted-foreground mb-4">
-        <button
-          onClick={() => router.push("/dealer/products")}
-          className="hover:text-primary transition-colors"
-        >
-          Products
-        </button>
-        {currentCategory && (
-          <>
-            <ChevronRight className="h-4 w-4 mx-2" />
-            <span className="font-medium text-foreground capitalize">
-              {currentCategory.replace(/-/g, " ")}
-            </span>
-          </>
-        )}
-      </nav>
-
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Page header */}
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground mt-1">
-            Browse and order available products.
+          {/* Breadcrumb */}
+          <nav className="flex items-center text-xs text-zinc-400 mb-2 font-medium">
+            <button
+              onClick={() => router.push("/dealer/products")}
+              className="hover:text-zinc-700 transition-colors"
+            >
+              Products
+            </button>
+            {currentCategory && (
+              <>
+                <ChevronRight className="h-3.5 w-3.5 mx-1.5 text-zinc-300" />
+                <span className="text-zinc-700 capitalize">
+                  {currentCategory.replace(/-/g, " ")}
+                </span>
+              </>
+            )}
+          </nav>
+          <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
+            {currentCategory
+              ? currentCategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+              : "All Products"}
+          </h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
+            Browse and order from the fishing catalog.
           </p>
         </div>
 
+        {/* Search */}
         <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <input
             type="text"
             placeholder="Search products..."
-            className="w-full pl-9 pr-4 py-2 bg-background border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-colors placeholder:text-zinc-400"
             value={searchTerm}
             onChange={handleSearchChange}
           />
         </div>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="p-4 bg-destructive/10 text-destructive text-sm rounded-md border border-destructive/20">
+        <div className="p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100 font-medium">
           {error}
         </div>
       )}
 
+      {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="border rounded-xl bg-card overflow-hidden animate-pulse"
-            >
-              <div className="w-full h-48 bg-muted"></div>
-              <div className="p-5 space-y-3">
-                <div className="h-5 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-1/2"></div>
-                <div className="h-6 bg-muted rounded w-1/3 mt-4"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="bg-white border border-zinc-100 overflow-hidden animate-pulse">
+              <div className="w-full h-52 bg-zinc-100" />
+              <div className="p-4 space-y-3">
+                <div className="h-3 bg-zinc-100 rounded w-1/3" />
+                <div className="h-5 bg-zinc-100 rounded w-3/4" />
+                <div className="h-6 bg-zinc-100 rounded w-1/4 mt-4" />
               </div>
             </div>
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20 bg-card border rounded-xl shadow-sm">
-          <h3 className="text-lg font-medium text-foreground">
-            No products found
-          </h3>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Try adjusting your search or check back later.
+        <div className="flex flex-col items-center justify-center py-24 bg-white border border-zinc-100">
+          <Package className="h-10 w-10 text-zinc-300 mb-3" />
+          <h3 className="text-base font-bold text-zinc-900">No products found</h3>
+          <p className="text-sm text-zinc-500 mt-1">
+            Try adjusting your search or browse a different category.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
           {products.map((product) => {
             const firstImage = product.images?.[0]?.src;
             const price = getLowestPrice(product);
@@ -150,34 +151,44 @@ export default function DealerProductsPage() {
               <div
                 key={product.id}
                 onClick={() => router.push(`/dealer/products/${product.id}`)}
-                className="group border rounded-xl bg-card overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col h-full"
+                className="group relative bg-white border border-zinc-100 overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-zinc-200/60 hover:border-zinc-200"
               >
-                <div className="w-full aspect-4/3 bg-muted relative overflow-hidden">
+                {/* Image */}
+                <div className="relative w-full aspect-square bg-zinc-50 overflow-hidden">
                   {firstImage ? (
                     <img
                       src={firstImage}
                       alt={product.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="flex items-center justify-center w-full h-full text-muted-foreground text-sm">
-                      No Image
+                    <div className="flex items-center justify-center w-full h-full">
+                      <Package className="h-10 w-10 text-zinc-200" />
+                    </div>
+                  )}
+                  {/* Red price badge on hover */}
+                  {price && price !== "N/A" && (
+                    <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md">
+                      ${price}
                     </div>
                   )}
                 </div>
 
-                <div className="p-5 flex flex-col grow">
-                  <div className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-1">
-                    {product.vendor || "Vendor"}
+                {/* Info */}
+                <div className="p-4">
+                  <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1">
+                    {product.vendor || "Brand"}
                   </div>
-                  <h3 className="text-lg font-semibold leading-tight line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-sm font-bold text-zinc-900 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors">
                     {product.title}
                   </h3>
-
-                  <div className="mt-auto pt-4 flex items-center justify-between">
-                    <div className="text-xl font-bold">
-                      {price !== "N/A" ? `$${price}` : "Price not available"}
-                    </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-base font-black text-zinc-900">
+                      {price !== "N/A" ? `$${price}` : "—"}
+                    </span>
+                    <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">
+                      View →
+                    </span>
                   </div>
                 </div>
               </div>
