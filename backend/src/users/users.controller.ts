@@ -7,17 +7,29 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Patch('profile')
+  updateProfile(
+    @CurrentUser() user: { id: number; email: string; role: Role },
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    return this.usersService.updateProfile(user.id, user.role, updateProfileDto);
+  }
 
   @Get()
   @Roles('master_admin')

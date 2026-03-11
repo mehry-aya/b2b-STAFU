@@ -82,6 +82,9 @@ export class AuthService {
         dealer: {
           select: {
             companyName: true,
+            address: true,
+            phone: true,
+            contractStatus: true,
           },
         },
       },

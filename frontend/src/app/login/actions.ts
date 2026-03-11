@@ -394,3 +394,30 @@ export async function getMeAction() {
     return { error: "Connection error" };
   }
 }
+
+export async function updateProfileAction(payload: any) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch("http://127.0.0.1:3001/api/users/profile", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      return { error: data.message || "Failed to update profile" };
+    }
+
+    return { success: true };
+  } catch {
+    return { error: "Connection error" };
+  }
+}
