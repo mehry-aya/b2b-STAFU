@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { GET_CATEGORIES_QUERY, GET_PRODUCTS_QUERY } from 'src/shopify/shopify-queries';
 
 export interface ShopifyProductSyncPayload {
   shopifyId: string;
@@ -61,20 +62,7 @@ this.storefrontApiUrl = `https://${cleanDomain}/api/2026-01/graphql.json`;
       return this.categoryCache.data;
     }
 
-    const query = `
-      query {
-        menu(handle: "b2b-menu") {
-          items {
-            title
-            url
-            items {
-              title
-              url
-            }
-          }
-        }
-      }
-    `;
+const query = GET_CATEGORIES_QUERY;
 
     try {
       const response = await firstValueFrom(
@@ -153,63 +141,7 @@ this.storefrontApiUrl = `https://${cleanDomain}/api/2026-01/graphql.json`;
     let cursor: string | null = null;
     const allProducts: ShopifyProductSyncPayload[] = [];
 
-    const query = `
-      query getProducts($cursor: String) {
-        products(first: 50, after: $cursor) {
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
-          edges {
-            node {
-              id
-              title
-              descriptionHtml
-              handle
-              vendor
-              productType
-              status
-              images(first: 10) {
-                edges {
-                  node {
-                    url
-                    altText
-                  }
-                }
-              }
-              collections(first: 10) {
-                edges {
-                  node {
-                    id
-                    title
-                    handle
-                  }
-                }
-              }
-              variants(first: 100) {
-                edges {
-                  node {
-                    id
-                    title
-                    sku
-                    price
-                    compareAtPrice
-                    inventoryQuantity
-                    image {
-                      url
-                    }
-                    selectedOptions {
-                      name
-                      value
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `;
+  const query = GET_PRODUCTS_QUERY;
 
     while (hasNextPage) {
       this.logger.log(`Fetching page of Shopify products... cursor: ${cursor}`);

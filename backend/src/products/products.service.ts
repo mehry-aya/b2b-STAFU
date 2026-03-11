@@ -12,6 +12,7 @@ export class ProductsService {
     private readonly shopifyService: ShopifyService,
   ) {}
 
+  // Sync products & variants from Shopify
   async syncFromShopify() {
     this.logger.log('Starting Shopify sync...');
     const productsData = await this.shopifyService.fetchAllProducts();
@@ -19,13 +20,12 @@ export class ProductsService {
     let productsSynced = 0;
     let variantsSynced = 0;
     const errors: string[] = [];
-
     const syncedAt = new Date();
 
     for (const p of productsData) {
       try {
         await this.prisma.$transaction(async (tx) => {
-          // First, ensure all collections for this product exist in our DB
+          // Ensure all collections exist
           const collectionConnections: { id: number }[] = [];
           for (const c of p.collections) {
             const collection = await (tx as any).collection.upsert({
@@ -36,6 +36,7 @@ export class ProductsService {
             collectionConnections.push({ id: collection.id });
           }
 
+          // Upsert product
           const product = await tx.product.upsert({
             where: { shopifyId: p.shopifyId },
             update: {
@@ -47,9 +48,7 @@ export class ProductsService {
               status: p.status,
               images: p.images as Prisma.JsonArray,
               syncedAt,
-              collections: {
-                set: collectionConnections,
-              },
+              collections: { set: collectionConnections },
             },
             create: {
               shopifyId: p.shopifyId,
@@ -61,14 +60,13 @@ export class ProductsService {
               status: p.status,
               images: p.images as Prisma.JsonArray,
               syncedAt,
-              collections: {
-                connect: collectionConnections,
-              },
+              collections: { connect: collectionConnections },
             },
           } as any);
 
           productsSynced++;
 
+          // Upsert variants
           for (const v of p.variants) {
             await tx.productVariant.upsert({
               where: { shopifyVariantId: v.shopifyVariantId },
@@ -78,7 +76,7 @@ export class ProductsService {
                 sku: v.sku,
                 price: v.price ? new Prisma.Decimal(v.price) : undefined,
                 compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
-                inventoryQuantity: v.inventoryQuantity,
+                inventoryQuantity: v.inventoryQuantity ?? 0, // ensures no null
                 option1: v.option1,
                 option2: v.option2,
                 option3: v.option3,
@@ -91,7 +89,7 @@ export class ProductsService {
                 sku: v.sku,
                 price: v.price ? new Prisma.Decimal(v.price) : undefined,
                 compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
-                inventoryQuantity: v.inventoryQuantity,
+                inventoryQuantity: v.inventoryQuantity ?? 0, // ensures no null
                 option1: v.option1,
                 option2: v.option2,
                 option3: v.option3,
@@ -107,24 +105,25 @@ export class ProductsService {
       }
     }
 
-    return {
-      productsSynced,
-      variantsSynced,
-      syncedAt,
-      errors,
-    };
+    return { productsSynced, variantsSynced, syncedAt, errors };
   }
 
+  // Fetch Shopify categories
   async getCategories() {
     return this.shopifyService.getCategories();
   }
 
-  async getActiveProducts(search?: string, productType?: string, allStatuses: boolean = false, categoryHandle?: string) {
+  // Fetch active products, with optional filters
+  async getActiveProducts(
+    search?: string,
+    productType?: string,
+    allStatuses: boolean = false,
+    categoryHandle?: string,
+    inStockOnly: boolean = false, // only include products with inventory > 0
+  ) {
     const whereClause: any = {};
 
-    if (!allStatuses) {
-      whereClause.status = 'active';
-    }
+    if (!allStatuses) whereClause.status = 'active';
 
     if (search) {
       whereClause.OR = [
@@ -134,50 +133,44 @@ export class ProductsService {
       ];
     }
 
-    if (productType) {
-      whereClause.productType = productType;
-    }
+    if (productType) whereClause.productType = productType;
 
     if (categoryHandle) {
       whereClause.collections = {
-        some: {
-          handle: {
-            equals: categoryHandle,
-            mode: 'insensitive',
-          },
-        },
+        some: { handle: { equals: categoryHandle, mode: 'insensitive' } },
       };
     }
 
-    const products = await (this.prisma.product as any).findMany({
+    // Fetch products with variants
+    let products = await (this.prisma.product as any).findMany({
       where: whereClause,
-      include: {
-        variants: true,
-      },
+      include: { variants: true },
       orderBy: { title: 'asc' },
     });
 
-    // Manually map to handle Decimal serialization issues in Server Actions
+    // Filter in-stock products
+    if (inStockOnly) {
+      products = products.filter(product =>
+        product.variants.some((v: any) => (v.inventoryQuantity || 0) > 0)
+      );
+    }
+
     return products.map((p: any) => this.mapProduct(p));
   }
 
+  // Fetch a single product by ID
   async getProductById(id: number) {
     const product = await (this.prisma.product as any).findFirst({
       where: { id, status: 'active' },
-      include: {
-        variants: {
-          orderBy: { price: 'asc' },
-        },
-      },
+      include: { variants: { orderBy: { price: 'asc' } } },
     });
 
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${id} not found or not active`);
-    }
+    if (!product) throw new NotFoundException(`Product with ID ${id} not found or not active`);
 
     return this.mapProduct(product);
   }
 
+  // Map Decimal values to string for front-end
   private mapProduct(product: any) {
     return {
       ...product,

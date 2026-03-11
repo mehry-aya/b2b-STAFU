@@ -23,27 +23,27 @@ export class ProductsController {
     return this.productsService.getCategories();
   }
 
-  @Get()
-  async getProducts(
-    @Query('search') search?: string,
-    @Query('productType') productType?: string,
-    @Query('category') category?: string,
-    @Query('all') all?: string,
-    @CurrentUser() user?: any,
-  ) {
-    try {
-      const isAdmin = user?.role === Role.admin || user?.role === Role.master_admin;
-      const allStatuses = isAdmin && all === 'true';
-      return await this.productsService.getActiveProducts(search, productType, allStatuses, category);
-    } catch (error: any) {
-      console.error('[ProductsController] getProducts error:', {
-        message: error.message,
-        stack: error.stack,
-        query: { search, productType, category, all }
-      });
-      throw error;
-    }
-  }
+@Get()
+async getProducts(
+  @Query('search') search?: string,
+  @Query('productType') productType?: string,
+  @Query('category') category?: string,
+  @Query('all') all?: string,
+  @Query('inStock') inStock?: string,
+  @CurrentUser() user?: any,
+) {
+  const isAdmin = user?.role === Role.admin || user?.role === Role.master_admin;
+  const allStatuses = isAdmin && all === 'true';
+  const inStockOnly = inStock === 'true';
+  
+  return await this.productsService.getActiveProducts(
+    search,
+    productType,
+    allStatuses,
+    category,
+    inStockOnly
+  );
+}
 
   @Get(':id')
   async getProduct(@Param('id', ParseIntPipe) id: number) {
