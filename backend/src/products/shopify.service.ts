@@ -13,6 +13,7 @@ export interface ShopifyProductSyncPayload {
   productType: string | null;
   status: string;
   images: any[];
+  options: { name: string; values: string[] }[];
   variants: ShopifyVariantSyncPayload[];
   collections: { shopifyId: string; title: string; handle: string }[];
 }
@@ -207,6 +208,7 @@ const query = GET_CATEGORIES_QUERY;
           productType: node.productType,
           status: node.status?.toLowerCase() || 'unknown',
           images,
+          options: node.options || [],
           variants: variants || [],
           collections: node.collections?.edges?.map((ce: any) => ({
             shopifyId: ce.node.id,

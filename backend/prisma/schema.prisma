@@ -53,6 +53,7 @@ model Product {
   productType String?          @map("product_type")
   status      String
   images      Json?
+  options     Json?
   syncedAt    DateTime         @default(now()) @map("synced_at")
   variants    ProductVariant[]
   collections Collection[]     @relation("ProductToCollection")

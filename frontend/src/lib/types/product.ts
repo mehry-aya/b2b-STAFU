@@ -28,6 +28,13 @@ export interface Product {
   productType: string | null;
   status: string;
   images: ProductImage[] | null;
+  options?: { name: string; values: string[] }[];
   syncedAt: string;
   variants?: ProductVariant[];
+  relatedProducts?: {
+    id: number;
+    title: string;
+    handle: string;
+    images: ProductImage[] | null;
+  }[];
 }

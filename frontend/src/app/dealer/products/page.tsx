@@ -99,13 +99,16 @@ export default function DealerProductsPage() {
               </>
             )}
           </nav>
-          <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
+          <h1 className="text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
             {currentCategory
               ? currentCategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
               : "All Products"}
+            <span className="text-xs font-medium bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-full border border-zinc-200 tracking-normal">
+              {totalCount} Items
+            </span>
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            Browse and order from the fishing catalog.
+            Browse and order.
           </p>
         </div>
 
@@ -186,12 +189,31 @@ export default function DealerProductsPage() {
 
                 {/* Info */}
                 <div className="p-4">
-                  <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1">
-                    {product.vendor || "Brand"}
-                  </div>
+                  
                   <h3 className="text-sm font-bold text-zinc-900 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors">
                     {product.title}
                   </h3>
+                  {/* {(() => {
+                    const sizes = Array.from(
+                      new Set(
+                        product.variants?.flatMap((v) => 
+                          [v.option1, v.option2, v.option3].filter(
+                            (opt) => opt && opt !== "Default Title"
+                          )
+                        )
+                      )
+                    ).join(", ");
+                    
+                    return sizes ? (
+                      <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1 truncate" title={sizes}>
+                        {sizes}
+                      </div>
+                    ) : (
+                      <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1">
+                        Standard
+                      </div>
+                    );
+                  })()} */}
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-base font-black text-zinc-900">
                       {price !== "N/A" ? `₺${price}` : "—"}

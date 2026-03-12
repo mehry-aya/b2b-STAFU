@@ -38,40 +38,40 @@ export default function AdminDealersPage() {
   const pendingCount = dealers.filter((d) => d.contractStatus === "pending").length;
   const rejectedCount = dealers.filter((d) => d.contractStatus === "rejected").length;
 
-  const stats = [
-    {
-      label: "Total Dealers",
-      value: totalDealers,
-      icon: Users,
-      color: "text-white",
-      bg: "bg-[#0f0f0f]",
-      border: "border-white/10",
-    },
-    {
-      label: "Approved",
-      value: approvedCount,
-      icon: CheckCircle,
-      color: "text-emerald-400",
-      bg: "bg-emerald-950/30",
-      border: "border-emerald-500/20",
-    },
-    {
-      label: "Pending Review",
-      value: pendingCount,
-      icon: Clock,
-      color: "text-amber-400",
-      bg: "bg-amber-950/30",
-      border: "border-amber-500/20",
-    },
-    {
-      label: "Rejected",
-      value: rejectedCount,
-      icon: XCircle,
-      color: "text-red-400",
-      bg: "bg-red-950/30",
-      border: "border-red-500/20",
-    },
-  ];
+ const stats = [
+  {
+    label: "Total Dealers",
+    value: totalDealers,
+    icon: Users,
+    color: "text-slate-700",
+    bg: "bg-slate-200",
+    border: "border-slate-200",
+  },
+  {
+    label: "Approved",
+    value: approvedCount,
+    icon: CheckCircle,
+    color: "text-emerald-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+  },
+  {
+    label: "Pending Review",
+    value: pendingCount,
+    icon: Clock,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+  },
+  {
+    label: "Rejected",
+    value: rejectedCount,
+    icon: XCircle,
+    color: "text-red-600",
+    bg: "bg-red-50",
+    border: "border-red-200",
+  },
+];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">

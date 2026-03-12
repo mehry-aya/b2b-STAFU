@@ -30,6 +30,10 @@ export const GET_PRODUCTS_QUERY = `
           vendor
           productType
           status
+          options {
+            name
+            values
+          }
           images(first: 10) {
             edges {
               node {

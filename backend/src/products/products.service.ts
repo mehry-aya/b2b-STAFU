@@ -47,6 +47,7 @@ export class ProductsService {
               productType: p.productType,
               status: p.status,
               images: p.images as Prisma.JsonArray,
+              options: p.options as Prisma.JsonArray,
               syncedAt,
               collections: { set: collectionConnections },
             },
@@ -59,6 +60,7 @@ export class ProductsService {
               productType: p.productType,
               status: p.status,
               images: p.images as Prisma.JsonArray,
+              options: p.options as Prisma.JsonArray,
               syncedAt,
               collections: { connect: collectionConnections },
             },
@@ -151,6 +153,15 @@ export class ProductsService {
       };
     }
 
+    // Filter by stock if requested (Dealers)
+    if (inStockOnly) {
+      whereClause.variants = {
+        some: {
+          inventoryQuantity: { gt: 0 }
+        }
+      };
+    }
+
     const skip = (page - 1) * limit;
 
     // Fetch total count for pagination
@@ -185,7 +196,32 @@ export class ProductsService {
 
     if (!product) throw new NotFoundException(`Product with ID ${id} not found or not active`);
 
-    return this.mapProduct(product);
+    const mappedProduct = this.mapProduct(product);
+
+    // Find related products (colors) based on title prefix
+    // Title format: "Product Name - Color Name"
+    const titleParts = product.title.split(' - ');
+    if (titleParts.length > 1) {
+      const baseTitle = titleParts[0];
+      const relatedProducts = await (this.prisma.product as any).findMany({
+        where: {
+          title: { startsWith: baseTitle },
+          id: { not: id },
+          status: 'active',
+        },
+        select: {
+          id: true,
+          title: true,
+          handle: true,
+          images: true,
+        },
+        take: 10,
+      });
+
+      (mappedProduct as any).relatedProducts = relatedProducts;
+    }
+
+    return mappedProduct;
   }
 
   // Map Decimal values to string for front-end

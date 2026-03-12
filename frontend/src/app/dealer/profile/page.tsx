@@ -154,7 +154,7 @@ export default function DealerProfilePage() {
             <div>
               <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-6 border-b pb-4">
                 <Building2 className="w-5 h-5 text-red-600" />
-                Company Information
+                Contractor Information
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
