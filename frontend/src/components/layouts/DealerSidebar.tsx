@@ -26,7 +26,7 @@ interface Category {
 export default function DealerSidebar({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const currentCategory = searchParams.get("category");
@@ -110,7 +110,7 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
 
 
   return (
-    <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle}>
+    <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle} showCart={true}>
       {children}
     </SidebarLayout>
   );

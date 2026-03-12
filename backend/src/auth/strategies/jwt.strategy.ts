@@ -27,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      throw new ForbiddenException('User not found');
+      throw new ForbiddenException('Session expired, please log in again');
     }
 
     if (!user.isActive) {

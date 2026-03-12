@@ -111,6 +111,31 @@ export async function createAdminAction(email: string, password: string) {
   }
 }
 
+export async function getAdminsAction() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch("http://127.0.0.1:3001/api/users/admins", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      return { error: data.message || "Failed to fetch admins" };
+    }
+
+    return { admins: await response.json() };
+  } catch {
+    return { error: "Failed to connect to server" };
+  }
+}
+
 export async function deleteAdminAction(id: number) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;

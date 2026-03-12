@@ -23,11 +23,14 @@ interface SidebarLayoutProps {
   children: React.ReactNode;
   navItems: NavItem[];
   brandSubtitle: React.ReactNode;
+  showCart?: boolean;
 }
+
 export default function SidebarLayout({
   children,
   navItems,
   brandSubtitle,
+  showCart = false,
 }: SidebarLayoutProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -80,6 +83,7 @@ export default function SidebarLayout({
         (pathname?.startsWith(item.href) &&
           item.href !== "/dealer/dashboard" &&
           item.href !== "/admin/dashboard" &&
+          item.href !== "/master/dashboard" &&
           item.href !== "/dealer/products"));
 
     const hasChildren = item.children && item.children.length > 0;
@@ -132,7 +136,7 @@ export default function SidebarLayout({
           ) : (
             <button
               onClick={item.onToggle}
-              className={`flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-150`}
+              className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-150"
               style={{ paddingLeft: depth > 0 ? `${depth * 1}rem` : "0.75rem" }}
             >
               {item.icon && <item.icon className="h-4 w-4 shrink-0 text-zinc-500" />}
@@ -163,7 +167,6 @@ export default function SidebarLayout({
     >
       {/* Brand */}
       <div className="px-5 py-6" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
-        {/* Red accent line */}
         <div className="w-8 h-0.5 bg-red-600 mb-3 rounded-full" />
         <h1
           className="text-xl font-black tracking-widest uppercase"
@@ -181,32 +184,31 @@ export default function SidebarLayout({
         </ul>
       </nav>
 
-      {/* Cart Toggle (Desktop) */}
-      <div className="px-3 py-4">
-        <button
-          onClick={() => setIsCartOpen(true)}
-          className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-bold bg-zinc-800 text-white hover:bg-zinc-700 transition-all group"
-        >
-          <div className="flex items-center gap-3">
-            <ShoppingBag className="h-4 w-4 text-red-500" />
-            <span>My Cart</span>
-          </div>
-          {totalItems > 0 && (
-            <span className="bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
-              {totalItems}
-            </span>
-          )}
-        </button>
-      </div>
+      {/* Cart Toggle — dealer only */}
+      {showCart && (
+        <div className="px-3 py-4">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-bold bg-zinc-800 text-white hover:bg-zinc-700 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <ShoppingBag className="h-4 w-4 text-red-500" />
+              <span>My Cart</span>
+            </div>
+            {totalItems > 0 && (
+              <span className="bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* User section */}
       <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
         {user && (
           <div className="flex items-center gap-3 px-2 mb-3">
-            {/* Avatar */}
-            <div
-              className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold shrink-0"
-            >
+            <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {getInitials(user.companyName)}
             </div>
             <div className="min-w-0">
@@ -232,7 +234,6 @@ export default function SidebarLayout({
 
   return (
     <div className="flex h-screen" style={{ background: "var(--surface)" }}>
-      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
@@ -240,7 +241,6 @@ export default function SidebarLayout({
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
@@ -249,9 +249,7 @@ export default function SidebarLayout({
         {sidebarContent}
       </aside>
 
-      {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile Header */}
         <header
           className="sticky top-0 z-30 flex h-14 items-center justify-between px-4 lg:hidden"
           style={{ background: "var(--sidebar-bg)", borderBottom: "1px solid var(--sidebar-border)" }}
@@ -270,17 +268,20 @@ export default function SidebarLayout({
               STAFUPRO
             </span>
           </div>
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="p-2 relative text-zinc-400 hover:text-white transition-colors"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full text-white">
-                {totalItems}
-              </span>
-            )}
-          </button>
+          {/* Cart icon in mobile header — dealer only */}
+          {showCart && (
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="p-2 relative text-zinc-400 hover:text-white transition-colors"
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full text-white">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          )}
         </header>
 
         <main className="flex-1 overflow-y-auto p-5 md:p-7 lg:p-8">
@@ -288,8 +289,10 @@ export default function SidebarLayout({
         </main>
       </div>
 
-      {/* Global Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      {/* Cart Sidebar — dealer only */}
+      {showCart && (
+        <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      )}
     </div>
   );
 }
