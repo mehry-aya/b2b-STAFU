@@ -14,16 +14,21 @@ import {
   CheckCircle2,
   Users,
   Search,
-  Filter
+  Filter,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { exportOrdersToExcel } from "@/lib/api/orders";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -92,14 +97,48 @@ export default function AdminOrdersPage() {
               className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600/50 transition-all"
             />
          </div>
-         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={async () => {
+                setExporting(true);
+                try {
+                  const blob = await exportOrdersToExcel();
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `orders-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+                  document.body.appendChild(a);
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  document.body.removeChild(a);
+                  toast({
+                    title: "Export Successful",
+                    description: "Your order export is ready and downloading.",
+                  });
+                } catch (err: any) {
+                  toast({
+                    title: "Export Failed",
+                    description: err.message || "Failed to export orders.",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setExporting(false);
+                }
+              }}
+              disabled={exporting}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50"
+            >
+              <Download className={`h-3.5 w-3.5 ${exporting ? 'animate-bounce' : ''}`} />
+              {exporting ? 'Exporting...' : 'Export to Excel'}
+            </button>
+            <div className="h-6 w-px bg-zinc-200 mx-2" />
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
               <Filter className="h-3.5 w-3.5" />
               Filter
             </button>
             <div className="h-6 w-px bg-zinc-200 mx-2" />
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{filteredOrders.length} Orders</span>
-         </div>
+          </div>
       </div>
 
       {/* Orders Table */}
@@ -158,7 +197,7 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="text-sm font-black text-zinc-900">${Number(order.totalAmount).toFixed(2)}</span>
+                      <span className="text-sm font-black text-zinc-900">₺{Number(order.totalAmount).toFixed(2)}</span>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <Link 

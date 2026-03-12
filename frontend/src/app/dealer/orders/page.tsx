@@ -137,7 +137,7 @@ export default function DealerOrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="text-sm font-black text-zinc-900">${Number(order.totalAmount).toFixed(2)}</span>
+                      <span className="text-sm font-black text-zinc-900">₺{Number(order.totalAmount).toFixed(2)}</span>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <Link 

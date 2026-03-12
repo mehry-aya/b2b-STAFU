@@ -142,7 +142,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       </button>
                     </div>
                     <span className="text-sm font-black text-zinc-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₺{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           <div className="p-6 bg-zinc-50 border-t border-zinc-100 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Subtotal</span>
-              <span className="text-2xl font-black text-zinc-900">${totalAmount.toFixed(2)}</span>
+              <span className="text-2xl font-black text-zinc-900">₺{totalAmount.toFixed(2)}</span>
             </div>
             <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
               Shipping & taxes calculated at checkout.

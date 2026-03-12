@@ -350,7 +350,7 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="text-sm font-bold text-zinc-900">
-                          {price ? `$${parseFloat(price).toFixed(2)}` : "-"}
+                          {price ? `₺${parseFloat(price).toFixed(2)}` : "-"}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">

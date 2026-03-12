@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from '@prisma/client';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class OrdersService {
@@ -97,5 +98,44 @@ export class OrdersService {
       where: { id },
       data: { status },
     });
+  }
+
+  async exportOrdersToExcel() {
+    const orders = await this.prisma.order.findMany({
+      include: {
+        dealer: {
+          include: { user: { select: { email: true } } },
+        },
+        items: {
+          include: {
+            productVariant: {
+              include: { product: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const data = orders.map((order) => ({
+      'Order ID': `#${order.id.toString().padStart(5, '0')}`,
+      'Dealer': order.dealer.companyName,
+      'Email': order.dealer.user.email,
+      'Date': order.createdAt.toLocaleDateString(),
+      'Status': order.status.replace('_', ' ').toUpperCase(),
+      'Total Amount': Number(order.totalAmount).toFixed(2),
+      'Items Count': order.items.length,
+      'Products': order.items
+        .map((i) => `${i.productVariant.product.title} (${i.quantity})`)
+        .join(', '),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Orders');
+
+    // Generate buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    return buffer;
   }
 }

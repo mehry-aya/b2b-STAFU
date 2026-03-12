@@ -24,6 +24,9 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import * as htmlToImage from "html-to-image";
+import jsPDF from "jspdf";
+import InvoiceTemplate from "@/components/InvoiceTemplate";
 
 export default function AdminOrderDetailPage({
   params: paramsPromise,
@@ -36,6 +39,8 @@ export default function AdminOrderDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
+  const invoiceRef = React.useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
     try {
@@ -70,6 +75,50 @@ export default function AdminOrderDetailPage({
       });
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleDownload = async (format: "pdf" | "png") => {
+    if (!invoiceRef.current || !order) return;
+    setDownloading(format);
+    
+    try {
+      const element = invoiceRef.current;
+      // The element is hidden but rendered, so we need to ensure it's visible to htmlToImage
+      // html-to-image can handle off-screen elements if they are in the DOM
+      
+      const fileName = `invoice-order-${order.id}-${new Date().toISOString().split('T')[0]}`;
+
+      if (format === "png") {
+        const dataUrl = await htmlToImage.toPng(element, { quality: 1.0, pixelRatio: 3 });
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = `${fileName}.png`;
+        link.click();
+      } else {
+        const dataUrl = await htmlToImage.toPng(element, { quality: 1.0, pixelRatio: 3 });
+        const pdf = new jsPDF("p", "mm", "a4");
+        
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${fileName}.pdf`);
+      }
+
+      toast({
+        title: "Download Started",
+        description: `Your invoice is being saved as ${format.toUpperCase()}.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Download Failed",
+        description: err.message || "Failed to generate invoice.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(null);
     }
   };
 
@@ -127,15 +176,33 @@ export default function AdminOrderDetailPage({
           Back to Global List
         </Link>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
-            <Printer className="h-3.5 w-3.5" />
-            Invoice
+          <button 
+            onClick={() => handleDownload("pdf")}
+            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
+            title={!["paid", "shipped"].includes(order.status) ? "Invoice available only for Paid or Shipped orders" : ""}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
+            {downloading === 'pdf' ? 'Generating PDF...' : 'PDF Invoice'}
           </button>
-          <button className="p-2 bg-white border border-zinc-200 rounded-xl text-zinc-400 hover:text-zinc-900 transition-colors">
-            <MoreVertical className="h-4 w-4" />
+          <button 
+            onClick={() => handleDownload("png")}
+            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
+            title={!["paid", "shipped"].includes(order.status) ? "Invoice available only for Paid or Shipped orders" : ""}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ShoppingBag className={`h-3.5 w-3.5 ${downloading === 'png' ? 'animate-pulse' : ''}`} />
+            {downloading === 'png' ? 'Generating PNG...' : 'PNG Invoice'}
           </button>
         </div>
       </div>
+
+        {/* Hidden Invoice Template for Export */}
+        <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
+          <div ref={invoiceRef}>
+            <InvoiceTemplate order={order} />
+          </div>
+        </div>
 
         {/* Order Hero */}
         <div className="bg-[#0f0f0f] rounded-3xl p-8 md:p-10 text-white relative overflow-hidden shadow-2xl">
@@ -239,7 +306,7 @@ export default function AdminOrderDetailPage({
               Financials
             </h3>
             <div className="space-y-1">
-              <p className="font-black text-3xl text-zinc-900 leading-tight font-mono tracking-tighter">${Number(order.totalAmount).toFixed(2)}</p>
+              <p className="font-black text-3xl text-zinc-900 leading-tight font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</p>
               <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest">Settled via B2B Credit</p>
             </div>
           </div>
@@ -254,12 +321,14 @@ export default function AdminOrderDetailPage({
           <div className="divide-y divide-zinc-100">
             {order.items.map((item) => (
               <div key={item.id} className="p-6 flex flex-col sm:flex-row sm:items-center gap-6 group hover:bg-zinc-50/50 transition-colors">
-                <div className="h-16 w-16 bg-zinc-50 rounded-xl overflow-hidden shrink-0 border border-zinc-100">
+                <div className="h-16 w-16 bg-zinc-100 rounded-xl overflow-hidden shrink-0 border border-zinc-200 shadow-inner">
                   {item.productVariant.imageUrl ? (
                     <img src={item.productVariant.imageUrl} alt={item.productVariant.title} className="h-full w-full object-cover" />
+                  ) : item.productVariant.product.images?.[0]?.src ? (
+                    <img src={item.productVariant.product.images[0].src} alt={item.productVariant.product.title} className="h-full w-full object-cover opacity-80" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
-                      <ShoppingBag className="h-6 w-6 text-zinc-200" />
+                      <ShoppingBag className="h-6 w-6 text-zinc-300" />
                     </div>
                   )}
                 </div>
@@ -280,12 +349,12 @@ export default function AdminOrderDetailPage({
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1">
                   <div className="text-xs font-bold text-zinc-400">
-                    <span className="text-zinc-900 font-mono">${Number(item.unitPrice).toFixed(2)}</span>
+                    <span className="text-zinc-900 font-mono">₺{Number(item.unitPrice).toFixed(2)}</span>
                     <span className="mx-2 text-zinc-300">×</span>
                     <span className="text-zinc-900 font-mono">{item.quantity}</span>
                   </div>
                   <div className="text-base font-black text-zinc-900 font-mono tracking-tighter">
-                    ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                    ₺{(Number(item.unitPrice) * item.quantity).toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -296,10 +365,10 @@ export default function AdminOrderDetailPage({
           <div className="p-8 bg-zinc-50/50 flex flex-col items-end gap-2 border-t border-zinc-100">
              <div className="flex items-center gap-8 text-xs font-bold text-zinc-400 uppercase tracking-widest">
                 <span>Grand Total</span>
-                <span className="text-2xl font-black text-red-600 font-mono tracking-tighter">${Number(order.totalAmount).toFixed(2)}</span>
+                <span className="text-2xl font-black text-red-600 font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</span>
              </div>
           </div>
-      </div>
+        </div>
     </div>
   );
 }

@@ -7,7 +7,9 @@ import {
   Param,
   UseGuards,
   ParseIntPipe,
+  Res,
 } from '@nestjs/common';
+import * as express from 'express';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -68,5 +70,19 @@ export class OrdersController {
     }
 
     return this.ordersService.updateStatus(id, updateOrderStatusDto.status);
+  }
+
+  @Get('export/excel')
+  @Roles(Role.admin, Role.master_admin)
+  async exportOrders(@Res() res: express.Response) {
+    const buffer = await this.ordersService.exportOrdersToExcel();
+
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="orders-export-${new Date().toISOString().split('T')[0]}.xlsx"`,
+      'Content-Length': buffer.length,
+    });
+
+    res.end(buffer);
   }
 }

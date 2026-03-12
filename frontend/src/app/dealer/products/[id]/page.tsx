@@ -211,7 +211,7 @@ export default function DealerProductDetailsPage({
             {/* Red price stamp */}
             {price && (
               <div className="absolute top-4 right-4 bg-red-600 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg">
-                ${price}
+                ₺{price}
               </div>
             )}
           </div>
@@ -255,7 +255,7 @@ export default function DealerProductDetailsPage({
           {/* Price */}
           <div>
             {price ? (
-              <span className="text-3xl font-black text-zinc-900">${price}</span>
+              <span className="text-3xl font-black text-zinc-900">₺{price}</span>
             ) : (
               <span className="text-base text-zinc-400 font-medium">Price unavailable</span>
             )}

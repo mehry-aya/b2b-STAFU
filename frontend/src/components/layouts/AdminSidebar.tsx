@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   Package,
   FileText,
-  Download,
   User,
 } from "lucide-react";
 
@@ -19,7 +18,6 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
     { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
     { label: "Products", href: "/admin/products", icon: Package },
     { label: "Contracts", href: "/admin/contracts", icon: FileText },
-    { label: "Export", href: "/admin/export", icon: Download },
     { label: "Profile", href: "/admin/profile", icon: User },
   ];
 

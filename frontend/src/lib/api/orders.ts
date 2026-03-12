@@ -59,3 +59,15 @@ export async function updateOrderStatus(id: number, status: OrderStatus) {
   if (!response.ok) throw new Error("Failed to update order status");
   return response.json();
 }
+
+export async function exportOrdersToExcel() {
+  const response = await fetch(`${API_BASE_URL}/orders/export/excel`, {
+    headers: await getAuthHeader(),
+    cache: 'no-store',
+  });
+  if (!response.ok) throw new Error("Failed to export orders");
+  
+  // Return the blob for the client to handle
+  const blob = await response.blob();
+  return blob;
+}

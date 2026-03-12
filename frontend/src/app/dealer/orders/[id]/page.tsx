@@ -122,7 +122,11 @@ export default function DealerOrderDetailPage({
           <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Back to History
         </Link>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
+        <button 
+          disabled={!["paid", "shipped"].includes(order.status)}
+          title={!["paid", "shipped"].includes(order.status) ? "Invoice available only for Paid or Shipped orders" : ""}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           <Printer className="h-3.5 w-3.5" />
           Print Invoice
         </button>
@@ -202,7 +206,7 @@ export default function DealerOrderDetailPage({
               Order Total
             </h3>
             <div className="space-y-1">
-              <p className="font-black text-3xl text-white leading-tight font-mono tracking-tighter">${Number(order.totalAmount).toFixed(2)}</p>
+              <p className="font-black text-3xl text-white leading-tight font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</p>
               <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Includes Tax & Fees</p>
             </div>
           </div>
@@ -216,12 +220,14 @@ export default function DealerOrderDetailPage({
           <div className="divide-y divide-zinc-100">
             {order.items.map((item) => (
               <div key={item.id} className="p-6 flex flex-col sm:flex-row sm:items-center gap-6 group hover:bg-zinc-50/50 transition-colors">
-                <div className="h-20 w-20 bg-zinc-50 rounded-2xl overflow-hidden shrink-0 border border-zinc-100 group-hover:scale-105 transition-transform duration-300">
+                <div className="h-20 w-20 bg-zinc-100 rounded-2xl overflow-hidden shrink-0 border border-zinc-200 group-hover:scale-105 transition-transform duration-300 shadow-inner">
                   {item.productVariant.imageUrl ? (
                     <img src={item.productVariant.imageUrl} alt={item.productVariant.title} className="h-full w-full object-cover" />
+                  ) : item.productVariant.product.images?.[0]?.src ? (
+                    <img src={item.productVariant.product.images[0].src} alt={item.productVariant.product.title} className="h-full w-full object-cover opacity-80" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
-                      <ShoppingBag className="h-8 w-8 text-zinc-200" />
+                      <ShoppingBag className="h-8 w-8 text-zinc-300" />
                     </div>
                   )}
                 </div>
@@ -243,12 +249,12 @@ export default function DealerOrderDetailPage({
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
                   <div className="text-xs font-bold text-zinc-400">
-                    <span className="text-zinc-900 font-mono">${Number(item.unitPrice).toFixed(2)}</span>
+                    <span className="text-zinc-900 font-mono">₺{Number(item.unitPrice).toFixed(2)}</span>
                     <span className="mx-2">×</span>
                     <span className="text-zinc-900 font-mono">{item.quantity}</span>
                   </div>
                   <div className="text-lg font-black text-zinc-900 font-mono tracking-tighter">
-                    ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                    ₺{(Number(item.unitPrice) * item.quantity).toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -259,7 +265,7 @@ export default function DealerOrderDetailPage({
           <div className="p-8 bg-zinc-50 flex flex-col items-end gap-2">
              <div className="flex items-center gap-8 text-sm">
                 <span className="font-bold text-zinc-400 uppercase tracking-widest">Subtotal</span>
-                <span className="font-black text-zinc-900 font-mono">${Number(order.totalAmount).toFixed(2)}</span>
+                <span className="font-black text-zinc-900 font-mono">₺{Number(order.totalAmount).toFixed(2)}</span>
              </div>
              <div className="flex items-center gap-8 text-sm">
                 <span className="font-bold text-zinc-400 uppercase tracking-widest">Shipping</span>
@@ -268,7 +274,7 @@ export default function DealerOrderDetailPage({
              <div className="h-px w-48 bg-zinc-200 my-2" />
              <div className="flex items-center gap-8 text-xl">
                 <span className="font-black text-zinc-900 uppercase tracking-tighter">Total Amount</span>
-                <span className="font-black text-red-600 font-mono tracking-tighter">${Number(order.totalAmount).toFixed(2)}</span>
+                <span className="font-black text-red-600 font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</span>
              </div>
           </div>
       </div>

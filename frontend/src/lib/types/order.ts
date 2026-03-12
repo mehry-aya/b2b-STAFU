@@ -12,6 +12,7 @@ export interface OrderItem {
     imageUrl: string | null;
     product: {
       title: string;
+      images: any; // Using any for Json field from Prisma
     };
   };
 }

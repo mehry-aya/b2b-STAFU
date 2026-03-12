@@ -179,7 +179,7 @@ export default function DealerProductsPage() {
                   {/* Red price badge on hover */}
                   {price && price !== "N/A" && (
                     <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md">
-                      ${price}
+                      ₺{price}
                     </div>
                   )}
                 </div>
@@ -194,7 +194,7 @@ export default function DealerProductsPage() {
                   </h3>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-base font-black text-zinc-900">
-                      {price !== "N/A" ? `$${price}` : "—"}
+                      {price !== "N/A" ? `₺${price}` : "—"}
                     </span>
                     <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">
                       View →
