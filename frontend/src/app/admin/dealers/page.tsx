@@ -3,15 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { getDealersAdminAction } from "@/app/login/actions";
 import DealerApprovalTable from "@/components/DealerApprovalTable";
-import Link from "next/link";
-import {
-  Users,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Anchor,
-  ArrowRight,
-} from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, Anchor } from "lucide-react";
+import DashboardHeader from "@/components/ui/DashboardHeader";
+import StatsRow from "@/components/ui/StatsRow";
 
 export default function AdminDealersPage() {
   const [dealers, setDealers] = useState<any[]>([]);
@@ -32,105 +26,60 @@ export default function AdminDealersPage() {
     Promise.resolve().then(() => fetchData());
   }, [fetchData]);
 
-  // Derived stats from dynamic dealer data
   const totalDealers = dealers.length;
   const approvedCount = dealers.filter((d) => d.contractStatus === "approved").length;
   const pendingCount = dealers.filter((d) => d.contractStatus === "pending").length;
   const rejectedCount = dealers.filter((d) => d.contractStatus === "rejected").length;
 
- const stats = [
-  {
-    label: "Total Dealers",
-    value: totalDealers,
-    icon: Users,
-    color: "text-slate-700",
-    bg: "bg-slate-200",
-    border: "border-slate-200",
-  },
-  {
-    label: "Approved",
-    value: approvedCount,
-    icon: CheckCircle,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-  },
-  {
-    label: "Pending Review",
-    value: pendingCount,
-    icon: Clock,
-    color: "text-amber-600",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-  },
-  {
-    label: "Rejected",
-    value: rejectedCount,
-    icon: XCircle,
-    color: "text-red-600",
-    bg: "bg-red-50",
-    border: "border-red-200",
-  },
-];
+  const stats = [
+    {
+      label: "Total Dealers",
+      value: totalDealers,
+      icon: Users,
+      color: "text-slate-700",
+      bg: "bg-slate-200",
+      border: "border-slate-200",
+    },
+    {
+      label: "Approved",
+      value: approvedCount,
+      icon: CheckCircle,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+    },
+    {
+      label: "Pending Review",
+      value: pendingCount,
+      icon: Clock,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      border: "border-amber-200",
+    },
+    {
+      label: "Rejected",
+      value: rejectedCount,
+      icon: XCircle,
+      color: "text-red-600",
+      bg: "bg-red-50",
+      border: "border-red-200",
+    },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0f0f0f] px-8 py-8">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-red-600 via-red-500 to-transparent" />
+      <DashboardHeader
+        title="Dealers"
+        subtitle="Review contracts and manage dealer account activations across the platform."
+        icon={Anchor}
+        breadcrumbs={[
+          { label: "Admin", href: "/admin/dashboard" },
+          { label: "Dealer Management" }
+        ]}
+      />
 
-        <div className="relative">
-          <div className="flex items-center gap-2 text-red-400 text-xs font-semibold tracking-widest uppercase mb-3">
-            <Anchor className="h-3.5 w-3.5" />
-            <Link href="/admin/dashboard" className="text-zinc-500 hover:text-zinc-300 transition-colors">
-              Admin
-            </Link>
-            <span className="text-zinc-600">/</span>
-            <span className="text-red-400">Dealer Management</span>
-          </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Dealers</h1>
-          <p className="text-zinc-400 text-sm mt-1 max-w-xl">
-            Review contracts and manage dealer account activations across the platform.
-          </p>
-        </div>
-      </div>
+      <StatsRow stats={stats} loading={loading} />
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className={`rounded-2xl border ${stat.bg} ${stat.border} px-5 py-4 flex items-center gap-4`}
-            >
-              <div className={`${stat.color}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className={`text-2xl font-black ${stat.color}`}>
-                  {loading ? (
-                    <span className="inline-block w-8 h-6 bg-white/10 rounded animate-pulse" />
-                  ) : (
-                    stat.value
-                  )}
-                </p>
-                <p className="text-xs text-zinc-500 font-medium mt-0.5">{stat.label}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Error */}
       {error && (
         <div className="p-4 bg-red-950/30 border border-red-600/20 text-red-400 rounded-2xl text-sm font-medium flex items-center gap-3">
           <XCircle className="w-4 h-4 shrink-0" />
@@ -138,7 +87,6 @@ export default function AdminDealersPage() {
         </div>
       )}
 
-      {/* Table */}
       <div>
         <h2 className="text-xs font-bold tracking-widest uppercase text-zinc-400 mb-4">
           All Dealers

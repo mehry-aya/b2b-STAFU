@@ -25,81 +25,13 @@ export class ProductsService {
     for (const p of productsData) {
       try {
         await this.prisma.$transaction(async (tx) => {
-          // Ensure all collections exist
-          const collectionConnections: { id: number }[] = [];
-          for (const c of p.collections) {
-            const collection = await (tx as any).collection.upsert({
-              where: { shopifyId: c.shopifyId },
-              update: { title: c.title, handle: c.handle },
-              create: { shopifyId: c.shopifyId, title: c.title, handle: c.handle },
-            });
-            collectionConnections.push({ id: collection.id });
-          }
-
-          // Upsert product
-          const product = await tx.product.upsert({
-            where: { shopifyId: p.shopifyId },
-            update: {
-              title: p.title,
-              description: p.description,
-              handle: p.handle,
-              vendor: p.vendor,
-              productType: p.productType,
-              status: p.status,
-              images: p.images as Prisma.JsonArray,
-              options: p.options as Prisma.JsonArray,
-              syncedAt,
-              collections: { set: collectionConnections },
-            },
-            create: {
-              shopifyId: p.shopifyId,
-              title: p.title,
-              description: p.description,
-              handle: p.handle,
-              vendor: p.vendor,
-              productType: p.productType,
-              status: p.status,
-              images: p.images as Prisma.JsonArray,
-              options: p.options as Prisma.JsonArray,
-              syncedAt,
-              collections: { connect: collectionConnections },
-            },
-          } as any);
-
+          const collectionConnections = await this.syncCollections(tx, p.collections);
+          const product = await this.syncProduct(tx, p, syncedAt, collectionConnections);
+          
           productsSynced++;
 
-          // Upsert variants
-          for (const v of p.variants) {
-            await tx.productVariant.upsert({
-              where: { shopifyVariantId: v.shopifyVariantId },
-              update: {
-                productId: product.id,
-                title: v.title,
-                sku: v.sku,
-                price: v.price ? new Prisma.Decimal(v.price) : undefined,
-                compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
-                inventoryQuantity: v.inventoryQuantity ?? 0, // ensures no null
-                option1: v.option1,
-                option2: v.option2,
-                option3: v.option3,
-                imageUrl: v.imageUrl,
-              },
-              create: {
-                shopifyVariantId: v.shopifyVariantId,
-                productId: product.id,
-                title: v.title,
-                sku: v.sku,
-                price: v.price ? new Prisma.Decimal(v.price) : undefined,
-                compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
-                inventoryQuantity: v.inventoryQuantity ?? 0, // ensures no null
-                option1: v.option1,
-                option2: v.option2,
-                option3: v.option3,
-                imageUrl: v.imageUrl,
-              },
-            } as any);
-            variantsSynced++;
-          }
+          const vSyncedCount = await this.syncVariants(tx, product.id, p.variants);
+          variantsSynced += vSyncedCount;
         });
       } catch (error: any) {
         this.logger.error(`Failed to sync product ${p.shopifyId}: ${error.message}`);
@@ -108,6 +40,91 @@ export class ProductsService {
     }
 
     return { productsSynced, variantsSynced, syncedAt, errors };
+  }
+
+  private async syncCollections(tx: Prisma.TransactionClient, collections: any[]) {
+    const collectionConnections: { id: number }[] = [];
+    for (const c of collections) {
+      const collection = await (tx as any).collection.upsert({
+        where: { shopifyId: c.shopifyId },
+        update: { title: c.title, handle: c.handle },
+        create: { shopifyId: c.shopifyId, title: c.title, handle: c.handle },
+      });
+      collectionConnections.push({ id: collection.id });
+    }
+    return collectionConnections;
+  }
+
+  private async syncProduct(
+    tx: Prisma.TransactionClient, 
+    p: any, 
+    syncedAt: Date, 
+    collectionConnections: { id: number }[]
+  ) {
+    return await tx.product.upsert({
+      where: { shopifyId: p.shopifyId },
+      update: {
+        title: p.title,
+        description: p.description,
+        handle: p.handle,
+        vendor: p.vendor,
+        productType: p.productType,
+        status: p.status,
+        images: p.images as Prisma.JsonArray,
+        options: p.options as Prisma.JsonArray,
+        syncedAt,
+        collections: { set: collectionConnections },
+      },
+      create: {
+        shopifyId: p.shopifyId,
+        title: p.title,
+        description: p.description,
+        handle: p.handle,
+        vendor: p.vendor,
+        productType: p.productType,
+        status: p.status,
+        images: p.images as Prisma.JsonArray,
+        options: p.options as Prisma.JsonArray,
+        syncedAt,
+        collections: { connect: collectionConnections },
+      },
+    } as any);
+  }
+
+  private async syncVariants(tx: Prisma.TransactionClient, productId: number, variants: any[]) {
+    let count = 0;
+    for (const v of variants) {
+      await tx.productVariant.upsert({
+        where: { shopifyVariantId: v.shopifyVariantId },
+        update: {
+          productId,
+          title: v.title,
+          sku: v.sku,
+          price: v.price ? new Prisma.Decimal(v.price) : undefined,
+          compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
+          inventoryQuantity: v.inventoryQuantity ?? 0,
+          option1: v.option1,
+          option2: v.option2,
+          option3: v.option3,
+          imageUrl: v.imageUrl,
+        },
+        create: {
+          shopifyVariantId: v.shopifyVariantId,
+          productId,
+          title: v.title,
+          sku: v.sku,
+          price: v.price ? new Prisma.Decimal(v.price) : undefined,
+          compareAtPrice: v.compareAtPrice ? new Prisma.Decimal(v.compareAtPrice) : undefined,
+          inventoryQuantity: v.inventoryQuantity ?? 0,
+          option1: v.option1,
+          option2: v.option2,
+          option3: v.option3,
+          imageUrl: v.imageUrl,
+        },
+      } as any);
+      count++;
+    }
+    return count;
   }
 
   // Fetch Shopify categories

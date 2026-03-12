@@ -1,26 +1,21 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchOrders } from "@/lib/api/orders"; // Admin can see all orders
+import { fetchOrders, exportOrdersToExcel } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
 import { 
   ShoppingBag, 
   Calendar, 
-  Clock, 
   Eye, 
-  CreditCard, 
-  Truck, 
   AlertCircle, 
-  CheckCircle2,
-  Users,
   Search,
   Filter,
   Download
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { exportOrdersToExcel } from "@/lib/api/orders";
 import { useToast } from "@/hooks/use-toast";
+import DashboardHeader from "@/components/ui/DashboardHeader";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -62,28 +57,15 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="bg-[#0f0f0f] rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-2xl">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="px-3 py-1 rounded-full bg-red-600/20 border border-red-600/30 text-red-500 text-[10px] font-black uppercase tracking-widest">
-              Global Management
-            </div>
-            <span className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-600 text-white">
-              Admin
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
-            ORDER <span className="text-red-600 italic">CONTROL</span>
-          </h1>
-          <p className="text-zinc-400 max-w-md text-sm md:text-base leading-relaxed font-medium">
-            Monitor and manage orders from all dealers. Update statuses, track fulfillment, and handle payments.
-          </p>
-        </div>
-        {/* Decorative grid */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-        <div className="absolute right-0 top-0 h-full w-1/3 bg-linear-to-l from-red-600/10 to-transparent pointer-events-none" />
-      </div>
+      <DashboardHeader
+        title="Order Control"
+        subtitle="Monitor and manage orders from all dealers. Update statuses, track fulfillment, and handle payments."
+        icon={ShoppingBag}
+        breadcrumbs={[
+          { label: "Admin Console" }
+        ]}
+        roleBadge={{ label: "Admin", type: "admin" }}
+      />
 
       {/* Toolbar */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white border border-zinc-100 p-4 rounded-2xl shadow-sm">

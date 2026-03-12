@@ -1,76 +1,23 @@
 "use client";
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import SidebarLayout from "./SidebarLayout";
-import { useSearchParams, usePathname } from "next/navigation";
-import { fetchCategories } from "@/lib/api/products";
+import { useSearchParams } from "next/navigation";
+import { useShopifyCategories } from "@/hooks/useShopifyCategories";
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   FileText,
   User,
-  ChevronDown,
-  ChevronRight,
 } from "lucide-react";
 
-interface Category {
-  title: string;
-  handle: string;
-  children: {
-    title: string;
-    handle: string;
-  }[];
-}
-
 export default function DealerSidebar({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const currentCategory = searchParams.get("category");
 
-  useEffect(() => {
-    fetchCategories().then((data) => {
-      setCategories(data);
-      // Auto-expand parent if a child is active (only on initial load or data change)
-      setOpenGroups((prev) => {
-        const newOpen = { ...prev };
-        data.forEach((cat: Category) => {
-          if (
-            cat.handle === currentCategory ||
-            cat.children.some((c) => c.handle === currentCategory)
-          ) {
-            newOpen[cat.title] = true;
-          }
-        });
-        return newOpen;
-      });
-    });
-  }, []); // Only fetch on mount
-
-  // Separate effect to handle auto-expansion when category changes via URL
-  useEffect(() => {
-    if (currentCategory && categories.length > 0) {
-      setOpenGroups((prev) => {
-        const newOpen = { ...prev };
-        categories.forEach((cat) => {
-          if (
-            cat.handle === currentCategory ||
-            cat.children.some((c) => c.handle === currentCategory)
-          ) {
-            newOpen[cat.title] = true;
-          }
-        });
-        return newOpen;
-      });
-    }
-  }, [currentCategory, categories]);
-
-  const toggleGroup = (title: string) => {
-    setOpenGroups((prev) => ({ ...prev, [title]: !prev[title] }));
-  };
+  const { categories, openGroups, toggleGroup } = useShopifyCategories(currentCategory);
 
   const navItems = [
     { label: "Dashboard", href: "/dealer/dashboard", icon: LayoutDashboard },
@@ -107,7 +54,6 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
       Dealer Portal
     </span>
   );
-
 
   return (
     <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle} showCart={true}>
