@@ -16,14 +16,20 @@ export async function fetchProducts(
   productType?: string,
   all?: boolean,
   category?: string,
-  inStock?: boolean
-): Promise<Product[]> {
+  inStock?: boolean,
+  status?: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<{ data: Product[]; total: number; totalPages: number; page: number; limit: number }> {
   const params = new URLSearchParams();
   if (search) params.append('search', search);
   if (productType) params.append('productType', productType);
   if (all) params.append('all', 'true');
   if (category) params.append('category', category);
   if (inStock) params.append("inStock", "true");
+  if (status) params.append("status", status);
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
   const queryString = params.toString() ? `?${params.toString()}` : '';
   const url = `${API_BASE_URL}/products${queryString}`;
   
@@ -42,7 +48,7 @@ export async function fetchProducts(
     }
 
     const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    return data;
   } catch (error) {
     console.error(`[Server Action] fetchProducts exception:`, (error as Error).message);
     throw error;

@@ -16,6 +16,10 @@ export default function DealerProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(24); // Grid looks better with multiples of 4 or 3
+  const [totalCount, setTotalCount] = useState(0);
 
   const loadProducts = async (searchquery: string = "") => {
     setLoading(true);
@@ -26,9 +30,14 @@ export default function DealerProductsPage() {
         undefined,
         false,
         currentCategory || undefined,
-        true
+        true,
+        undefined,
+        page,
+        pageSize
       );
-      setProducts(data);
+      setProducts(data.data);
+      setTotalPages(data.totalPages);
+      setTotalCount(data.total);
     } catch (err: any) {
       setError(err.message || "Failed to load products");
     } finally {
@@ -38,7 +47,7 @@ export default function DealerProductsPage() {
 
   useEffect(() => {
     loadProducts(searchTerm);
-  }, [currentCategory]);
+  }, [currentCategory, page]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
@@ -50,6 +59,7 @@ export default function DealerProductsPage() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setPage(1); // Reset to first page on search
     debouncedSearch(e.target.value);
   };
 
@@ -194,6 +204,54 @@ export default function DealerProductsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 py-8 border-t border-zinc-100">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight className="h-4 w-4 rotate-180" />
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1.5 mx-2">
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const p = i + 1;
+              if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-9 h-9 text-xs font-black rounded-xl border transition-all ${
+                      page === p
+                        ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20"
+                        : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              }
+              if (p === page - 2 || p === page + 2) {
+                return <span key={p} className="text-zinc-300 text-xs">•••</span>;
+              }
+              return null;
+            })}
+          </div>
+
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       )}
     </div>

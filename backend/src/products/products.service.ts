@@ -113,17 +113,27 @@ export class ProductsService {
     return this.shopifyService.getCategories();
   }
 
-  // Fetch active products, with optional filters
-  async getActiveProducts(
+  // Fetch products with pagination and optional filters
+  async getProducts(
     search?: string,
     productType?: string,
     allStatuses: boolean = false,
     categoryHandle?: string,
-    inStockOnly: boolean = false, // only include products with inventory > 0
+    inStockOnly: boolean = false,
+    status?: string,
+    page: number = 1,
+    limit: number = 10,
   ) {
     const whereClause: any = {};
 
-    if (!allStatuses) whereClause.status = 'active';
+    // For admin/all view, we can filter by specific status
+    if (allStatuses) {
+      if (status && status !== 'all') {
+        whereClause.status = status;
+      }
+    } else {
+      whereClause.status = 'active';
+    }
 
     if (search) {
       whereClause.OR = [
@@ -141,21 +151,29 @@ export class ProductsService {
       };
     }
 
+    const skip = (page - 1) * limit;
+
+    // Fetch total count for pagination
+    const total = await (this.prisma.product as any).count({
+      where: whereClause,
+    });
+
     // Fetch products with variants
     let products = await (this.prisma.product as any).findMany({
       where: whereClause,
       include: { variants: true },
       orderBy: { title: 'asc' },
+      skip,
+      take: limit,
     });
 
-    // Filter in-stock products
-    if (inStockOnly) {
-      products = products.filter(product =>
-        product.variants.some((v: any) => (v.inventoryQuantity || 0) > 0)
-      );
-    }
-
-    return products.map((p: any) => this.mapProduct(p));
+    return {
+      data: products.map((p: any) => this.mapProduct(p)),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   // Fetch a single product by ID
