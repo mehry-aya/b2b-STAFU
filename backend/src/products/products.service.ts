@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShopifyService } from './shopify.service';
+import { SyncStatusService } from './sync-status.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -8,27 +9,50 @@ export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly shopifyService: ShopifyService,
+    private prisma: PrismaService,
+    private shopifyService: ShopifyService,
+    private syncStatusService: SyncStatusService,
   ) {}
 
   // Sync products & variants from Shopify
-  async syncFromShopify() {
-    this.logger.log('Starting Shopify sync...');
-    const productsData = await this.shopifyService.fetchAllProducts();
+async syncFromShopify() {
+  this.logger.log('Starting Shopify sync...');
+  this.syncStatusService.startSync(0);
 
-    let productsSynced = 0;
-    let variantsSynced = 0;
-    const errors: string[] = [];
-    const syncedAt = new Date();
+  try {
+    const totalCount = await this.shopifyService.fetchProductsCount();
+    this.syncStatusService.setTotal(totalCount);
+    this.logger.log(`Total products to sync: ${totalCount}`);
+  } catch (error: any) {
+    this.logger.warn(`Could not fetch total count: ${error.message}`);
+  }
 
-    for (const p of productsData) {
+  let productsSynced = 0;
+  let variantsSynced = 0;
+  const errors: string[] = [];
+  const syncedAt = new Date();
+  let cursor: string | null = null;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    let page: Awaited<ReturnType<typeof this.shopifyService.fetchProductsPage>>;
+
+    try {
+      page = await this.shopifyService.fetchProductsPage(cursor);
+    } catch (error: any) {
+      this.logger.error(`Failed to fetch page from Shopify: ${error.message}`);
+      this.syncStatusService.setError(error.message);
+      throw error;
+    }
+
+    for (const p of page.products) {
       try {
         await this.prisma.$transaction(async (tx) => {
           const collectionConnections = await this.syncCollections(tx, p.collections);
           const product = await this.syncProduct(tx, p, syncedAt, collectionConnections);
-          
+
           productsSynced++;
+          this.syncStatusService.updateProgress(productsSynced);
 
           const vSyncedCount = await this.syncVariants(tx, product.id, p.variants);
           variantsSynced += vSyncedCount;
@@ -39,9 +63,13 @@ export class ProductsService {
       }
     }
 
-    return { productsSynced, variantsSynced, syncedAt, errors };
+    hasNextPage = page.hasNextPage;
+    cursor = page.endCursor;
   }
 
+  this.syncStatusService.completeSync();
+  return { productsSynced, variantsSynced, syncedAt, errors };
+}
   private async syncCollections(tx: Prisma.TransactionClient, collections: any[]) {
     const collectionConnections: { id: number }[] = [];
     for (const c of collections) {

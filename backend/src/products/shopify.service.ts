@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { GET_CATEGORIES_QUERY, GET_PRODUCTS_QUERY } from 'src/shopify/shopify-queries';
+import { COUNT_QUERY, GET_CATEGORIES_QUERY, GET_PRODUCTS_QUERY } from 'src/shopify/shopify-queries';
 import { ShopifyMapper } from 'src/shopify/shopify.mapper';
 
 export interface ShopifyProductSyncPayload {
@@ -134,58 +134,60 @@ const query = GET_CATEGORIES_QUERY;
     }
   }
 
-  async fetchAllProducts(): Promise<ShopifyProductSyncPayload[]> {
-    if (!this.storeDomain || !this.accessToken) {
-      throw new Error('Shopify credentials are not configured.');
-    }
-
-    let hasNextPage = true;
-    let cursor: string | null = null;
-    const allProducts: ShopifyProductSyncPayload[] = [];
-
-  const query = GET_PRODUCTS_QUERY;
-
-    while (hasNextPage) {
-      this.logger.log(`Fetching page of Shopify products... cursor: ${cursor}`);
-      
-      const response = await firstValueFrom(
-        this.httpService.post(
-          this.apiUrl,
-          {
-            query,
-            variables: { cursor },
-          },
-          {
-            headers: {
-              'X-Shopify-Access-Token': this.accessToken,
-              'Content-Type': 'application/json',
-            },
-          },
-        ),
-      );
-
-      const parsedData = response.data;
-      if (parsedData.errors && parsedData.errors.length > 0) {
-        this.logger.error(`Shopify API Error: ${JSON.stringify(parsedData.errors)}`);
-        throw new Error('Shopify API Error');
-      }
-
-      const productsPage = parsedData.data?.products;
-      if (!productsPage) {
-        break;
-      }
-
-      const nodes = productsPage.edges.map((e: any) => e.node);
-      
-      for (const node of nodes) {
-        allProducts.push(ShopifyMapper.mapNodeToProductPayload(node));
-      }
-
-      hasNextPage = productsPage.pageInfo.hasNextPage;
-      cursor = productsPage.pageInfo.endCursor;
-    }
-
-    this.logger.log(`Fetched total ${allProducts.length} products from Shopify.`);
-    return allProducts;
+ async fetchProductsPage(cursor: string | null): Promise<{
+  products: ShopifyProductSyncPayload[];
+  hasNextPage: boolean;
+  endCursor: string | null;
+}> {
+  if (!this.storeDomain || !this.accessToken) {
+    throw new Error('Shopify credentials are not configured.');
   }
+
+  const response = await firstValueFrom(
+    this.httpService.post(
+      this.apiUrl,
+      { query: GET_PRODUCTS_QUERY, variables: { cursor } },
+      {
+        headers: {
+          'X-Shopify-Access-Token': this.accessToken,
+          'Content-Type': 'application/json',
+        },
+      },
+    ),
+  );
+
+  const parsedData = response.data;
+  if (parsedData.errors?.length > 0) {
+    throw new Error('Shopify API Error');
+  }
+
+  const productsPage = parsedData.data?.products;
+  if (!productsPage) return { products: [], hasNextPage: false, endCursor: null };
+
+  const products = productsPage.edges.map((e: any) =>
+    ShopifyMapper.mapNodeToProductPayload(e.node),
+  );
+
+  return {
+    products,
+    hasNextPage: productsPage.pageInfo.hasNextPage,
+    endCursor: productsPage.pageInfo.endCursor,
+  };
+}
+async fetchProductsCount(): Promise<number> {
+  const response = await firstValueFrom(
+    this.httpService.post(
+      this.apiUrl,
+      { query: COUNT_QUERY },
+      {
+        headers: {
+          'X-Shopify-Access-Token': this.accessToken,
+          'Content-Type': 'application/json',
+        },
+      },
+    ),
+  );
+
+  return response.data?.data?.productsCount?.count ?? 0;
+}
 }

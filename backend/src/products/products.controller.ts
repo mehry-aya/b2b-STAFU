@@ -1,5 +1,6 @@
-import { Controller, Post, Get, Param, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Param, Query, UseGuards, ParseIntPipe, Logger } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { SyncStatusService } from './sync-status.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -9,13 +10,30 @@ import { Role } from '@prisma/client';
 @Controller('products')
 @UseGuards(JwtAuthGuard)
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+    private readonly logger = new Logger(ProductsController.name);
+
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly syncStatusService: SyncStatusService,
+  ) {}
 
   @Post('sync')
+@UseGuards(RolesGuard)
+@Roles(Role.master_admin, Role.admin)
+async syncProducts() {
+  // Don't await — let it run in the background
+  this.productsService.syncFromShopify().catch((err) => {
+    this.logger.error('Background sync failed:', err.message);
+  });
+
+  return { message: 'Sync started' };
+}
+
+  @Get('sync/status')
   @UseGuards(RolesGuard)
   @Roles(Role.master_admin, Role.admin)
-  async syncProducts() {
-    return this.productsService.syncFromShopify();
+  async getSyncStatus() {
+    return this.syncStatusService.getStatus();
   }
 
   @Get('categories')

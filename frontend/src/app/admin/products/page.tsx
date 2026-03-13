@@ -3,14 +3,19 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/lib/types/product";
-import { fetchProducts, syncShopifyProducts } from "@/lib/api/products";
-import { RefreshCw, PackageOpen, AlertCircle, Search, Tag, Anchor, Box, ChevronLeft, ChevronRight, Filter, Calendar } from "lucide-react";
+import { fetchProducts, syncShopifyProducts, fetchSyncStatus } from "@/lib/api/products";
+import { RefreshCw, PackageOpen, AlertCircle, Search, Tag, Anchor, Box, ChevronLeft, ChevronRight, Filter, Calendar, CheckCircle2 } from "lucide-react";
 
 export default function AdminProductsPage() {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{
+    total: number;
+    current: number;
+    percent: number;
+  } | null>(null);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -59,29 +64,59 @@ export default function AdminProductsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleSync = async () => {
-    if (syncing) return;
-    setSyncing(true);
+const handleSync = async () => {
+  if (syncing) return;
+  setSyncing(true);
+  setSyncStatus({ total: 0, current: 0, percent: 0 });
 
+  try {
+    await syncShopifyProducts(); // returns fast now (202)
+  } catch (err: any) {
+    toast({
+      title: "Sync Failed",
+      description: err.message || "An error occurred while syncing with Shopify.",
+      variant: "destructive",
+    });
+    setSyncing(false);
+    setSyncStatus(null);
+    return;
+  }
+
+  const pollInterval = setInterval(async () => {
     try {
-      const result = await syncShopifyProducts();
-      toast({
-        title: "Sync Complete",
-        description: `Successfully synced ${result.productsSynced} products and ${result.variantsSynced} variants from Shopify.`,
-      });
-      // Reload the table with fresh data
-      await loadProducts();
-    } catch (err: any) {
-      toast({
-        title: "Sync Failed",
-        description:
-          err.message || "An error occurred while syncing with Shopify.",
-        variant: "destructive",
-      });
-    } finally {
-      setSyncing(false);
+      const status = await fetchSyncStatus();
+
+      if (status.isSyncing) {
+        const total = status.totalProducts || 0;
+        const current = status.syncedProducts || 0;
+        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+        setSyncStatus({ total, current, percent });
+      } else {
+        // isSyncing: false means it's done
+        clearInterval(pollInterval);
+        setSyncStatus(null);
+        setSyncing(false);
+
+        if (status.lastError) {
+          toast({
+            title: "Sync Failed",
+            description: status.lastError,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sync Complete",
+            description: `Synced ${status.syncedProducts} products from Shopify.`,
+          });
+        }
+
+        await loadProducts();
+      }
+    } catch (err) {
+      console.error("Error polling sync status:", err);
     }
-  };
+  }, 1000);
+};
 
   const getStatusBadge = (status: string) => {
     const s = status.toLowerCase();
@@ -161,6 +196,48 @@ export default function AdminProductsPage() {
           </div>
         </div>
       </div>
+      {/* Progress Bar Overlay */}
+
+   {syncing && syncStatus && (
+        <div className="rounded-2xl bg-zinc-900 px-6 py-4 flex items-center gap-6 shadow-lg">
+          <div className="flex-1">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-[11px] font-bold text-white/60 uppercase tracking-widest flex items-center gap-2">
+                <RefreshCw className="w-3 h-3 animate-spin text-red-500" />
+                {syncStatus.total === 0 ? "Fetching from Shopify..." : "Syncing Inventory..."}
+              </span>
+              <span className="text-[11px] font-black text-white px-2.5 py-0.5 bg-red-600 rounded-full">
+                {syncStatus.total === 0 ? "..." : `${syncStatus.percent}%`}
+              </span>
+            </div>
+            <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
+              {syncStatus.total === 0 ? (
+                <div
+                  className="h-full w-1/3 bg-gradient-to-r from-red-600 to-red-400 rounded-full"
+                  style={{ animation: 'indeterminate 1.2s ease-in-out infinite' }}
+                />
+              ) : (
+                <div
+                  className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${syncStatus.percent}%` }}
+                />
+              )}
+            </div>
+          </div>
+          <div className="text-right shrink-0">
+            <span className="block text-sm font-black text-white">
+              {syncStatus.total === 0 ? (
+                <span className="text-white/40">Loading...</span>
+              ) : (
+                <>{syncStatus.current} <span className="text-white/40">/ {syncStatus.total}</span></>
+              )}
+            </span>
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+              Products Synced
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Filters and Search Row */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">

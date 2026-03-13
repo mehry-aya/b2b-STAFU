@@ -99,7 +99,7 @@ export async function fetchProductById(id: number | string): Promise<Product> {
   }
 }
 
-export async function syncShopifyProducts(): Promise<{ productsSynced: number; variantsSynced: number; errors: string[] }> {
+export async function syncShopifyProducts(): Promise<void> {
   const url = `${API_BASE_URL}/products/sync`;
   console.log(`[Server Action] syncShopifyProducts calling: ${url}`);
 
@@ -115,10 +115,35 @@ export async function syncShopifyProducts(): Promise<{ productsSynced: number; v
       console.error(`[Server Action] syncShopifyProducts failed:`, errorData);
       throw new Error(errorData?.message || 'Failed to sync Shopify products');
     }
+    // Completion is detected via polling /sync/status
+  } catch (error) {
+    console.error(`[Server Action] syncShopifyProducts exception:`, (error as Error).message);
+    throw error;
+  }
+}
+
+export async function fetchSyncStatus(): Promise<{
+  isSyncing: boolean;
+  totalProducts: number;
+  syncedProducts: number;
+  lastError: string | null;
+  startedAt: string | null;
+}> {
+  const url = `${API_BASE_URL}/products/sync/status`;
+  
+  try {
+    const response = await fetch(url, {
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch sync status');
+    }
 
     return response.json();
   } catch (error) {
-    console.error(`[Server Action] syncShopifyProducts exception:`, error);
+    console.error(`[Server Action] fetchSyncStatus exception:`, error);
     throw error;
   }
 }

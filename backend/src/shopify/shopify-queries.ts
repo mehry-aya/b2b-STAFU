@@ -75,3 +75,11 @@ export const GET_PRODUCTS_QUERY = `
     }
   }
 `;
+
+export const COUNT_QUERY = `
+  query {
+    productsCount {
+      count
+    }
+  }
+`;
