@@ -261,14 +261,18 @@ export async function uploadContractAction(formData: FormData) {
   }
 }
 
-export async function getDealersAdminAction() {
+export async function getDealersAdminAction(page: number = 1, limit: number = 10) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/dealers/admin/list", {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    const response = await fetch(`http://127.0.0.1:3001/api/dealers/admin/list?${params.toString()}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -277,7 +281,7 @@ export async function getDealersAdminAction() {
 
     if (!response.ok) return { error: "Failed to fetch dealers" };
 
-    return { dealers: await response.json() };
+    return { data: await response.json() };
   } catch {
     return { error: "Connection error" };
   }
@@ -334,14 +338,18 @@ export async function createOrderAction(items: { productId: number; variantId: n
   }
 }
 
-export async function getOrdersAction() {
+export async function getOrdersAction(page: number = 1, limit: number = 10) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/orders", {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    const response = await fetch(`http://127.0.0.1:3001/api/orders?${params.toString()}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -349,20 +357,29 @@ export async function getOrdersAction() {
     });
 
     if (!response.ok) return { error: "Failed to fetch orders" };
-    return { orders: await response.json() };
+    return { data: await response.json() };
   } catch {
     return { error: "Connection error" };
   }
 }
 
-export async function getMyOrdersAction() {
+export async function getMyOrdersAction(page: number = 1, limit: number = 10) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/orders/my-orders", {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Note: backend also needs a paginated way to fetch my orders if it's separate
+    // In orders.service.ts, the findAll logic handles dealerId, so /api/orders?page=1&limit=10 
+    // should work for dealers too if it uses the service.findAll(page, limit, dealerId)
+    // However, MyOrders uses /api/orders/my-orders in this action.
+    // Let's check orders.controller.ts for 'my-orders'
+    const response = await fetch(`http://127.0.0.1:3001/api/orders/my-orders?${params.toString()}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -370,7 +387,7 @@ export async function getMyOrdersAction() {
     });
 
     if (!response.ok) return { error: "Failed to fetch your orders" };
-    return { orders: await response.json() };
+    return { data: await response.json() };
   } catch {
     return { error: "Connection error" };
   }

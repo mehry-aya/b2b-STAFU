@@ -11,8 +11,12 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function fetchOrders() {
-  const response = await fetch(`${API_BASE_URL}/orders`, {
+export async function fetchOrders(page: number = 1, limit: number = 10) {
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('limit', limit.toString());
+  
+  const response = await fetch(`${API_BASE_URL}/orders?${params.toString()}`, {
     headers: await getAuthHeader(),
     cache: 'no-store',
   });

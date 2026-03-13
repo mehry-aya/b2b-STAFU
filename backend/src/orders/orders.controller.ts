@@ -8,6 +8,7 @@ import {
   UseGuards,
   ParseIntPipe,
   Res,
+  Query,
 } from '@nestjs/common';
 import * as express from 'express';
 import { OrdersService } from './orders.service';
@@ -33,11 +34,15 @@ export class OrdersController {
   }
 
   @Get()
-  async findAll(@CurrentUser() user: any) {
+  async findAll(
+    @CurrentUser() user: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
     if (user.role === Role.dealer) {
-      return this.ordersService.findAll(user.dealer.id);
+      return this.ordersService.findAll(Number(page), Number(limit), user.dealer.id);
     }
-    return this.ordersService.findAll();
+    return this.ordersService.findAll(Number(page), Number(limit));
   }
 
   @Get(':id')

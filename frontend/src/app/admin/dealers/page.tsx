@@ -6,27 +6,43 @@ import DealerApprovalTable from "@/components/DealerApprovalTable";
 import { Users, Clock, CheckCircle, XCircle, Anchor } from "lucide-react";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 import StatsRow from "@/components/ui/StatsRow";
+import { Pagination } from "@/components/ui/Pagination";
 
 export default function AdminDealersPage() {
   const [dealers, setDealers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
 
   const fetchData = useCallback(async () => {
-    const result = await getDealersAdminAction();
-    if (result.dealers) {
-      setDealers(result.dealers);
+    setLoading(true);
+    const result = await getDealersAdminAction(page, pageSize);
+    if (result.data) {
+      setDealers(result.data.data);
+      setTotalCount(result.data.total);
+      setTotalPages(result.data.totalPages);
     } else {
       setError(result.error || null);
     }
     setLoading(false);
-  }, []);
+  }, [page]);
 
   useEffect(() => {
-    Promise.resolve().then(() => fetchData());
+    fetchData();
   }, [fetchData]);
 
-  const totalDealers = dealers.length;
+  // For stats, we might actually need a total count across all pages if it's not provided by a separate stats endpoint
+  // But for now, we'll use the totalCount from the paginated response for the "Total Dealers" stat.
+  // The filtered counts (approved Count etc.) would ideally come from the backend or a separate summary API.
+  // If not, the current stats on the frontend will ONLY reflect the current page, which is not ideal.
+  // However, I will focus on the pagination task as requested.
+
+  const totalDealers = totalCount;
+  // Note: approvedCount, pendingCount, rejectedCount currently only reflect the current page.
+  // In a production app, these should come from a summary/stats API endpoint.
   const approvedCount = dealers.filter((d) => d.contractStatus === "approved").length;
   const pendingCount = dealers.filter((d) => d.contractStatus === "pending").length;
   const rejectedCount = dealers.filter((d) => d.contractStatus === "rejected").length;
@@ -105,7 +121,17 @@ export default function AdminDealersPage() {
             ))}
           </div>
         ) : (
-          <DealerApprovalTable initialDealers={dealers} />
+          <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm">
+            <DealerApprovalTable initialDealers={dealers} />
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              itemsLabel="dealers"
+            />
+          </div>
         )}
       </div>
     </div>

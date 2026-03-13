@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchOrders, exportOrdersToExcel } from "@/lib/api/orders";
+import { getOrdersAction } from "@/app/login/actions";
 import { Order } from "@/lib/types/order";
 import { 
   ShoppingBag, 
@@ -16,28 +16,42 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHeader from "@/components/ui/DashboardHeader";
+import { Pagination } from "@/components/ui/Pagination";
+import { exportOrdersToExcel } from "@/lib/api/orders";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [exporting, setExporting] = useState(false);
+  const pageSize = 10;
   const { toast } = useToast();
 
-  useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        const data = await fetchOrders();
-        setOrders(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load orders");
-      } finally {
-        setLoading(false);
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const result = await getOrdersAction(page, pageSize);
+      if (result.data) {
+        setOrders(result.data.data);
+        setTotalPages(result.data.totalPages);
+        setTotalCount(result.data.total);
+      } else {
+        setError(result.error || "Failed to load orders");
       }
-    };
+    } catch (err: any) {
+      setError(err.message || "Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadOrders();
-  }, []);
+  }, [page]);
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -119,7 +133,7 @@ export default function AdminOrdersPage() {
               Filter
             </button>
             <div className="h-6 w-px bg-zinc-200 mx-2" />
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{filteredOrders.length} Orders</span>
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{totalCount} Orders</span>
           </div>
       </div>
 
@@ -200,6 +214,14 @@ export default function AdminOrdersPage() {
                <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">No matching orders found</p>
             </div>
           )}
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            itemsLabel="orders"
+          />
         </div>
       )}
     </div>

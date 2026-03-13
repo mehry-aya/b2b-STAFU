@@ -6,18 +6,33 @@ import { ContractStatus } from '@prisma/client';
 export class DealersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
-    return this.prisma.dealer.findMany({
-      include: {
-        user: {
-          select: {
-            email: true,
-            isActive: true,
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.dealer.findMany({
+        include: {
+          user: {
+            select: {
+              email: true,
+              isActive: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.dealer.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      page,
+      limit,
+    };
   }
 
   async updateStatus(dealerId: number, status: ContractStatus) {

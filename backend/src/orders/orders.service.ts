@@ -55,16 +55,32 @@ export class OrdersService {
     });
   }
 
-  async findAll(dealerId?: number) {
-    return this.prisma.order.findMany({
-      where: dealerId ? { dealerId } : {},
-      include: {
-        dealer: {
-          select: { companyName: true },
+  async findAll(page: number = 1, limit: number = 10, dealerId?: number) {
+    const skip = (page - 1) * limit;
+    const where = dealerId ? { dealerId } : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        include: {
+          dealer: {
+            select: { companyName: true },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number, dealerId?: number) {

@@ -6,6 +6,7 @@ import {
   UseGuards,
   ParseIntPipe,
   Body,
+  Query,
 } from '@nestjs/common';
 import { DealersService } from './dealers.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -20,8 +21,8 @@ export class DealersController {
 
   @Get('admin/list')
   @Roles(Role.admin, Role.master_admin)
-  findAll() {
-    return this.dealersService.findAll();
+  findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10) {
+    return this.dealersService.findAll(Number(page), Number(limit));
   }
 
   @Patch('admin/:id/status')

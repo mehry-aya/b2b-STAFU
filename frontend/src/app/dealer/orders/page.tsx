@@ -1,30 +1,40 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchOrders } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
-import { ShoppingBag, Calendar, Clock, ChevronRight, Eye, CreditCard, Truck, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ShoppingBag, Calendar, Clock, Eye, CreditCard, Truck, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { Pagination } from "@/components/ui/Pagination";
 
 export default function DealerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
+
+  const loadOrders = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await fetchOrders(page, pageSize);
+      setOrders(result.data);
+      setTotalPages(result.totalPages);
+      setTotalCount(result.total);
+    } catch (err: any) {
+      setError(err.message || "Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadOrders = async () => {
-      try {
-        const data = await fetchOrders();
-        setOrders(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load orders");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadOrders();
-  }, []);
+  }, [page]);
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -113,7 +123,7 @@ export default function DealerOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {orders.map((order) => (
+                {orders.map((order: Order) => (
                   <tr key={order.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-black text-zinc-900">#{order.id.toString().padStart(5, '0')}</span>
@@ -153,6 +163,14 @@ export default function DealerOrdersPage() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            itemsLabel="orders"
+          />
         </div>
       )}
     </div>

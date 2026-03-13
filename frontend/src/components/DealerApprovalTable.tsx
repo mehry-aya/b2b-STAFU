@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { approveDealerAction } from "@/app/login/actions";
 import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
 
@@ -23,6 +23,11 @@ export default function DealerApprovalTable({
   initialDealers: Dealer[];
 }) {
   const [dealers, setDealers] = useState(initialDealers);
+
+  useEffect(() => {
+    setDealers(initialDealers);
+  }, [initialDealers]);
+
   const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   const handleUpdate = async (id: number, status: string) => {
