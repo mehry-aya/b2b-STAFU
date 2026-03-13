@@ -12,7 +12,7 @@ import {
   User,
   Shield,
 } from "lucide-react";
-import { getMeAction } from "@/app/login/actions";
+import { getMeAction } from "@/app/(auth)/actions";
 
 export default function AdminSidebar({ children }: { children: ReactNode }) {
   const [isMaster, setIsMaster] = useState(false);

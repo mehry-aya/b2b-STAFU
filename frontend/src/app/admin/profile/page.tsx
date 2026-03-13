@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Anchor, ArrowRight, Save, Lock, User as UserIcon, EyeIcon, EyeOffIcon } from "lucide-react";
-import { updateProfileAction } from "@/app/login/actions";
+import { updateProfileAction } from "@/app/(auth)/actions";
 
 export default function AdminProfilePage() {
   const [loading, setLoading] = useState(false);

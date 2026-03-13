@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { approveDealerAction } from "@/app/login/actions";
+import { approveDealerAction } from "@/app/(auth)/actions";
 import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
 
 interface Dealer {

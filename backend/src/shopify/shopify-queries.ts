@@ -83,3 +83,30 @@ export const COUNT_QUERY = `
     }
   }
 `;
+
+export const GET_AUTH_CAROUSEL_QUERY = `
+  query getAuthCarousel($type: String!) {
+    metaobjects(type: $type, first: 250) {
+      edges {
+        node {
+          handle
+          fields {
+            key
+            value
+            references(first: 50) {
+              edges {
+                node {
+                  ... on MediaImage {
+                    image {
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

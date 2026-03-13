@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { User as UserIcon, Building2, MapPin, Phone, Lock, Save, EyeIcon, EyeOffIcon } from "lucide-react";
-import { updateProfileAction, getMeAction } from "@/app/login/actions";
+import { updateProfileAction, getMeAction } from "@/app/(auth)/actions";
 
 export default function DealerProfilePage() {
   const [loading, setLoading] = useState(false);

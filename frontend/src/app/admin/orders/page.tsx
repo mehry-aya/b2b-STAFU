@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getOrdersAction } from "@/app/login/actions";
+import { getOrdersAction } from "@/app/(auth)/actions";
 import { Order } from "@/lib/types/order";
 import { 
   ShoppingBag, 

@@ -22,7 +22,7 @@ export default function AdminExportPage() {
               Export
             </h1>
             <p className="text-zinc-400 text-sm mt-1">
-              Data export and reporting — coming soon.
+              Data export and reporting coming soon.
             </p>
           </div>
         </div>
@@ -34,8 +34,7 @@ export default function AdminExportPage() {
           Export functionality is under development
         </p>
         <p className="text-xs text-zinc-400 mt-1">
-          This section will allow you to export orders, dealers, and product
-          data as CSV or PDF.
+          ...
         </p>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { getDealersAdminAction } from "@/app/login/actions";
+import { getDealersAdminAction } from "@/app/(auth)/actions";
 import DealerApprovalTable from "@/components/DealerApprovalTable";
 import { Users, Clock, CheckCircle, XCircle, Anchor } from "lucide-react";
 import DashboardHeader from "@/components/ui/DashboardHeader";

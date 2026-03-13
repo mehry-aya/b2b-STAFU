@@ -22,7 +22,7 @@ export default function AdminContractsPage() {
               Contracts
             </h1>
             <p className="text-zinc-400 text-sm mt-1">
-              Dealer contract management — coming soon.
+              Dealer contract management coming soon.
             </p>
           </div>
         </div>
@@ -33,9 +33,7 @@ export default function AdminContractsPage() {
         <p className="text-sm font-semibold text-zinc-500">
           Contracts management is under development
         </p>
-        <p className="text-xs text-zinc-400 mt-1">
-          This section will allow you to review and approve dealer contracts.
-        </p>
+        <p className="text-xs text-zinc-400 mt-1">... </p>
       </div>
     </div>
   );

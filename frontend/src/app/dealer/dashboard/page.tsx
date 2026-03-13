@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMeAction } from "@/app/login/actions";
+import { getMeAction } from "@/app/(auth)/actions";
 import {
   ShoppingCart,
   Clock,

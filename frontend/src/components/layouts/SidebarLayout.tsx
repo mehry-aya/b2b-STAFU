@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, LogOut, ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
-import { logoutAction, getMeAction } from "@/app/login/actions";
+import { logoutAction, getMeAction } from "@/app/(auth)/actions";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { useCart } from "@/context/CartContext";
 

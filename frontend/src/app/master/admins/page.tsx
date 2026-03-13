@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getMeAction } from "@/app/login/actions";
+import { getMeAction } from "@/app/(auth)/actions";
 import {
   createAdminAction,
   deleteAdminAction,
   getAdminsAction,
-} from "@/app/login/actions";
+} from "@/app/(auth)/actions";
 import {
   Shield,
   Plus,
