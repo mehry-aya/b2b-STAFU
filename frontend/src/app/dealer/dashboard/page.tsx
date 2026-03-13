@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getMeAction } from "@/app/(auth)/actions";
+import { getDealerStatsAction } from "@/app/dashboard/actions";
 import {
   ShoppingCart,
   Clock,
@@ -11,164 +12,206 @@ import {
   Package,
   TrendingUp,
   Anchor,
+  DollarSign,
+  AlertCircle,
+  FileText,
+  XCircle,
 } from "lucide-react";
 
 export default function DealerDashboard() {
   const [user, setUser] = useState<{ companyName: string; email: string } | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMeAction().then((data) => {
-      if (data && !data.error) {
-        const companyName = data.dealer?.companyName || "Dealer";
-        setUser({ companyName, email: data.email });
+    Promise.all([
+      getMeAction(),
+      getDealerStatsAction()
+    ]).then(([userData, statsData]) => {
+      if (userData && !userData.error) {
+        const companyName = userData.dealer?.companyName || "Dealer";
+        setUser({ companyName, email: userData.email });
       }
+      if (statsData.stats) {
+        setStats(statsData.stats);
+      }
+      setLoading(false);
     });
   }, []);
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "pending": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "rejected": return "bg-rose-100 text-rose-700 border-rose-200";
+      default: return "bg-zinc-100 text-zinc-700 border-zinc-200";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-8 animate-pulse">
+        <div className="h-48 bg-zinc-100 rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-zinc-100 rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const dealerStats = [
+    { label: "Total Orders", value: stats?.totalOrders || 0, icon: ShoppingCart },
+    { label: "Pending Orders", value: stats?.pendingOrders || 0, icon: Clock },
+    { label: "Total Spent", value: formatCurrency(stats?.totalSpent || 0), icon: DollarSign },
+    { label: "Contract Status", value: "Approved", icon: FileText, type: "badge" },
+  ];
+
   const quickLinks = [
-    {
-      label: "Browse Products",
-      description: "Explore the full fishing catalog",
-      href: "/dealer/products",
-      icon: Package,
-      accent: "red",
-    },
-    {
-      label: "My Orders",
-      description: "Track and manage your orders",
-      href: "/dealer/orders",
-      icon: ShoppingCart,
-      accent: "zinc",
-    },
-    {
-      label: "Contracts",
-      description: "Upload and review contracts",
-      href: "/dealer/contracts",
-      icon: CheckCircle,
-      accent: "zinc",
-    },
-    {
-      label: "Profile",
-      description: "Manage your account details",
-      href: "/dealer/profile",
-      icon: TrendingUp,
-      accent: "zinc",
-    },
+    { label: "Browse Products", description: "Explore the full fishing catalog", href: "/dealer/products", icon: Package, accent: "red" },
+    { label: "My Orders", description: "Track and manage your orders", href: "/dealer/orders", icon: ShoppingCart, accent: "zinc" },
+    { label: "Contracts", description: "Upload and review contracts", href: "/dealer/contracts", icon: FileText, accent: "zinc" },
+    { label: "Profile", description: "Manage your account details", href: "/dealer/profile", icon: TrendingUp, accent: "zinc" },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 pb-12">
       {/* Hero welcome */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0f0f0f] px-8 py-10">
-        {/* Decorative grid */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        {/* Red accent bar */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#0f0f0f] px-8 py-10 shadow-2xl shadow-zinc-200">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-red-600 via-red-500 to-transparent" />
-
+        
         <div className="relative flex items-start justify-between gap-6 flex-wrap">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-red-400 text-xs font-semibold tracking-widest uppercase mb-3">
-              <Anchor className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-2 text-red-500 text-xs font-black tracking-widest uppercase mb-3">
+              <Anchor className="h-4 w-4" />
               <span>Dealer Portal</span>
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight">
+            <h1 className="text-4xl font-black text-white tracking-tight">
               Welcome back{user?.companyName ? `, ${user.companyName}` : ""}
             </h1>
-            <p className="text-zinc-400 text-sm max-w-md">
-              Your B2B fishing gear hub. Browse the latest products, track orders,
-              and manage your account — all in one place.
+            <p className="text-zinc-400 text-sm max-w-sm">
+              Manage your fishing inventory, track orders, and oversee your business performance.
             </p>
           </div>
-
-          {/* Stat pills */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl px-4 py-2.5 border border-white/10">
-              <Clock className="h-4 w-4 text-red-400" />
-              <span className="text-xs text-zinc-300 font-medium">Active Account</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl px-4 py-2.5 border border-white/10">
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span className="text-xs text-zinc-300 font-medium">Approved Dealer</span>
-            </div>
-          </div>
+          
         </div>
       </div>
 
-      {/* Section title */}
-      <div>
-        <h2 className="text-xs font-bold tracking-widest uppercase text-zinc-400 mb-4">
-          Quick Access
-        </h2>
+      {/* Stat Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {dealerStats.map((stat) => {
+          const Icon = stat.icon;
+          const isStatus = stat.label === "Contract Status";
+          return (
+            <div 
+              key={stat.label} 
+              className={`bg-white border rounded-3xl p-6 shadow-sm ${
+                isStatus 
+                  ? getStatusColor(stat.value) 
+                  : "border-zinc-100"
+              }`}
+            >
+              <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 mb-4">
+                <Icon className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</p>
+              {stat.type === "badge" ? (
+                <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase border bg-white/50 border-black/10`}>
+                  {stat.value}
+                </span>
+              ) : (
+                <p className="text-2xl font-black text-zinc-900 mt-1">{stat.value}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickLinks.map((item) => {
-            const Icon = item.icon;
-            const isPrimary = item.accent === "red";
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`group relative flex flex-col gap-3 rounded-2xl p-5 border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
-                  isPrimary
-                    ? "bg-red-600 border-red-700 text-white hover:bg-red-700 hover:shadow-red-900/30"
-                    : "bg-white border-zinc-100 text-zinc-900 hover:border-zinc-200 hover:shadow-zinc-100"
-                }`}
-              >
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
-                    isPrimary
-                      ? "bg-red-700/60 text-white"
-                      : "bg-zinc-100 text-zinc-600 group-hover:bg-zinc-200"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Order */}
+        <div className="lg:col-span-2 space-y-4">
+          <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" /> Recent Order
+          </h2>
+          {stats?.recentOrder ? (
+            <div className="bg-white border border-zinc-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs text-zinc-500 font-medium">Order ID</p>
+                  <p className="text-lg font-black text-zinc-900">#{stats.recentOrder.id.toString().padStart(5, '0')}</p>
+                </div>
+                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${getStatusColor(stats.recentOrder.status)}`}>
+                  {stats.recentOrder.status.replace('_', ' ')}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 border-y border-zinc-50 py-4 mb-6">
+                <div>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Date</p>
+                  <p className="text-sm font-bold text-zinc-700">{new Date(stats.recentOrder.date).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p className={`text-sm font-bold ${isPrimary ? "text-white" : "text-zinc-900"}`}>
-                    {item.label}
-                  </p>
-                  <p className={`text-xs mt-0.5 ${isPrimary ? "text-red-100/80" : "text-zinc-500"}`}>
-                    {item.description}
-                  </p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Items</p>
+                  <p className="text-sm font-bold text-zinc-700">{stats.recentOrder.itemsCount} products</p>
                 </div>
-                <ArrowRight
-                  className={`absolute right-4 top-4 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity ${
-                    isPrimary ? "text-red-200" : "text-zinc-400"
-                  }`}
-                />
+                <div>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Total</p>
+                  <p className="text-sm font-bold text-zinc-900">{formatCurrency(stats.recentOrder.total)}</p>
+                </div>
+              </div>
+              <Link href="/dealer/orders" className="text-sm font-bold text-red-600 hover:text-red-700 flex items-center justify-center gap-1">
+                View All Orders <ArrowRight className="h-4 w-4" />
               </Link>
-            );
-          })}
+            </div>
+          ) : (
+            <div className="bg-zinc-50 border border-dashed border-zinc-200 rounded-3xl p-12 text-center">
+              <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 mx-auto mb-4">
+                <ShoppingCart className="h-6 w-6" />
+              </div>
+              <p className="text-zinc-500 font-medium">No orders yet</p>
+              <Link href="/dealer/products" className="text-sm font-bold text-red-600 mt-2 inline-block">Start Shopping</Link>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Info strip */}
-      <div className="rounded-2xl bg-white border border-zinc-100 px-6 py-5 flex items-center justify-between gap-4 flex-wrap shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-            <Anchor className="h-5 w-5 text-red-600" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-zinc-900">Need assistance?</p>
-            <p className="text-xs text-zinc-500">
-              Contact your account manager or browse the product catalog.
-            </p>
+        {/* Quick Links / Modern Grid */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+            <Anchor className="h-5 w-5" /> Quick Access
+          </h2>
+          <div className="grid grid-cols-1 gap-3">
+            {quickLinks.map((item) => {
+              const Icon = item.icon;
+              const isRed = item.accent === "red";
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:-translate-x-1 ${
+                    isRed ? "bg-zinc-900 border-zinc-900 text-white" : "bg-white border-zinc-100 text-zinc-900 hover:border-zinc-300"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isRed ? "bg-red-600" : "bg-zinc-100 group-hover:bg-zinc-200"}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">{item.label}</p>
+                    <p className={`text-[10px] ${isRed ? "text-zinc-400" : "text-zinc-500"}`}>{item.description}</p>
+                  </div>
+                  <ArrowRight className={`absolute right-4 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity ${isRed ? "text-red-400" : "text-zinc-300"}`} />
+                </Link>
+              );
+            })}
           </div>
         </div>
-        <Link
-          href="/dealer/products"
-          className="flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold rounded-xl px-4 py-2.5 hover:bg-red-600 transition-colors"
-        >
-          Shop Now
-          <ArrowRight className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   );

@@ -5,13 +5,24 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'https://b2b-stafu.vercel.app',
+      'https://b2b-stafu-git-main-ayamehri293-4414s-projects.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  await app.listen(3001);
-  console.log('STAFUPRO API running on http://localhost:3001');
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`STAFUPRO API running on port ${port}`);
 }
+
 bootstrap().catch((err) => {
   console.error(err);
   process.exit(1);

@@ -7,6 +7,7 @@ import { DealersModule } from './dealers/dealers.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CarouselModule } from './carousel/carousel.module';
+import { StatsModule } from './stats/stats.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { CarouselModule } from './carousel/carousel.module';
     ProductsModule,
     OrdersModule,
     CarouselModule,
+    StatsModule,
   ],
 
 })
