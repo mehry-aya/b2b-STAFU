@@ -28,6 +28,7 @@ export default function AdminOrdersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [exporting, setExporting] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
   const pageSize = 10;
   const { toast } = useToast();
 
@@ -64,10 +65,12 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => 
-    order.id.toString().includes(searchQuery) || 
-    order.dealer?.companyName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.id.toString().includes(searchQuery) || 
+      order.dealer?.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -128,10 +131,26 @@ export default function AdminOrdersPage() {
               {exporting ? 'Exporting...' : 'Export to Excel'}
             </button>
             <div className="h-6 w-px bg-zinc-200 mx-2" />
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors">
-              <Filter className="h-3.5 w-3.5" />
-              Filter
-            </button>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none flex items-center gap-2 pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600/50"
+              >
+                <option value="all">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="pending_payment">Pending Payment</option>
+                <option value="paid">Paid</option>
+                <option value="shipped">Shipped</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <Filter className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             <div className="h-6 w-px bg-zinc-200 mx-2" />
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{totalCount} Orders</span>
           </div>

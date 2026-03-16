@@ -10,19 +10,14 @@ export default async function AuthLayout({
   try {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001/api";
     const url = `${backendUrl}/carousel-images?page=login`;
-    
-    console.log("Fetching carousel from:", url);
-    
+        
     const response = await fetch(url, {
       next: { revalidate: 3600 }
     });
 
-    console.log("Response status:", response.status);
-    console.log("Response ok:", response.ok);
 
     if (response.ok) {
       images = await response.json();
-      console.log("Images loaded:", images.length, images);
     } else {
       const text = await response.text();
       console.error("Response not ok:", text);

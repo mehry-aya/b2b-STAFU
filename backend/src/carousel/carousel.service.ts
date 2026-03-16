@@ -49,7 +49,7 @@ export class CarouselService {
 
     const metaobjects = response.data?.data?.metaobjects?.edges || [];
     const images: string[] = [];
-this.logger.debug(JSON.stringify(response.data?.data, null, 2));
+// this.logger.debug(JSON.stringify(response.data?.data, null, 2));
     for (const edge of metaobjects) {
       const fields = edge.node.fields;
       const isActive = fields.find((f: any) => f.key === 'is_active')?.value === 'true';
