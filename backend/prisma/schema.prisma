@@ -17,6 +17,7 @@ enum ContractStatus {
   pending
   approved
   rejected
+  suspended
 }
 
 model User {

@@ -278,6 +278,25 @@ export async function getDealersAdminAction(page: number = 1, limit: number = 10
   }
 }
 
+export async function getDealerDetailAction(id: number) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch(`${API_BASE}/dealers/admin/${id}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) return { error: "Failed to fetch dealer details" };
+    return { dealer: await response.json() };
+  } catch {
+    return { error: "Connection error" };
+  }
+}
+
 export async function approveDealerAction(id: number, status: string) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;

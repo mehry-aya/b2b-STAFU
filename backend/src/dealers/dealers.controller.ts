@@ -25,6 +25,12 @@ export class DealersController {
     return this.dealersService.findAll(Number(page), Number(limit));
   }
 
+  @Get('admin/:id')
+  @Roles(Role.admin, Role.master_admin)
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.dealersService.findOneAdmin(id);
+  }
+
   @Patch('admin/:id/status')
   @Roles(Role.admin, Role.master_admin)
   updateStatus(

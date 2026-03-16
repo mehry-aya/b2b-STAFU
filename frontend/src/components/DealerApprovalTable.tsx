@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { approveDealerAction } from "@/app/(auth)/actions";
 import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface Dealer {
   id: number;
@@ -49,6 +51,10 @@ export default function DealerApprovalTable({
     setUpdatingId(null);
   };
 
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  const baseUrl = isMaster ? "/master" : "/admin";
+
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -79,9 +85,12 @@ export default function DealerApprovalTable({
                 className="hover:bg-zinc-50/50 transition-colors group"
               >
                 <td className="px-6 py-4">
-                  <div className="text-sm font-bold text-zinc-900 group-hover:text-red-600 transition-colors">
+                  <Link
+                    href={`${baseUrl}/dealers/${dealer.id}`}
+                    className="text-sm font-bold text-zinc-900 group-hover:text-red-600 transition-colors block"
+                  >
                     {dealer.companyName}
-                  </div>
+                  </Link>
                   <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-zinc-400">
                     <Mail className="h-3 w-3" />
                     {dealer.user.email}

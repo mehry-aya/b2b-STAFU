@@ -35,16 +35,53 @@ export class DealersService {
     };
   }
 
+  async findOneAdmin(id: number) {
+    const dealer = await this.prisma.dealer.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            email: true,
+            isActive: true,
+            createdAt: true,
+          },
+        },
+        orders: {
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
+      },
+    });
+
+    if (!dealer) throw new NotFoundException('Dealer not found');
+    return dealer;
+  }
+
   async updateStatus(dealerId: number, status: ContractStatus) {
     const dealer = await this.prisma.dealer.findUnique({
       where: { id: dealerId },
     });
     if (!dealer) throw new NotFoundException('Dealer not found');
 
-    // If approved, we also activate the user account
+    // If approved, we also activate the user account. If rejected or suspended, we deactivate it.
     const updatedDealer = await this.prisma.dealer.update({
       where: { id: dealerId },
-      data: { contractStatus: status },
+      data: { 
+        contractStatus: status,
+        user: {
+          update: {
+            isActive: status === 'approved'
+          }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            isActive: true
+          }
+        }
+      }
     });
 
     return updatedDealer;
