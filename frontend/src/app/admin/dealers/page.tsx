@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { getDealersAdminAction } from "@/app/(auth)/actions";
 import DealerApprovalTable from "@/components/DealerApprovalTable";
 import { Users, Clock, CheckCircle, XCircle, Anchor } from "lucide-react";
@@ -9,6 +10,9 @@ import StatsRow from "@/components/ui/StatsRow";
 import { Pagination } from "@/components/ui/Pagination";
 
 export default function AdminDealersPage() {
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  
   const [dealers, setDealers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,9 +93,10 @@ export default function AdminDealersPage() {
         subtitle="Review contracts and manage dealer account activations across the platform."
         icon={Anchor}
         breadcrumbs={[
-          { label: "Admin", href: "/admin/dashboard" },
+          { label: isMaster ? "Master" : "Admin", href: isMaster ? "/master/dashboard" : "/admin/dashboard" },
           { label: "Dealer Management" }
         ]}
+        roleBadge={isMaster ? { label: "Master", type: "master" } : { label: "Admin", type: "admin" }}
       />
 
       <StatsRow stats={stats} loading={loading} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { Product } from "@/lib/types/product";
 import { fetchProducts } from "@/lib/api/products";
 import { useProductSync } from "@/hooks/use-product-sync";
@@ -10,6 +11,9 @@ import { AlertCircle, Search, Anchor, RefreshCw, Calendar, Filter } from "lucide
 import { Pagination } from "@/components/ui/Pagination";
 
 export default function AdminProductsPage() {
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -77,11 +81,15 @@ export default function AdminProductsPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-red-400 text-xs font-bold tracking-widest uppercase">
               <Anchor className="h-3.5 w-3.5" />
-              <span>Product Catalog</span>
+              <span>{isMaster ? "Master Catalog" : "Product Catalog"}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">Manage Products</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              {isMaster ? "Master Management" : "Manage Products"}
+            </h1>
             <p className="text-zinc-400 text-sm max-w-md">
-              View, search, and synchronize your entire Shopify inventory. Keep your B2B offerings up to date.
+              {isMaster 
+                ? "Oversee and synchronize the entire platform product catalog across all dealers."
+                : "View, search, and synchronize your entire Shopify inventory. Keep your B2B offerings up to date."}
             </p>
           </div>
 

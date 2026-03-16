@@ -1,6 +1,7 @@
 import React from 'react';
 import { Order } from '@/lib/types/order';
 import { format } from 'date-fns';
+import { Logo } from '@/components/ui/Logo';
 
 interface InvoiceTemplateProps {
   order: Order;
@@ -12,7 +13,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
       {/* Header */}
       <div className="flex justify-between items-start border-b-2 border-zinc-900 pb-8 mb-8">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter mb-2 italic">STAFU <span className="text-red-600">PRO SERIES</span></h1>
+          <Logo variant="black" width={180} height={40} className="mb-2" />
           <p className="text-sm font-bold text-zinc-500 uppercase tracking-[0.2em]">Official B2B Order Invoice</p>
         </div>
         <div className="text-right">
@@ -26,7 +27,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
       <div className="grid grid-cols-2 gap-16 mb-16">
         <div>
           <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 border-b border-zinc-100 pb-1">From</h3>
-          <p className="font-black text-base uppercase tracking-tight">STAFU PRO SERIES</p>
+          <Logo variant="black" width={120} height={30} className="mb-2" />
           <p className="text-xs text-zinc-500 leading-relaxed mt-2 font-medium">
             Yenibosna Merkez mh. Meryem Ana sk.,<br />
             Bahcelievler, No: 20/22,<br />

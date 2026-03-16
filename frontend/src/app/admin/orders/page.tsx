@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getOrdersAction, getAuthToken } from "@/app/(auth)/actions";
+import { usePathname } from "next/navigation";
 import { Order } from "@/lib/types/order";
 import { 
   ShoppingBag, 
@@ -19,6 +20,9 @@ import DashboardHeader from "@/components/ui/DashboardHeader";
 import { Pagination } from "@/components/ui/Pagination";
 
 export default function AdminOrdersPage() {
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,9 +84,9 @@ export default function AdminOrdersPage() {
         subtitle="Monitor and manage orders from all dealers. Update statuses, track fulfillment, and handle payments."
         icon={ShoppingBag}
         breadcrumbs={[
-          { label: "Admin Console" }
+          { label: isMaster ? "Master Console" : "Admin Console" }
         ]}
-        roleBadge={{ label: "Admin", type: "admin" }}
+        roleBadge={isMaster ? { label: "Master", type: "master" } : { label: "Admin", type: "admin" }}
       />
 
       {/* Toolbar */}

@@ -1,8 +1,12 @@
 "use client";
 
 import { FileText } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function AdminContractsPage() {
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="relative overflow-hidden rounded-2xl bg-[#0f0f0f] px-8 py-8">
@@ -19,10 +23,12 @@ export default function AdminContractsPage() {
           <FileText className="h-8 w-8 text-red-400" />
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">
-              Contracts
+              {isMaster ? "Master Contracts" : "Contracts"}
             </h1>
             <p className="text-zinc-400 text-sm mt-1">
-              Dealer contract management coming soon.
+              {isMaster 
+                ? "Platform-wide contract management coming soon." 
+                : "Dealer contract management coming soon."}
             </p>
           </div>
         </div>

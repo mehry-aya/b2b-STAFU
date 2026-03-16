@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { Anchor, ArrowRight, Save, Lock, User as UserIcon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { updateProfileAction } from "@/app/(auth)/actions";
 
 export default function AdminProfilePage() {
+  const pathname = usePathname();
+  const isMaster = pathname?.startsWith("/master");
+  
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -72,14 +76,18 @@ export default function AdminProfilePage() {
         <div className="relative">
           <div className="flex items-center gap-2 text-red-400 text-xs font-semibold tracking-widest uppercase mb-3">
             <UserIcon className="h-3.5 w-3.5" />
-            <span className="text-zinc-500">Admin</span>
+            <span className="text-zinc-500">{isMaster ? "Master" : "Admin"}</span>
             <span className="text-zinc-600">/</span>
             <span className="text-red-400">Profile Settings</span>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Security & Profile</h1>
-          <p className="text-zinc-400 text-sm mt-1 max-w-xl">
-            Update your administrator credentials.
-          </p>
+            <h1 className="text-3xl font-black text-white tracking-tight">
+              {isMaster ? "Master Security" : "Security & Profile"}
+            </h1>
+            <p className="text-zinc-400 text-sm mt-1 max-w-xl">
+              {isMaster 
+                ? "Update your master administrator credentials." 
+                : "Update your administrator credentials."}
+            </p>
         </div>
       </div>
 

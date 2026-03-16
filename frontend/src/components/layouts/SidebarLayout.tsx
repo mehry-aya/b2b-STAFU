@@ -7,6 +7,7 @@ import { Menu, LogOut, ChevronDown, ChevronRight, ShoppingBag } from "lucide-rea
 import { logoutAction, getMeAction } from "@/app/(auth)/actions";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { useCart } from "@/context/CartContext";
+import { Logo } from "@/components/ui/Logo";
 
 interface NavItem {
   icon?: React.ElementType;
@@ -168,15 +169,9 @@ export default function SidebarLayout({
       {/* Brand */}
       <div className="px-5 py-6" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
         <div className="w-8 h-0.5 bg-red-600 mb-3 rounded-full" />
-        <h1
-          className="text-xl font-black tracking-widest uppercase"
-          style={{ color: "var(--sidebar-text-active)", letterSpacing: "0.15em" }}
-        >
-          STAFUPRO
-        </h1>
-        <div className="mt-1">{brandSubtitle}</div>
+        <Logo variant="white" width={120} height={32} className="h-14 mt-5" />
       </div>
-
+<div className="mt-1 mx-4">{brandSubtitle}</div>
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-0.5 px-3">
@@ -261,12 +256,7 @@ export default function SidebarLayout({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span
-              className="text-base font-black tracking-widest uppercase"
-              style={{ color: "var(--sidebar-text-active)" }}
-            >
-              STAFUPRO
-            </span>
+            <Logo variant="white" width={90} height={24} className="h-6" />
           </div>
           {/* Cart icon in mobile header — dealer only */}
           {showCart && (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { loginAction } from "../actions";
+import { Logo } from "@/components/ui/Logo";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -38,9 +39,7 @@ export default function LoginPage() {
   return (
     <div className="p-8 sm:p-12">
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-black text-white tracking-tight">
-          STAFU<span className="text-slate-300">PRO</span>
-        </h1>
+        <Logo variant="white" width={140} height={40} className="justify-center mx-auto h-16" />
         <p className="mt-3 text-slate-200 font-medium">
           B2B Dealer Portal Login
         </p>
