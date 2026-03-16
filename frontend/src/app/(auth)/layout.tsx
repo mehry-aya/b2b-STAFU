@@ -8,8 +8,8 @@ export default async function AuthLayout({
   let images: string[] = [];
   
   try {
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
-    const url = `${backendUrl}/api/carousel-images?page=login`;
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001/api";
+    const url = `${backendUrl}/carousel-images?page=login`;
     
     console.log("Fetching carousel from:", url);
     
