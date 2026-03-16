@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   Package,
   FileText,
-  BarChart3,
   User,
   Shield,
 } from "lucide-react";
@@ -34,7 +33,6 @@ export default function AdminSidebar({ children }: { children: ReactNode }) {
     { label: "Orders", href: `${base}/orders`, icon: ShoppingCart },
     { label: "Products", href: `${base}/products`, icon: Package },
     { label: "Contracts", href: `${base}/contracts`, icon: FileText },
-    { label: "Export", href: `${base}/export`, icon: BarChart3 },
     { label: "Profile", href: `${base}/profile`, icon: User },
    
   ];
