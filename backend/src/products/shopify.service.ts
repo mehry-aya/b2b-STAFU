@@ -47,7 +47,7 @@ export class ShopifyService {
   ) {
     this.storeDomain = this.configService.get<string>('SHOPIFY_STORE_URL') || '';
     this.accessToken = this.configService.get<string>('SHOPIFY_ADMIN_API_TOKEN') || '';
-    this.storefrontAccessToken = this.configService.get<string>('NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN') || '';
+    this.storefrontAccessToken = this.configService.get<string>('SHOPIFY_STOREFRONT_ACCESS_TOKEN') || '';
     
     const cleanDomain = this.storeDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     this.apiUrl = `https://${cleanDomain}/admin/api/2026-01/graphql.json`;

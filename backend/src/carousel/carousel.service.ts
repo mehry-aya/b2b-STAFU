@@ -18,7 +18,7 @@ export class CarouselService {
     private readonly configService: ConfigService,
   ) {
     const storeDomain = this.configService.get<string>('SHOPIFY_STORE_URL') || '';
-    this.storefrontAccessToken = this.configService.get<string>('NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN') || '';
+    this.storefrontAccessToken = this.configService.get<string>('SHOPIFY_STOREFRONT_ACCESS_TOKEN') || '';
     
     const cleanDomain = storeDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     this.storefrontApiUrl = `https://${cleanDomain}/api/2025-01/graphql.json`;
