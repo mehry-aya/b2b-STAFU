@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { AuthPayload } from "@/lib/auth";
 import { decodeJwt } from "jose";
 
+const API_BASE = process.env.BACKEND_URL || 'http://127.0.0.1:3001/api';
+
 export async function loginAction(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -14,7 +16,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/auth/login", {
+    const response = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -32,12 +34,12 @@ export async function loginAction(prevState: unknown, formData: FormData) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24,
       path: "/",
     });
 
     const payload = decodeJwt(access_token) as AuthPayload;
-    
+
     if (payload.role === "master_admin") {
       redirect("/master/dashboard");
     } else if (payload.role === "admin") {
@@ -67,7 +69,7 @@ export async function registerAction(prevState: unknown, formData: FormData) {
   const address = formData.get("address") as string;
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/auth/register", {
+    const response = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, companyName, phone, address }),
@@ -91,7 +93,7 @@ export async function createAdminAction(email: string, password: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/users/create-admin", {
+    const response = await fetch(`${API_BASE}/users/create-admin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,10 +120,8 @@ export async function getAdminsAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/users/admins", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE}/users/admins`, {
+      headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
 
@@ -143,11 +143,9 @@ export async function deleteAdminAction(id: number) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://127.0.0.1:3001/api/users/${id}`, {
+    const response = await fetch(`${API_BASE}/users/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -168,11 +166,9 @@ export async function getProductsAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/products", {
+    const response = await fetch(`${API_BASE}/products`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -193,11 +189,9 @@ export async function syncProductsAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/products/sync", {
+    const response = await fetch(`${API_BASE}/products/sync`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
@@ -210,6 +204,7 @@ export async function syncProductsAction() {
     return { error: "Failed to connect to server" };
   }
 }
+
 export async function getDealerStatusAction() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -217,16 +212,12 @@ export async function getDealerStatusAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/auth/me", {
+    const response = await fetch(`${API_BASE}/auth/me`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) {
-      return { error: "Failed to fetch profile" };
-    }
+    if (!response.ok) return { error: "Failed to fetch profile" };
 
     const user = await response.json();
     return { dealer: user.dealer };
@@ -242,11 +233,9 @@ export async function uploadContractAction(formData: FormData) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/dealers/contract", {
+    const response = await fetch(`${API_BASE}/dealers/contract`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
 
@@ -271,16 +260,13 @@ export async function getDealersAdminAction(page: number = 1, limit: number = 10
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
-    
-    const response = await fetch(`http://127.0.0.1:3001/api/dealers/admin/list?${params.toString()}`, {
+
+    const response = await fetch(`${API_BASE}/dealers/admin/list?${params.toString()}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) return { error: "Failed to fetch dealers" };
-
     return { data: await response.json() };
   } catch {
     return { error: "Connection error" };
@@ -294,7 +280,7 @@ export async function approveDealerAction(id: number, status: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://127.0.0.1:3001/api/dealers/admin/${id}/status`, {
+    const response = await fetch(`${API_BASE}/dealers/admin/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -304,7 +290,6 @@ export async function approveDealerAction(id: number, status: string) {
     });
 
     if (!response.ok) return { error: "Update failed" };
-
     return { success: true };
   } catch {
     return { error: "Connection error" };
@@ -318,7 +303,7 @@ export async function createOrderAction(items: { productId: number; variantId: n
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/orders", {
+    const response = await fetch(`${API_BASE}/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -348,12 +333,10 @@ export async function getOrdersAction(page: number = 1, limit: number = 10) {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
-    
-    const response = await fetch(`http://127.0.0.1:3001/api/orders?${params.toString()}`, {
+
+    const response = await fetch(`${API_BASE}/orders?${params.toString()}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) return { error: "Failed to fetch orders" };
@@ -373,17 +356,10 @@ export async function getMyOrdersAction(page: number = 1, limit: number = 10) {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('limit', limit.toString());
-    
-    // Note: backend also needs a paginated way to fetch my orders if it's separate
-    // In orders.service.ts, the findAll logic handles dealerId, so /api/orders?page=1&limit=10 
-    // should work for dealers too if it uses the service.findAll(page, limit, dealerId)
-    // However, MyOrders uses /api/orders/my-orders in this action.
-    // Let's check orders.controller.ts for 'my-orders'
-    const response = await fetch(`http://127.0.0.1:3001/api/orders/my-orders?${params.toString()}`, {
+
+    const response = await fetch(`${API_BASE}/orders/my-orders?${params.toString()}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) return { error: "Failed to fetch your orders" };
@@ -400,7 +376,7 @@ export async function updateOrderStatusAction(id: number, status: string) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`http://127.0.0.1:3001/api/orders/${id}/status`, {
+    const response = await fetch(`${API_BASE}/orders/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -423,10 +399,8 @@ export async function getMeAction() {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     });
 
@@ -444,7 +418,7 @@ export async function updateProfileAction(payload: any) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch("http://127.0.0.1:3001/api/users/profile", {
+    const response = await fetch(`${API_BASE}/users/profile`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
