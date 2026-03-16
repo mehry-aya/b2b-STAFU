@@ -61,6 +61,11 @@ export async function logoutAction() {
   redirect("/login");
 }
 
+export async function getAuthToken() {
+  const cookieStore = await cookies();
+  return cookieStore.get("token")?.value;
+}
+
 export async function registerAction(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

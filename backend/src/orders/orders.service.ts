@@ -116,8 +116,34 @@ export class OrdersService {
     });
   }
 
-  async exportOrdersToExcel() {
+  async exportOrdersToExcel(
+    startDate?: string,
+    endDate?: string,
+    status?: OrderStatus | 'all',
+  ) {
+    const whereClause: any = {};
+
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        gte: new Date(startDate),
+        lte: new Date(endDate),
+      };
+    } else if (startDate) {
+      whereClause.createdAt = {
+        gte: new Date(startDate),
+      };
+    } else if (endDate) {
+      whereClause.createdAt = {
+        lte: new Date(endDate),
+      };
+    }
+
+    if (status && status !== 'all') {
+      whereClause.status = status;
+    }
+
     const orders = await this.prisma.order.findMany({
+      where: whereClause,
       include: {
         dealer: {
           include: { user: { select: { email: true } } },

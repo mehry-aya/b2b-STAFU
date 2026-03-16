@@ -28,8 +28,6 @@ export class OrdersController {
   @Post()
   @Roles(Role.dealer)
   async create(@CurrentUser() user: any, @Body() createOrderDto: CreateOrderDto) {
-    // Note: In a real app, you'd lookup the dealerId from the user.id
-    // Assuming user.dealer.id is available via auth strategy profile
     return this.ordersService.create(user.dealer.id, createOrderDto);
   }
 
@@ -79,8 +77,17 @@ export class OrdersController {
 
   @Get('export/excel')
   @Roles(Role.admin, Role.master_admin)
-  async exportOrders(@Res() res: express.Response) {
-    const buffer = await this.ordersService.exportOrdersToExcel();
+  async exportOrders(
+    @Res() res: express.Response,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('status') status?: string,
+  ) {
+    const buffer = await this.ordersService.exportOrdersToExcel(
+      startDate,
+      endDate,
+      status as any,
+    );
 
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

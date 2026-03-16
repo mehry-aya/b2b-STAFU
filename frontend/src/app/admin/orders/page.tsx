@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getOrdersAction } from "@/app/(auth)/actions";
+import { getOrdersAction, getAuthToken } from "@/app/(auth)/actions";
 import { Order } from "@/lib/types/order";
 import { 
   ShoppingBag, 
@@ -17,7 +17,6 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 import { Pagination } from "@/components/ui/Pagination";
-import { exportOrdersToExcel } from "@/lib/api/orders";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -27,6 +26,8 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [exporting, setExporting] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const pageSize = 10;
@@ -97,19 +98,59 @@ export default function AdminOrdersPage() {
             />
          </div>
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">From</span>
+                <input 
+                  type="date" 
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-28"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">To</span>
+                <input 
+                  type="date" 
+                  value={dateTo}
+                  min={dateFrom}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-28"
+                />
+              </div>
+            </div>
+
             <button 
               onClick={async () => {
                 setExporting(true);
                 try {
-                  const blob = await exportOrdersToExcel();
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `orders-export-${new Date().toISOString().split('T')[0]}.xlsx`;
-                  document.body.appendChild(a);
-                  a.click();
-                  window.URL.revokeObjectURL(url);
-                  document.body.removeChild(a);
+                  const token = await getAuthToken();
+                  if (!token) throw new Error("Authentication token not found.");
+
+                  const queryParams = new URLSearchParams();
+                  if (dateFrom) queryParams.append("startDate", dateFrom);
+                  if (dateTo) queryParams.append("endDate", dateTo);
+                  if (statusFilter !== "all") queryParams.append("status", statusFilter);
+
+                  const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/orders/export/excel?${queryParams.toString()}`;
+
+                  const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                  });
+
+                  if (!response.ok) throw new Error("Failed to export orders.");
+
+                  const blob = await response.blob();
+                  const downloadUrl = window.URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = downloadUrl;
+                  link.download = `orders-export-${new Date().toISOString().split('T')[0]}.xlsx`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  window.URL.revokeObjectURL(downloadUrl);
+
                   toast({
                     title: "Export Successful",
                     description: "Your order export is ready and downloading.",
@@ -125,10 +166,10 @@ export default function AdminOrdersPage() {
                 }
               }}
               disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50 h-9"
             >
               <Download className={`h-3.5 w-3.5 ${exporting ? 'animate-bounce' : ''}`} />
-              {exporting ? 'Exporting...' : 'Export to Excel'}
+              {exporting ? 'Exporting...' : 'Export (xlsx)'}
             </button>
             <div className="h-6 w-px bg-zinc-200 mx-2" />
             <div className="relative">
