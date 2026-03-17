@@ -241,8 +241,15 @@ export default function DealerProductDetailsPage({
             )}
             {/* Red price stamp */}
             {price && (
-              <div className="absolute top-4 right-4 bg-red-600 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg">
-                ₺{price}
+              <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
+                {selectedVariant?.compareAtPrice && (
+                  <div className="bg-zinc-900/80 text-white text-xs font-bold px-2 py-1 rounded-lg line-through shadow-lg backdrop-blur-sm">
+                    ₺{parseFloat(selectedVariant.compareAtPrice).toFixed(2)}
+                  </div>
+                )}
+                <div className="bg-red-600 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg">
+                  ₺{price}
+                </div>
               </div>
             )}
           </div>
@@ -284,9 +291,11 @@ export default function DealerProductDetailsPage({
           </div>
 
           {/* Price */}
-          <div>
+          <div className="flex flex-col gap-1">
             {price ? (
-              <span className="text-3xl font-black text-zinc-900">₺{price}</span>
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-black text-zinc-900">₺{price}</span>
+              </div>
             ) : (
               <span className="text-base text-zinc-400 font-medium">Price unavailable</span>
             )}

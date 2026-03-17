@@ -374,12 +374,22 @@ export default function AdminOrderDetailPage({
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1">
                   <div className="text-xs font-bold text-zinc-400">
-                    <span className="text-zinc-900 font-mono">₺{Number(item.unitPrice).toFixed(2)}</span>
-                    <span className="mx-2 text-zinc-300">×</span>
-                    <span className="text-zinc-900 font-mono">{item.quantity}</span>
+                    <div className="flex flex-col items-end leading-tight">
+                      <span className="text-zinc-900 font-mono">₺{Number(item.unitPrice).toFixed(2)}</span>
+                      <span className="text-[10px] text-zinc-400 line-through font-medium">₺{(Number(item.unitPrice) * 2).toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-1 justify-end">
+                      <span className="mx-2 text-zinc-300">×</span>
+                      <span className="text-zinc-900 font-mono">{item.quantity}</span>
+                    </div>
                   </div>
-                  <div className="text-base font-black text-zinc-900 font-mono tracking-tighter">
-                    ₺{(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                  <div className="flex flex-col items-end mt-1">
+                    <div className="text-base font-black text-zinc-900 font-mono tracking-tighter">
+                      ₺{(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                    </div>
+                    <div className="text-[10px] text-zinc-400 line-through font-bold">
+                      ₺{(Number(item.unitPrice) * 2 * item.quantity).toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>

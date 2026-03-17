@@ -128,9 +128,16 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-bold text-zinc-900">
-                        {firstVariant?.price ? `₺${parseFloat(firstVariant.price).toFixed(2)}` : "-"}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm font-bold text-zinc-900">
+                          {firstVariant?.price ? `₺${parseFloat(firstVariant.price).toFixed(2)}` : "-"}
+                        </span>
+                        {firstVariant?.compareAtPrice && (
+                          <span className="text-[10px] text-zinc-400 line-through font-medium">
+                            ₺{parseFloat(firstVariant.compareAtPrice).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <StatusBadge status={product.status} />

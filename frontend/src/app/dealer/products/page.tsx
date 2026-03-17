@@ -181,8 +181,10 @@ export default function DealerProductsPage() {
                   )}
                   {/* Red price badge on hover */}
                   {price && price !== "N/A" && (
-                    <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md">
-                      ₺{price}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-md">
+                        ₺{price}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -193,31 +195,13 @@ export default function DealerProductsPage() {
                   <h3 className="text-sm font-bold text-zinc-900 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors">
                     {product.title}
                   </h3>
-                  {/* {(() => {
-                    const sizes = Array.from(
-                      new Set(
-                        product.variants?.flatMap((v) => 
-                          [v.option1, v.option2, v.option3].filter(
-                            (opt) => opt && opt !== "Default Title"
-                          )
-                        )
-                      )
-                    ).join(", ");
-                    
-                    return sizes ? (
-                      <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1 truncate" title={sizes}>
-                        {sizes}
-                      </div>
-                    ) : (
-                      <div className="text-[10px] font-semibold tracking-widest text-zinc-400 uppercase mb-1">
-                        Standard
-                      </div>
-                    );
-                  })()} */}
+                  
                   <div className="mt-3 flex items-center justify-between">
-                    <span className="text-base font-black text-zinc-900">
-                      {price !== "N/A" ? `₺${price}` : "—"}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-base font-black text-zinc-900">
+                        {price !== "N/A" ? `₺${price}` : "—"}
+                      </span>
+                    </div>
                     <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">
                       View →
                     </span>

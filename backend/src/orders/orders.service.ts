@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
 
 @Injectable()
@@ -25,10 +25,11 @@ export class OrdersService {
       if (!variant) {
         throw new NotFoundException(`Variant #${item.variantId} not found`);
       }
+      const unitPrice = variant.price ? variant.price.mul(0.5).toDecimalPlaces(2) : new Prisma.Decimal(0);
       return {
         productVariantId: item.variantId,
         quantity: item.quantity,
-        unitPrice: variant.price || 0,
+        unitPrice: unitPrice,
       };
     });
 

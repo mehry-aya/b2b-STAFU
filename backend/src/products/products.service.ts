@@ -273,11 +273,16 @@ async syncFromShopify() {
   private mapProduct(product: any) {
     return {
       ...product,
-      variants: product.variants?.map((v: any) => ({
-        ...v,
-        price: v.price?.toString() || null,
-        compareAtPrice: v.compareAtPrice?.toString() || null,
-      })),
+      variants: product.variants?.map((v: any) => {
+        const originalPrice = v.price ? v.price.toDecimalPlaces(2) : null;
+        const discountedPrice = originalPrice ? originalPrice.mul(0.5).toDecimalPlaces(2) : null;
+        
+        return {
+          ...v,
+          price: discountedPrice?.toString() || null,
+          compareAtPrice: originalPrice?.toString() || null,
+        };
+      }),
     };
   }
 }

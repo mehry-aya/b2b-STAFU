@@ -109,7 +109,9 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
               <span className="font-mono text-zinc-900">₺0,00</span>
             </div>
             <div className="pt-6 border-t-4 border-zinc-900 flex justify-between items-center">
-              <span className="text-base font-black uppercase tracking-tighter">Total Due</span>
+              <div className="flex flex-col">
+                <span className="text-base font-black uppercase tracking-tighter">Total Due</span>
+              </div>
               <div className="text-right">
                 <span className="text-red-600 font-mono text-2xl font-black tracking-tighter">
                   ₺{Number(order.totalAmount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
