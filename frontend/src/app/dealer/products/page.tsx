@@ -201,6 +201,15 @@ export default function DealerProductsPage() {
                       <span className="text-base font-black text-zinc-900">
                         {price !== "N/A" ? `₺${price}` : "—"}
                       </span>
+                      {product.variants && (
+                        <span className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${
+                          product.variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) > 0 
+                            ? "text-emerald-600" 
+                            : "text-red-500"
+                        }`}>
+                          {product.variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0)} in stock
+                        </span>
+                      )}
                     </div>
                     <span className="text-[10px] font-semibold text-zinc-400 group-hover:text-red-500 transition-colors uppercase tracking-wide">
                       View →

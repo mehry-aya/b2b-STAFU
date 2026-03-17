@@ -31,8 +31,9 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
             <tr>
               <th className="px-6 py-4 rounded-tl-3xl">Product</th>
               <th className="px-6 py-4">Details</th>
-              <th className="px-6 py-4 text-center">Variants</th>
-              <th className="px-6 py-4 text-right">Price</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">Variants</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">Stock</th>
+              <th className="px-6 py-4 text-right text-xs font-black text-zinc-500 uppercase tracking-widest">Price</th>
               <th className="px-6 py-4 text-center">Status</th>
               <th className="px-6 py-4 text-right rounded-tr-3xl">Last Synced</th>
             </tr>
@@ -125,6 +126,15 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                     <td className="px-6 py-4 text-center">
                       <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-zinc-100 text-zinc-700 font-bold text-sm">
                         {product.variants?.length || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`text-sm font-black ${
+                        (product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
+                          ? "text-zinc-900" 
+                          : "text-red-500"
+                      }`}>
+                        {product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
