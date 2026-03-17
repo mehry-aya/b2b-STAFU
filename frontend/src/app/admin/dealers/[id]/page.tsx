@@ -19,6 +19,7 @@ import {
 import Link from "next/link";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 import { format } from "date-fns";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function DealerDetailPage() {
   const { id } = useParams();
@@ -30,6 +31,8 @@ export default function DealerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchDealer() {
@@ -46,6 +49,15 @@ export default function DealerDetailPage() {
   }, [id]);
 
   const handleStatusUpdate = async (status: string) => {
+    if (status === "suspended") {
+      setPendingStatus(status);
+      setIsConfirmDialogOpen(true);
+      return;
+    }
+    await performStatusUpdate(status);
+  };
+
+  const performStatusUpdate = async (status: string) => {
     setUpdating(true);
     const result = await approveDealerAction(Number(id), status);
     if (result.success) {
@@ -263,6 +275,16 @@ export default function DealerDetailPage() {
           </section>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        title="Suspend Account"
+        description="Are you sure you want to suspend this dealer account? They will lose access to the platform until reactivated."
+        onConfirm={() => pendingStatus && performStatusUpdate(pendingStatus)}
+        confirmText="Suspend"
+        variant="danger"
+      />
     </div>
   );
 }

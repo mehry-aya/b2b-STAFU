@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import InvoiceTemplate from "@/components/InvoiceTemplate";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function AdminOrderDetailPage({
   params: paramsPromise,
@@ -40,6 +41,7 @@ export default function AdminOrderDetailPage({
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const invoiceRef = React.useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
@@ -58,6 +60,15 @@ export default function AdminOrderDetailPage({
   }, [params.id]);
 
   const handleStatusUpdate = async (newStatus: "paid" | "shipped" | "cancelled") => {
+    if (!order) return;
+    if (newStatus === "cancelled") {
+      setIsCancelDialogOpen(true);
+      return;
+    }
+    await performStatusUpdate(newStatus);
+  };
+
+  const performStatusUpdate = async (newStatus: "paid" | "shipped" | "cancelled") => {
     if (!order) return;
     setUpdating(newStatus);
     try {
@@ -369,6 +380,16 @@ export default function AdminOrderDetailPage({
              </div>
           </div>
         </div>
+
+        <ConfirmDialog
+          isOpen={isCancelDialogOpen}
+          onOpenChange={setIsCancelDialogOpen}
+          title="Cancel Order"
+          description="Are you sure you want to cancel this order? This action cannot be undone."
+          onConfirm={() => performStatusUpdate("cancelled")}
+          confirmText="Cancel Order"
+          variant="danger"
+        />
     </div>
   );
 }

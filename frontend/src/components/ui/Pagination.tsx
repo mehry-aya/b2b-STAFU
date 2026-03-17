@@ -20,12 +20,7 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="bg-zinc-50 border-t border-zinc-200 px-6 py-4 flex items-center justify-between">
-      <p className="text-sm text-zinc-500 font-medium">
-        Showing <span className="font-bold text-zinc-900">{(page - 1) * pageSize + 1}</span> to{" "}
-        <span className="font-bold text-zinc-900">{Math.min(page * pageSize, totalCount)}</span> of{" "}
-        <span className="font-bold text-zinc-900">{totalCount}</span> {itemsLabel}
-      </p>
+    <div className="bg-zinc-50 border-t border-zinc-200 px-6 py-4 flex flex-col items-center gap-2">
       <div className="flex items-center gap-2">
         <button
           onClick={() => onPageChange(Math.max(1, page - 1))}
@@ -68,6 +63,11 @@ export function Pagination({
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
+       <p className="text-xs text-zinc-500 font-medium">
+        Showing <span className="font-semibold text-zinc-900">{(page - 1) * pageSize + 1}</span> to{" "}
+        <span className="font-semibold text-zinc-900">{Math.min(page * pageSize, totalCount)}</span> of{" "}
+        <span className="font-semibold text-zinc-900">{totalCount}</span> {itemsLabel}
+      </p>
     </div>
   );
 }

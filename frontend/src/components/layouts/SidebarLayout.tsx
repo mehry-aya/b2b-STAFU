@@ -237,7 +237,7 @@ export default function SidebarLayout({
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-86 transform transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

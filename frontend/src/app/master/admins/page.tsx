@@ -19,6 +19,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface Admin {
   id: number;
@@ -32,6 +33,8 @@ export default function MasterAdminsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState<number | null>(null);
   const router = useRouter();
 
   // Role guard: redirect non-master_admin users away
@@ -60,13 +63,19 @@ export default function MasterAdminsPage() {
   if (!authorized) return null;
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this admin?")) return;
-    const result = await deleteAdminAction(id);
+    setAdminToDelete(id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (adminToDelete === null) return;
+    const result = await deleteAdminAction(adminToDelete);
     if (result.success) {
-      setAdmins((prev) => prev.filter((a) => a.id !== id));
+      setAdmins((prev) => prev.filter((a) => a.id !== adminToDelete));
     } else {
       alert(result.error);
     }
+    setAdminToDelete(null);
   }
 
   return (
@@ -210,6 +219,16 @@ export default function MasterAdminsPage() {
           }}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete Administrator"
+        description="Are you sure you want to delete this administrator? This action cannot be undone and they will lose all access to the portal."
+        onConfirm={confirmDelete}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

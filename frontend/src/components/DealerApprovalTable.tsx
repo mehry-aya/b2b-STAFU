@@ -5,6 +5,7 @@ import { approveDealerAction } from "@/app/(auth)/actions";
 import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface Dealer {
   id: number;
@@ -34,8 +35,19 @@ export default function DealerApprovalTable({
   }, [initialDealers]);
 
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [dealerToReject, setDealerToReject] = useState<number | null>(null);
 
   const handleUpdate = async (id: number, status: string) => {
+    if (status === "rejected") {
+      setDealerToReject(id);
+      setIsRejectDialogOpen(true);
+      return;
+    }
+    await performUpdate(id, status);
+  };
+
+  const performUpdate = async (id: number, status: string) => {
     setUpdatingId(id);
     const result = await approveDealerAction(id, status);
     if (result.success) {
@@ -184,6 +196,16 @@ export default function DealerApprovalTable({
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        isOpen={isRejectDialogOpen}
+        onOpenChange={setIsRejectDialogOpen}
+        title="Reject Dealer"
+        description="Are you sure you want to reject this dealer? This will prevent them from accessing the platform."
+        onConfirm={() => dealerToReject && performUpdate(dealerToReject, "rejected")}
+        confirmText="Reject"
+        variant="danger"
+      />
     </div>
   );
 }
