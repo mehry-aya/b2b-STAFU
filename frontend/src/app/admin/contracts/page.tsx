@@ -14,12 +14,14 @@ import {
   ChevronRight,
   User,
   Calendar,
-  MessageSquare
+  MessageSquare,
+  Upload
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
-import { getAdminContractsAction, reviewContractAction } from "@/app/(auth)/actions";
+import { getAdminContractsAction, uploadContractAction, getDealersAdminAction } from "@/app/(auth)/actions";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Contract {
   id: number;
@@ -41,12 +43,13 @@ export default function AdminContractsPage() {
   const isMaster = pathname?.startsWith("/master");
   
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [dealers, setDealers] = useState<any[]>([]);
+  const [selectedDealerId, setSelectedDealerId] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-  const [reviewNotes, setReviewNotes] = useState("");
-  const [processingReview, setProcessingReview] = useState(false);
 
   const fetchContracts = useCallback(async () => {
     try {
@@ -61,32 +64,48 @@ export default function AdminContractsPage() {
     }
   }, [statusFilter]);
 
+  const fetchDealers = useCallback(async () => {
+    try {
+      const result = await getDealersAdminAction(1, 100); // Get first 100 dealers
+      if (result.data) {
+        setDealers(result.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to load dealers", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchContracts();
-  }, [fetchContracts]);
+    fetchDealers();
+  }, [fetchContracts, fetchDealers]);
 
-  const handleReview = async (status: "approved" | "rejected") => {
-    if (!selectedContract) return;
-    
-    setProcessingReview(true);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedDealerId) {
+      if (!selectedDealerId) toast.error("Please select a dealer first");
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("dealerId", selectedDealerId);
+
     try {
-      const result = await reviewContractAction(
-        selectedContract.id,
-        status,
-        reviewNotes
-      );
-
+      const result = await uploadContractAction(formData);
       if (result.error) throw new Error(result.error);
-
-      toast.success(`Contract ${status} successfully`);
-      setSelectedContract(null);
-      setReviewNotes("");
+      
+      toast.success("Contract uploaded and sent successfully");
       fetchContracts();
+      setSelectedDealerId("");
+      // Reset input
+      e.target.value = "";
     } catch (error) {
-      toast.error("Failed to update status");
+      toast.error("Failed to upload contract");
       console.error(error);
     } finally {
-      setProcessingReview(false);
+      setUploading(false);
     }
   };
 
@@ -129,27 +148,30 @@ export default function AdminContractsPage() {
         
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-[10px] font-black text-blue-400 uppercase tracking-widest">
-                Compliance Engine
-              </span>
-            </div>
             <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic">
-              {isMaster ? "Master Contracts" : "Contract Control"}
+              Contract Control
             </h1>
             <p className="text-zinc-400 text-sm mt-3 font-medium tracking-wide max-w-xl">
-              REVIEW AND MANAGE DEALER TRADING AGREEMENTS. ENSURE COMPLIANCE AND DOCUMENTATION STANDARDS ARE MET.
+              REVIEW AND MANAGE DEALER AGREEMENTS. ENSURE COMPLIANCE AND DOCUMENTATION STANDARDS ARE MET.
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Pending Review</p>
-              <p className="text-3xl font-black text-amber-500">{contracts.filter(c => c.status === "pending").length}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Pending Review</p>
+              <p className="text-xl font-black text-amber-500">{contracts.filter(c => c.status === "pending").length}</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Total Documents</p>
-              <p className="text-3xl font-black text-white">{contracts.length}</p>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Approved</p>
+              <p className="text-xl font-black text-emerald-500">{contracts.filter(c => c.status === "approved").length}</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Rejected</p>
+              <p className="text-xl font-black text-rose-500">{contracts.filter(c => c.status === "rejected").length}</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-4 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Documents</p>
+              <p className="text-xl font-black text-white">{contracts.length}</p>
             </div>
           </div>
         </div>
@@ -159,29 +181,72 @@ export default function AdminContractsPage() {
         {/* Main List Section */}
         <div className={`flex-1 space-y-6 transition-all duration-500 ${selectedContract ? "lg:w-3/5" : "w-full"}`}>
           {/* Controls */}
-          <div className="bg-white rounded-4xl border border-zinc-200 p-4 shadow-sm flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-              <input 
-                type="text"
-                placeholder="Search by dealer or file name..."
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          <div className="bg-white rounded-4xl border border-zinc-200 p-6 shadow-sm flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1 space-y-2">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Select Dealer</label>
+                <SearchableSelect
+                  options={dealers.map(d => ({ id: d.id, label: d.companyName }))}
+                  value={selectedDealerId}
+                  onChange={(val) => setSelectedDealerId(val.toString())}
+                  placeholder="Choose a dealer..."
+                  searchPlaceholder="Search by name..."
+                />
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Upload Document</label>
+                <div className="relative group">
+                  <input 
+                    type="file" 
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                    disabled={uploading || !selectedDealerId}
+                    className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+                  />
+                  <div className={`
+                    flex items-center justify-center gap-3 px-4 py-3.5 bg-zinc-50 border-2 border-dashed border-zinc-200 rounded-2xl
+                    group-hover:border-blue-500/50 group-hover:bg-blue-50/50 transition-all duration-300
+                    ${uploading ? "opacity-50" : ""}
+                  `}>
+                    {uploading ? (
+                       <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Upload className="w-5 h-5 text-blue-600" />
+                    )}
+                    <span className="text-xs font-black text-zinc-900 uppercase tracking-widest">
+                      {uploading ? "Uploading..." : "Click to select file"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Filter className="h-4 w-4 text-zinc-400" />
-              <select 
-                className="bg-zinc-50 border-none rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 outline-none"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all text-zinc-400">Status: All</option>
-                <option value="pending">Status: Pending</option>
-                <option value="approved">Status: Approved</option>
-                <option value="rejected">Status: Rejected</option>
-              </select>
+
+            <div className="h-px bg-zinc-100" />
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <input 
+                  type="text"
+                  placeholder="Search tracking list..."
+                  className="w-full pl-11 pr-4 py-3 bg-zinc-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Filter className="h-4 w-4 text-zinc-400" />
+                <select 
+                  className="bg-zinc-50 border-none rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 outline-none"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">Status: All</option>
+                  <option value="pending">Status: Pending</option>
+                  <option value="approved">Status: Approved</option>
+                  <option value="rejected">Status: Rejected</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -291,7 +356,7 @@ export default function AdminContractsPage() {
             </div>
 
             {/* Preview Area */}
-            <div className="aspect-4/5 bg-zinc-100 relative group overflow-hidden">
+            <div className="aspect-4/5 bg-zinc-950 relative group overflow-hidden">
               <iframe 
                 src={selectedContract.fileUrl} 
                 className="w-full h-full border-none shadow-inner"
@@ -328,47 +393,23 @@ export default function AdminContractsPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <MessageSquare className="w-3 h-3" /> Admin Notes (Internal & Dealer visible)
-                </label>
-                <textarea 
-                  className="w-full h-24 bg-zinc-50 border border-zinc-100 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-zinc-300 outline-none"
-                  placeholder="Review findings, reason for rejection, or general notes..."
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                />
-              </div>
-
-              {selectedContract.status === "pending" ? (
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <button 
-                    onClick={() => handleReview("approved")}
-                    disabled={processingReview}
-                    className="group relative h-14 bg-emerald-600 text-white rounded-[1.25rem] font-black uppercase tracking-[0.2em] text-[10px] overflow-hidden transition-all hover:bg-emerald-700 active:scale-95 disabled:opacity-50"
-                  >
-                    <div className="absolute inset-0 bg-linear-to-r from-emerald-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                    <span className="relative flex items-center justify-center gap-2">
-                       <CheckCircle2 className="w-4 h-4" /> Approve
-                    </span>
-                  </button>
-                  <button 
-                    onClick={() => handleReview("rejected")}
-                    disabled={processingReview}
-                    className="h-14 bg-rose-50 text-rose-600 border border-rose-100 rounded-[1.25rem] font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:bg-rose-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <XCircle className="w-4 h-4" /> Reject
-                  </button>
-                </div>
-              ) : (
-                <div className={`p-4 rounded-2xl border flex items-center justify-between ${getStatusStyles(selectedContract.status)}`}>
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(selectedContract.status)}
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em]">Already {selectedContract.status}</p>
+              <div className="pt-4">
+                <div className={`p-6 rounded-3xl border flex flex-col gap-4 ${getStatusStyles(selectedContract.status)}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(selectedContract.status)}
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em]">STATUS | {selectedContract.status}</p>
+                    </div>
+                    <Download className="w-4 h-4 opacity-50" />
                   </div>
-                  <Download className="w-4 h-4 opacity-50" />
+                  {selectedContract.notes && (
+                    <div className="p-4 bg-white/50 rounded-2xl border border-white/20">
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">Dealer Response:</p>
+                      <p className="text-xs font-medium italic">{selectedContract.notes}</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}

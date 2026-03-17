@@ -56,13 +56,25 @@ export class ContractsService {
       },
     });
 
-    // If approved, optionally update the dealer's main contract status
+    // If approved, update the dealer's main contract status and activate user
     if (status === ContractStatus.approved) {
         await this.prisma.dealer.update({
             where: { id: contract.dealerId },
             data: {
                 contractStatus: ContractStatus.approved,
-                contractUrl: contract.fileUrl
+                contractUrl: contract.fileUrl,
+                user: {
+                    update: {
+                        isActive: true
+                    }
+                }
+            }
+        });
+    } else if (status === ContractStatus.rejected) {
+        await this.prisma.dealer.update({
+            where: { id: contract.dealerId },
+            data: {
+                contractStatus: ContractStatus.rejected
             }
         });
     }

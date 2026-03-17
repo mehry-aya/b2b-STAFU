@@ -241,7 +241,7 @@ export async function uploadContractAction(formData: FormData) {
     const response = await fetch(`${API_BASE}/contracts/upload`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body: formData,
+      body: formData, // FormData contains 'file' and 'dealerId'
     });
 
     if (!response.ok) {

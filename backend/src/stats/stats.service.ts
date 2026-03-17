@@ -34,11 +34,17 @@ export class StatsService {
       this.prisma.user.count({ where: { role: Role.dealer, isActive: true } }),
       this.prisma.user.count({ where: { role: { in: [Role.admin, Role.master_admin] } } }),
       this.prisma.order.count(),
-      this.prisma.dealer.findMany({
-        where: { contractStatus: 'pending' },
-        include: { user: { select: { email: true } } },
+      this.prisma.contract.findMany({
+        where: { status: 'pending' },
+        include: { 
+          dealer: { 
+            include: { user: { select: { email: true } } } 
+          } 
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
       }),
-      this.prisma.dealer.count({ where: { contractStatus: 'pending' } }),
+      this.prisma.contract.count({ where: { status: 'pending' } }),
       this.prisma.order.count({ where: { status: 'pending_payment' } }),
     ]);
 
@@ -68,7 +74,7 @@ export class StatsService {
       totalOrders,
       pendingOrders,
       totalSpent,
-      dealer,
+      recentContract,
       recentOrder,
     ] = await Promise.all([
       this.prisma.order.count({ where: { dealerId } }),
@@ -77,9 +83,10 @@ export class StatsService {
         where: { dealerId, status: { in: [OrderStatus.paid, OrderStatus.shipped] } },
         _sum: { totalAmount: true },
       }),
-      this.prisma.dealer.findUnique({
-        where: { id: dealerId },
-        select: { contractStatus: true },
+      this.prisma.contract.findFirst({
+        where: { dealerId },
+        orderBy: { createdAt: 'desc' },
+        select: { status: true },
       }),
       this.prisma.order.findFirst({
         where: { dealerId },
@@ -98,7 +105,7 @@ export class StatsService {
       totalOrders,
       pendingOrders,
       totalSpent: totalSpent._sum.totalAmount || 0,
-      contractStatus: dealer?.contractStatus || 'none',
+      contractStatus: recentContract?.status || 'none',
       recentOrder: recentOrder ? {
         id: recentOrder.id,
         date: recentOrder.createdAt,

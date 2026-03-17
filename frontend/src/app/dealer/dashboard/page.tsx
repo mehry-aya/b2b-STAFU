@@ -46,12 +46,39 @@ export default function DealerDashboard() {
     }).format(amount);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
-      case "approved": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-      case "pending": return "bg-amber-100 text-amber-700 border-amber-200";
-      case "rejected": return "bg-rose-100 text-rose-700 border-rose-200";
-      default: return "bg-zinc-100 text-zinc-700 border-zinc-200";
+      case "approved": return {
+        card: "bg-emerald-50/30 border-emerald-500/10",
+        badge: "bg-white text-emerald-600 border-emerald-200",
+        icon: "bg-emerald-50 text-emerald-600"
+      };
+      case "pending": return {
+        card: "bg-amber-50/30 border-amber-500/10",
+        badge: "bg-white text-amber-600 border-amber-200",
+        icon: "bg-amber-50 text-amber-600"
+      };
+      case "rejected": return {
+        card: "bg-rose-50/30 border-rose-500/10",
+        badge: "bg-white text-rose-600 border-rose-200",
+        icon: "bg-rose-50 text-rose-600"
+      };
+      default: return {
+        card: "bg-zinc-50/30 border-zinc-500/10",
+        badge: "bg-white text-zinc-600 border-zinc-200",
+        icon: "bg-zinc-50 text-zinc-600"
+      };
+    }
+  };
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "paid":
+      case "shipped": return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "pending_payment":
+      case "draft": return "bg-amber-50 text-amber-700 border-amber-200";
+      case "cancelled": return "bg-rose-50 text-rose-700 border-rose-200";
+      default: return "bg-zinc-50 text-zinc-700 border-zinc-200";
     }
   };
 
@@ -72,7 +99,7 @@ export default function DealerDashboard() {
     { label: "Total Orders", value: stats?.totalOrders || 0, icon: ShoppingCart },
     { label: "Pending Orders", value: stats?.pendingOrders || 0, icon: Clock },
     { label: "Total Spent", value: formatCurrency(stats?.totalSpent || 0), icon: DollarSign },
-    { label: "Contract Status", value: "Approved", icon: FileText, type: "badge" },
+    { label: "Contract Status", value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
   ];
 
   const quickLinks = [
@@ -111,21 +138,23 @@ export default function DealerDashboard() {
         {dealerStats.map((stat) => {
           const Icon = stat.icon;
           const isStatus = stat.label === "Contract Status";
+          const styles = isStatus ? getStatusStyles(stat.value) : null;
+          
           return (
             <div 
               key={stat.label} 
-              className={`bg-white border rounded-3xl p-6 shadow-sm ${
-                isStatus 
-                  ? getStatusColor(stat.value) 
-                  : "border-zinc-100"
+              className={`bg-white border rounded-3xl p-6 shadow-sm transition-all duration-300 ${
+                isStatus ? styles?.card : "border-zinc-100 hover:shadow-md"
               }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 mb-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+                isStatus ? styles?.icon : "bg-zinc-50 text-zinc-500"
+              }`}>
                 <Icon className="h-5 w-5" />
               </div>
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</p>
               {stat.type === "badge" ? (
-                <span className={`inline-block mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase border bg-white/50 border-black/10`}>
+                <span className={`inline-block mt-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase border shadow-xs ${styles?.badge}`}>
                   {stat.value}
                 </span>
               ) : (
@@ -149,7 +178,7 @@ export default function DealerDashboard() {
                   <p className="text-xs text-zinc-500 font-medium">Order ID</p>
                   <p className="text-lg font-black text-zinc-900">#{stats.recentOrder.id.toString().padStart(5, '0')}</p>
                 </div>
-                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${getStatusColor(stats.recentOrder.status)}`}>
+                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${getOrderStatusColor(stats.recentOrder.status)}`}>
                   {stats.recentOrder.status.replace('_', ' ')}
                 </div>
               </div>

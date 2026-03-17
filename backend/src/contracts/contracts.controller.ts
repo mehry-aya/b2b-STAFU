@@ -29,7 +29,7 @@ export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Post('upload')
-  @Roles(Role.dealer)
+  @Roles(Role.admin, Role.master_admin)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -46,13 +46,8 @@ export class ContractsController {
   )
   async uploadContract(
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: any,
+    @Body('dealerId', ParseIntPipe) dealerId: number,
   ) {
-    // Assuming user object has dealerId for dealer role
-    const dealerId = user.dealerId;
-    if (!dealerId) {
-      throw new ForbiddenException('Only dealers can upload contracts');
-    }
     return this.contractsService.create(
       dealerId,
       file.originalname,
@@ -83,11 +78,19 @@ export class ContractsController {
   }
 
   @Patch(':id/review')
-  @Roles(Role.admin, Role.master_admin)
+  @Roles(Role.dealer)
   async review(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateContractStatusDto,
+    @CurrentUser() user: any,
   ) {
+    const dealerId = user.dealerId;
+    const contract = await this.contractsService.findOne(id);
+    
+    if (contract.dealerId !== dealerId) {
+      throw new ForbiddenException('You can only review your own contracts');
+    }
+
     return this.contractsService.updateStatus(id, updateDto.status, updateDto.notes);
   }
 }

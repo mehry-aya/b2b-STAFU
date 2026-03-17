@@ -162,17 +162,18 @@ export default function MasterDashboard() {
                   </span>
                 </div>
                 <div className="divide-y divide-zinc-50">
-                  {stats.alerts.pendingContracts.map((dealer: any) => (
-                    <div key={dealer.id} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-50/30 transition-colors">
+                  {stats.alerts.pendingContracts.map((contract: any) => (
+                    <div key={contract.id} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-50/30 transition-colors">
                       <div>
-                        <p className="text-sm font-bold text-zinc-900">{dealer.companyName}</p>
-                        <p className="text-xs text-zinc-500">{dealer.user.email}</p>
+                        <p className="text-sm font-bold text-zinc-900">{contract.dealer?.companyName || "Unknown Dealer"}</p>
+                        <p className="text-xs text-zinc-500">{contract.dealer?.user?.email}</p>
+                        <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-tighter">{contract.fileName}</p>
                       </div>
                       <Link
                         href="/admin/contracts"
                         className="bg-zinc-900 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-zinc-800 transition-colors"
                       >
-                        Review
+                        Details
                       </Link>
                     </div>
                   ))}
@@ -182,21 +183,21 @@ export default function MasterDashboard() {
 
             {/* Pending Orders */}
             {stats?.alerts?.pendingOrdersCount > 0 && (
-              <div className="bg-white border border-rose-100 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+              <div className="bg-white border border-amber-100 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <Clock className="h-6 w-6" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-zinc-900">Orders Requiring Action</h3>
                     <p className="text-sm text-zinc-500 mt-1">
-                      There are <span className="font-bold text-rose-600">{stats.alerts.pendingOrdersCount}</span> orders awaiting master approval or payment confirmation.
+                      There are <span className="font-bold text-amber-600">{stats.alerts.pendingOrdersCount}</span> orders awaiting master approval or payment confirmation.
                     </p>
                   </div>
                 </div>
                 <Link
                   href="/admin/orders"
-                  className="mt-6 flex items-center justify-center gap-2 w-full bg-rose-600 text-white font-bold py-3 rounded-xl hover:bg-rose-700 transition-colors"
+                  className="mt-6 flex items-center justify-center gap-2 w-full bg-amber-600 text-white font-bold py-3 rounded-xl hover:bg-amber-700 transition-colors"
                 >
                   Manage Transactions
                   <ArrowRight className="h-4 w-4" />

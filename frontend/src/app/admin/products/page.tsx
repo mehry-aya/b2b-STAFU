@@ -84,7 +84,7 @@ export default function AdminProductsPage() {
               <span>{isMaster ? "Master Catalog" : "Product Catalog"}</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-              {isMaster ? "Master Management" : "Manage Products"}
+              Products Management
             </h1>
             <p className="text-zinc-400 text-sm max-w-md">
               {isMaster 
