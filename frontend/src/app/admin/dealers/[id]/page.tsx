@@ -20,6 +20,7 @@ import Link from "next/link";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 import { format } from "date-fns";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Dealer } from "@/lib/types/dealer";
 
 export default function DealerDetailPage() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ export default function DealerDetailPage() {
   const isMaster = pathname?.startsWith("/master");
   const baseUrl = isMaster ? "/master" : "/admin";
 
-  const [dealer, setDealer] = useState<any>(null);
+  const [dealer, setDealer] = useState<Dealer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
@@ -61,7 +62,8 @@ export default function DealerDetailPage() {
     setUpdating(true);
     const result = await approveDealerAction(Number(id), status);
     if (result.success) {
-      setDealer({ ...dealer, contractStatus: status });
+      // We force any here because status comes from the UI as a string but Dealer type is stricter
+      setDealer(dealer ? { ...dealer, contractStatus: status as any } : null);
     } else {
       alert(result.error || "Failed to update status");
     }
@@ -116,6 +118,21 @@ export default function DealerDetailPage() {
                 {dealer.contractStatus}
               </div>
             </div>
+            {dealer.statusChangedByEmail && (
+              <div className="px-6 py-2 bg-zinc-50/50 border-b border-zinc-100 flex items-center justify-between opacity-70">
+                <div className="flex items-center gap-2">
+                  <UserIcon className="w-2.5 h-2.5 text-zinc-400" />
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                    {dealer.contractStatus.charAt(0).toUpperCase() + dealer.contractStatus.slice(1)} by {dealer.statusChangedByEmail}
+                  </p>
+                </div>
+                {dealer.statusChangedAt && (
+                   <p className="text-[8px] font-medium text-zinc-400">
+                     {format(new Date(dealer.statusChangedAt), 'MMM dd, HH:mm')}
+                   </p>
+                )}
+              </div>
+            )}
             <div className="p-6 space-y-6">
               <div className="space-y-4">
                 <div className="flex items-start gap-4">

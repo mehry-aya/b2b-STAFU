@@ -72,7 +72,7 @@ export class OrdersController {
       }
     }
 
-    return this.ordersService.updateStatus(id, updateOrderStatusDto.status);
+    return this.ordersService.updateStatus(id, updateOrderStatusDto.status, user.email);
   }
 
   @Get('export/excel')

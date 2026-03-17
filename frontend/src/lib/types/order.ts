@@ -22,6 +22,8 @@ export interface Order {
   dealerId: number;
   totalAmount: number;
   status: OrderStatus;
+  statusChangedByEmail?: string | null;
+  statusChangedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];

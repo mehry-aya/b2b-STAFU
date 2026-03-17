@@ -13,7 +13,7 @@ import {
   CheckCircle2, 
   AlertCircle,
   Package,
-  User,
+  User as UserIcon,
   ArrowRight,
   Printer,
   MoreVertical,
@@ -243,6 +243,20 @@ export default function AdminOrderDetailPage({
                 {getStatusIcon(order.status)}
                 {order.status.replace('_', ' ')}
               </div>
+
+              {order.statusChangedByEmail && (
+                <div className="flex flex-col items-end opacity-60 hover:opacity-100 transition-opacity">
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <UserIcon className="w-2.5 h-2.5" />
+                    {order.status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} by {order.statusChangedByEmail}
+                  </p>
+                  {order.statusChangedAt && (
+                    <p className="text-[8px] font-medium text-zinc-400 mt-0.5 uppercase tracking-tighter">
+                      {format(new Date(order.statusChangedAt), 'MMM dd, yyyy HH:mm')}
+                    </p>
+                  )}
+                </div>
+              )}
               
               {/* Admin Actions */}
               <div className="flex flex-wrap gap-2 justify-end">
@@ -287,7 +301,7 @@ export default function AdminOrderDetailPage({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2">
-              <User className="h-3 w-3 text-red-500" />
+              <UserIcon className="h-3 w-3 text-red-500" />
               Dealer Account
             </h3>
             <div className="space-y-1">

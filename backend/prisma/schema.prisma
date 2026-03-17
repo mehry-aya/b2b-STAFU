@@ -38,9 +38,11 @@ model Dealer {
   phone          String?
   address        String?
   contractUrl    String?
-  contractStatus ContractStatus @default(pending)
-  createdAt      DateTime       @default(now())
-  user           User           @relation(fields: [userId], references: [id])
+  contractStatus       ContractStatus @default(pending)
+  statusChangedByEmail String?
+  statusChangedAt      DateTime?
+  createdAt            DateTime       @default(now())
+  user                 User           @relation(fields: [userId], references: [id])
   orders         Order[]
 }
 
@@ -84,9 +86,11 @@ model Order {
   id          Int         @id @default(autoincrement())
   dealerId    Int         @map("dealer_id")
   totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
-  status      OrderStatus @default(draft)
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  status               OrderStatus @default(draft)
+  statusChangedByEmail String?     @map("status_changed_by_email")
+  statusChangedAt      DateTime?   @map("status_changed_at")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
   dealer      Dealer      @relation(fields: [dealerId], references: [id])
   items       OrderItem[]
 

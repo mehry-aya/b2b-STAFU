@@ -60,7 +60,7 @@ export class DealersService {
     return dealer;
   }
 
-  async updateStatus(dealerId: number, status: ContractStatus) {
+  async updateStatus(dealerId: number, status: ContractStatus, adminEmail: string) {
     const dealer = await this.prisma.dealer.findUnique({
       where: { id: dealerId },
     });
@@ -71,12 +71,14 @@ export class DealersService {
       where: { id: dealerId },
       data: { 
         contractStatus: status,
+        statusChangedByEmail: adminEmail,
+        statusChangedAt: new Date(),
         user: {
           update: {
             isActive: status === 'approved'
           }
         }
-      },
+      } as any,
       include: {
         user: {
           select: {
