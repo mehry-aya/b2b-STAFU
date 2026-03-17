@@ -12,7 +12,11 @@ export default function AdminProfilePage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    old: false,
+    new: false,
+    confirm: false
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -122,17 +126,17 @@ export default function AdminProfilePage() {
                 <input
                   id="oldPassword"
                   name="oldPassword"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword.old ? "text" : "password"}
                   required
                   className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                   placeholder="Enter current password"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(prev => ({ ...prev, old: !prev.old }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                 >
-                  {showPassword ? (
+                  {showPassword.old ? (
                     <EyeOffIcon className="h-5 w-5" />
                   ) : (
                     <EyeIcon className="h-5 w-5" />
@@ -152,17 +156,17 @@ export default function AdminProfilePage() {
                 <input
                   id="newPassword"
                   name="newPassword"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword.new ? "text" : "password"}
                   required
                   className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                   placeholder="Enter new password"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(prev => ({ ...prev, new: !prev.new }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                 >
-                  {showPassword ? (
+                  {showPassword.new ? (
                     <EyeOffIcon className="h-5 w-5" />
                   ) : (
                     <EyeIcon className="h-5 w-5" />
@@ -182,17 +186,17 @@ export default function AdminProfilePage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword.confirm ? "text" : "password"}
                   required
                   className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                   placeholder="Confirm new password"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                 >
-                  {showPassword ? (
+                  {showPassword.confirm ? (
                     <EyeOffIcon className="h-5 w-5" />
                   ) : (
                     <EyeIcon className="h-5 w-5" />
