@@ -100,7 +100,7 @@ export default function MasterAdminsPage() {
               Administrators
             </h1>
             <p className="text-zinc-400 text-sm max-w-md">
-              Add and remove portal administrators. Admins can manage dealers,
+              Add and remove portal administrators. You can manage dealers,
               orders, products, and contracts.
             </p>
           </div>

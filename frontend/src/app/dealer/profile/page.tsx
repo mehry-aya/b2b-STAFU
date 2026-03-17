@@ -130,7 +130,7 @@ export default function DealerProfilePage() {
           </div>
           <h1 className="text-3xl font-black text-white tracking-tight">Your Profile</h1>
           <p className="text-zinc-400 text-sm mt-1 max-w-xl">
-            Update your company details, contact information, and security settings.
+            Update your company details, contact information, shippement address and security settings.
           </p>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function DealerProfilePage() {
 
                 <div className="space-y-1.5 md:col-span-2">
                   <label htmlFor="address" className="block text-sm font-bold text-zinc-700">
-                    Address
+                    Shippement Address
                   </label>
                   <div className="relative">
                     <div className="absolute top-3.5 left-4 pointer-events-none">

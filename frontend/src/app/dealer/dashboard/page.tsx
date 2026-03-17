@@ -99,7 +99,7 @@ export default function DealerDashboard() {
               Welcome back{user?.companyName ? `, ${user.companyName}` : ""}
             </h1>
             <p className="text-zinc-400 text-sm max-w-sm">
-              Manage your fishing inventory, track orders, and oversee your business performance.
+              Manage inventory, track orders, and oversee your business performance.
             </p>
           </div>
           

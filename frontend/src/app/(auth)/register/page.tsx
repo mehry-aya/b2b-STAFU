@@ -33,7 +33,7 @@ export default function RegisterPage() {
       <div className="text-center mb-10">
         <Logo variant="white" width={140} height={40} className="justify-center mx-auto h-16" />
         <p className="mt-3 text-slate-200 font-medium tracking-wide">
-          DEALER REGISTRATION
+          Dealer <span className="text-red-600 font-bold">Sign Up</span>
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export default function RegisterPage() {
                   name="phone"
                   type="tel"
                   className="block w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all font-medium"
-                  placeholder="+1 234..."
+                  placeholder="+90 (555) 555 55 55"
                 />
               </div>
               <div>
@@ -151,9 +151,9 @@ export default function RegisterPage() {
             <div className="text-center">
               <Link
                 href="/login"
-                className="text-sm font-bold text-slate-300 hover:text-white transition-colors uppercase tracking-widest border-b border-transparent hover:border-white pb-1"
+                className="text-sm font-semibold text-slate-300 hover:text-white transition-colors tracking-widest border-b border-transparent hover:border-white pb-1"
               >
-                Already have an account? Sign in
+                Already have an account? <span className="text-red-600 font-bold letter-spacing-1">Sign in</span> 
               </Link>
             </div>
           </div>

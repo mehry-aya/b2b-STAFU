@@ -43,7 +43,7 @@ export default function LoginPage() {
       <div className="text-center mb-10">
         <Logo variant="white" width={140} height={40} className="justify-center mx-auto h-16" />
         <p className="mt-3 text-slate-200 font-medium">
-          B2B Dealer Portal Login
+          B2B Dealer Portal <span className="text-red-600 font-bold">Sign In</span>
         </p>
       </div>
 
@@ -131,7 +131,7 @@ export default function LoginPage() {
           <div className="text-center pt-2">
             <Link
               href="/register"
-              className="text-sm font-bold text-slate-300 hover:text-white transition-colors uppercase tracking-widest border-b border-transparent hover:border-white pb-1"
+              className="text-sm font-bold text-slate-300 hover:text-white transition-colors tracking-widest border-b border-transparent hover:border-white pb-1"
             >
               Apply for Dealer Access
             </Link>
