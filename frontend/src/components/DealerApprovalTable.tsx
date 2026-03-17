@@ -17,6 +17,9 @@ interface Dealer {
     email: string;
     isActive: boolean;
   };
+  _count?: {
+    orders: number;
+  };
 }
 
 export default function DealerApprovalTable({
@@ -72,6 +75,9 @@ export default function DealerApprovalTable({
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                 Status
+              </th>
+              <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                Orders
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">
                 Actions
@@ -135,18 +141,30 @@ export default function DealerApprovalTable({
                     {dealer.contractStatus}
                   </span>
                 </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="text-xs font-bold text-zinc-900 border border-zinc-100 bg-zinc-50 px-2 py-1 rounded-lg inline-block min-w-[32px]">
+                    {dealer._count?.orders || 0}
+                  </div>
+                </td>
                 <td className="px-6 py-4">
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex gap-1.5 justify-end">
+                    <Link
+                      href={`${baseUrl}/dealers/${dealer.id}`}
+                      className="p-1.5 rounded-lg bg-zinc-50 text-zinc-600 hover:bg-zinc-900 hover:text-white transition-all border border-zinc-100"
+                      title="View Details"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Link>
                     <button
                       onClick={() => handleUpdate(dealer.id, "approved")}
                       disabled={
                         updatingId === dealer.id ||
                         dealer.contractStatus === "approved"
                       }
-                      className="p-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-30 transition-all border border-emerald-100"
+                      className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-30 transition-all border border-emerald-100"
                       title="Approve"
                     >
-                      <Check className="h-4 w-4" />
+                      <Check className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => handleUpdate(dealer.id, "rejected")}
@@ -154,10 +172,10 @@ export default function DealerApprovalTable({
                         updatingId === dealer.id ||
                         dealer.contractStatus === "rejected"
                       }
-                      className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-30 transition-all border border-red-100"
+                      className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-30 transition-all border border-red-100"
                       title="Reject"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </td>

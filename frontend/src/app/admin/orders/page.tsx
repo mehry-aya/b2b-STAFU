@@ -89,41 +89,80 @@ export default function AdminOrdersPage() {
         roleBadge={isMaster ? { label: "Master", type: "master" } : { label: "Admin", type: "admin" }}
       />
 
-      {/* Toolbar */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white border border-zinc-100 p-4 rounded-2xl shadow-sm">
-         <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <input 
-              type="text" 
-              placeholder="Search by Order ID or Dealer..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600/50 transition-all"
-            />
-         </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">From</span>
+      {/* Toolbar from Mockup Refined */}
+      <div className="bg-white border border-zinc-100 p-6 rounded-3xl shadow-sm">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+          {/* Left Side: Search */}
+          <div className="relative w-full xl:max-w-xs 2xl:max-w-md">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-black text-transparent uppercase tracking-tighter select-none">Search</span>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search by Order ID or Dealer..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-zinc-50 border border-zinc-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-red-600/10 focus:border-red-600/30 transition-all placeholder:text-zinc-400 font-medium h-[42px]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Filters & Actions grouped */}
+          <div className="flex flex-wrap items-end gap-3 w-full xl:w-auto">
+            {/* Date From */}
+            <div className="flex flex-col gap-1.5 flex-1 sm:flex-none">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter ml-1">From</span>
+              <div className="flex items-center gap-2 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-xl hover:bg-zinc-100/50 transition-colors h-[42px]">
                 <input 
                   type="date" 
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-28"
-                />
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-50 border border-zinc-100 rounded-xl">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">To</span>
-                <input 
-                  type="date" 
-                  value={dateTo}
-                  min={dateFrom}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-28"
+                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-full sm:w-28 appearance-none"
                 />
               </div>
             </div>
 
+            {/* Date To */}
+            <div className="flex flex-col gap-1.5 flex-1 sm:flex-none">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter ml-1">To</span>
+              <div className="flex items-center gap-2 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-xl hover:bg-zinc-100/50 transition-colors h-[42px]">
+                <input 
+                  type="date" 
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="bg-transparent text-xs font-bold text-zinc-700 outline-none w-full sm:w-28 appearance-none"
+                />
+              </div>
+            </div>
+           {/* Status Filter */}
+            <div className="relative w-full sm:w-48">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-black text-transparent uppercase tracking-tighter select-none">Status</span>
+                <div className="relative">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full appearance-none flex items-center gap-2 pl-10 pr-10 py-2.5 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-all cursor-pointer outline-none focus:ring-2 focus:ring-red-600/10 focus:border-red-600/30 h-[42px]"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="pending_payment">Pending Payment</option>
+                    <option value="paid">Paid</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <Filter className="h-3.5 w-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.6} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Export Button */}
             <button 
               onClick={async () => {
                 setExporting(true);
@@ -170,39 +209,27 @@ export default function AdminOrdersPage() {
                 }
               }}
               disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50 h-9"
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50 h-[42px] shadow-sm flex-1 sm:flex-none justify-center"
             >
-              <Download className={`h-3.5 w-3.5 ${exporting ? 'animate-bounce' : ''}`} />
-              {exporting ? 'Exporting...' : 'Export (xlsx)'}
+              <Download className={`h-4 w-4 ${exporting ? 'animate-bounce' : ''}`} />
+              <span className="whitespace-nowrap">{exporting ? 'Exporting...' : 'Export'}</span>
             </button>
-            <div className="h-6 w-px bg-zinc-200 mx-2" />
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none flex items-center gap-2 pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600/50"
-              >
-                <option value="all">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="pending_payment">Pending Payment</option>
-                <option value="paid">Paid</option>
-                <option value="shipped">Shipped</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <Filter className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            <div className="h-6 w-px bg-zinc-200 mx-2" />
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{totalCount} Orders</span>
+
+           
           </div>
+        </div>
       </div>
 
-      {/* Orders Table */}
-      {loading ? (
+      {/* Order Counter and Table Area */}
+      <div className="space-y-3">
+        {/* Counter Aligned Right Above Table */}
+        <div className="flex justify-end pr-2">
+          <div className="flex flex-col items-end leading-tight">
+            <span className="text-[12px] font-black text-zinc-600 uppercase tracking-widest -mt-1"> {totalCount} Orders</span>
+          </div>
+        </div>
+
+        {loading ? (
         <div className="bg-white border border-zinc-100 rounded-3xl p-12 flex flex-col items-center justify-center space-y-4">
           <div className="w-12 h-12 border-4 border-zinc-100 border-t-red-600 rounded-full animate-spin" />
           <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">Loading orders...</p>
@@ -288,6 +315,7 @@ export default function AdminOrdersPage() {
           />
         </div>
       )}
+    </div>
     </div>
   );
 }

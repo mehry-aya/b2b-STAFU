@@ -18,6 +18,9 @@ export class DealersService {
               isActive: true,
             },
           },
+          _count: {
+            select: { orders: true },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,
