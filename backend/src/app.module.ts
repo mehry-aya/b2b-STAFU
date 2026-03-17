@@ -8,6 +8,7 @@ import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CarouselModule } from './carousel/carousel.module';
 import { StatsModule } from './stats/stats.module';
+import { ContractsModule } from './contracts/contracts.module';
 
 
 @Module({
@@ -21,6 +22,7 @@ import { StatsModule } from './stats/stats.module';
     OrdersModule,
     CarouselModule,
     StatsModule,
+    ContractsModule,
   ],
 
 })

@@ -40,6 +40,9 @@ lerna-debug.log*
 .env.test
 .env.production
 
+/uploads
+/uploads/contracts
+
 # prisma
 /prisma/migrations
 # Prisma seed

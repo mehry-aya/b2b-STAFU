@@ -35,8 +35,17 @@ export class AuthService {
     return user;
   }
 
-  login(user: { id: number; email: string; role: string }) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+  async login(user: { id: number; email: string; role: string }) {
+    const payload: any = { sub: user.id, email: user.email, role: user.role };
+    
+    if (user.role === 'dealer') {
+      const dealer = await this.prisma.dealer.findUnique({
+        where: { userId: user.id }
+      });
+      if (dealer) {
+        payload.dealerId = dealer.id;
+      }
+    }
 
     return {
       access_token: this.jwtService.sign(payload),

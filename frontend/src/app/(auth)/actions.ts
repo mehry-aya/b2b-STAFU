@@ -238,7 +238,7 @@ export async function uploadContractAction(formData: FormData) {
   if (!token) return { error: "Authentication required" };
 
   try {
-    const response = await fetch(`${API_BASE}/dealers/contract`, {
+    const response = await fetch(`${API_BASE}/contracts/upload`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -249,9 +249,74 @@ export async function uploadContractAction(formData: FormData) {
       return { error: data.message || "Upload failed" };
     }
 
-    return { success: true, dealer: await response.json() };
+    return { success: true, contract: await response.json() };
   } catch {
     return { error: "Failed to connect to server" };
+  }
+}
+
+export async function getMyContractsAction() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch(`${API_BASE}/contracts/my-contracts`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) return { error: "Failed to fetch contracts" };
+    return { data: await response.json() };
+  } catch {
+    return { error: "Connection error" };
+  }
+}
+
+export async function getAdminContractsAction(status?: string) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const url = status 
+      ? `${API_BASE}/contracts/admin/list?status=${status}`
+      : `${API_BASE}/contracts/admin/list`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) return { error: "Failed to fetch contracts" };
+    return { data: await response.json() };
+  } catch {
+    return { error: "Connection error" };
+  }
+}
+
+export async function reviewContractAction(id: number, status: string, notes?: string) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { error: "Authentication required" };
+
+  try {
+    const response = await fetch(`${API_BASE}/contracts/${id}/review`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status, notes }),
+    });
+
+    if (!response.ok) return { error: "Review update failed" };
+    return { success: true, contract: await response.json() };
+  } catch {
+    return { error: "Connection error" };
   }
 }
 

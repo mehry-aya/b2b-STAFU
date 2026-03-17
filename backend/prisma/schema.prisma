@@ -38,12 +38,28 @@ model Dealer {
   phone          String?
   address        String?
   contractUrl    String?
-  contractStatus       ContractStatus @default(pending)
+  contractStatus ContractStatus @default(pending)
   statusChangedByEmail String?
   statusChangedAt      DateTime?
   createdAt            DateTime       @default(now())
   user                 User           @relation(fields: [userId], references: [id])
   orders         Order[]
+  contracts      Contract[]
+}
+
+model Contract {
+  id        Int            @id @default(autoincrement())
+  dealerId  Int
+  fileName  String
+  fileUrl   String
+  status    ContractStatus @default(pending)
+  type      String
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  dealer    Dealer         @relation(fields: [dealerId], references: [id])
+
+  @@map("contracts")
 }
 
 model Product {

@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "sonner";
 import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
@@ -33,6 +34,7 @@ export default function RootLayout({
         <CartProvider>
           {children}
           <Toaster />
+          <SonnerToaster position="top-right" expand={true} richColors />
         </CartProvider>
       </body>
     </html>
