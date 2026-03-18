@@ -16,6 +16,8 @@ export class ShopifyMapper {
         option2: options[1]?.value || null,
         option3: options[2]?.value || null,
         imageUrl: v.image?.url || null,
+        translationsTr: v.translationsTr || [],
+        translationsEn: v.translationsEn || [],
       } as ShopifyVariantSyncPayload;
     });
 
@@ -40,6 +42,8 @@ export class ShopifyMapper {
         title: ce.node.title,
         handle: ce.node.handle,
       })) || [],
+      translationsTr: node.translationsTr || [],
+      translationsEn: node.translationsEn || [],
     };
   }
 }

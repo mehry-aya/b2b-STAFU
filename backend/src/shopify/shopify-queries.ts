@@ -14,6 +14,16 @@ export const GET_CATEGORIES_QUERY = `
   }
 `;
 
+export const SHOP_LOCALES_QUERY = `
+  query {
+    shopLocales {
+      locale
+      primary
+      published
+    }
+  }
+`;
+
 export const GET_PRODUCTS_QUERY = `
   query getProducts($cursor: String) {
     products(first: 50, after: $cursor) {
@@ -30,6 +40,16 @@ export const GET_PRODUCTS_QUERY = `
           vendor
           productType
           status
+          translationsTr: translations(locale: "tr") {
+            locale
+            key
+            value
+          }
+          translationsEn: translations(locale: "en") {
+            locale
+            key
+            value
+          }
           options {
             name
             values
@@ -65,6 +85,16 @@ export const GET_PRODUCTS_QUERY = `
                 }
                 selectedOptions {
                   name
+                  value
+                }
+                translationsTr: translations(locale: "tr") {
+                  locale
+                  key
+                  value
+                }
+                translationsEn: translations(locale: "en") {
+                  locale
+                  key
                   value
                 }
               }

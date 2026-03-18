@@ -51,16 +51,16 @@
     "backToLogin": "GİRİŞE DÖN"
   },
   "DealerProducts": {
-    "breadcrumb": "Ürünler",
+    "breadcrumb": "Katalog",
     "allProducts": "Tüm Ürünler",
-    "items": "Ürün",
-    "subtitle": "Göz atın ve sipariş verin.",
-    "searchPlaceholder": "Ürünlerde ara...",
+    "items": "ürün",
+    "subtitle": "Koleksiyonumuza göz atın ve siparişinizi oluşturun.",
+    "searchPlaceholder": "Ürün ara...",
     "noProducts": "Ürün bulunamadı",
-    "noProductsDesc": "Aramanızı ayarlamayı veya farklı bir kategoriye göz atmayı deneyin.",
+    "noProductsDesc": "Aramanızı veya kategori filtrenizi değiştirmeyi deneyin.",
     "inStock": "stokta",
-    "view": "Görüntüle →",
-    "productsLabel": "ürün"
+    "view": "İncele",
+    "productsLabel": "Ürünler"
   },
   "DealerOrders": {
     "badge": "Geçmiş",
@@ -478,5 +478,26 @@
     "active": "Aktif",
     "draft": "Taslak",
     "at": "saat"
+  },
+  "ProductDetail": {
+    "backToProducts": "Ürünlere Dön",
+    "productNotFound": "Ürün Bulunamadı",
+    "noImage": "Görsel Yok",
+    "priceUnavailable": "Fiyat mevcut değil",
+    "color": "Renk",
+    "selectOptions": "Stok durumunu görmek için tüm seçenekleri seçin",
+    "sku": "SKU",
+    "availability": "Stok Durumu",
+    "outOfStock": "Stokta Yok",
+    "inStock": "{count} stokta",
+    "qty": "Adet",
+    "addToOrder": "Siparişe Ekle",
+    "productDetails": "Ürün Detayları",
+    "showLess": "Daha az göster",
+    "readFullDescription": "Tam açıklamayı oku",
+    "addedToCart": "Sepete Eklendi",
+    "addedToCartDesc": "{count}x {title} sepetinize eklendi.",
+    "brand": "Marka",
+    "currentColor": "Güncel"
   }
 }

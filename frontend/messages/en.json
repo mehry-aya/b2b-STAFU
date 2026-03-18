@@ -51,16 +51,16 @@
     "backToLogin": "BACK TO LOGIN"
   },
   "DealerProducts": {
-    "breadcrumb": "Products",
+    "breadcrumb": "Catalog",
     "allProducts": "All Products",
-    "items": "Items",
-    "subtitle": "Browse and order.",
+    "items": "items",
+    "subtitle": "Browse our collection and create your order.",
     "searchPlaceholder": "Search products...",
     "noProducts": "No products found",
-    "noProductsDesc": "Try adjusting your search or browse a different category.",
+    "noProductsDesc": "Try adjusting your search or category filter.",
     "inStock": "in stock",
-    "view": "View →",
-    "productsLabel": "products"
+    "view": "View Detail",
+    "productsLabel": "Products"
   },
   "DealerOrders": {
     "badge": "History",
@@ -478,5 +478,26 @@
     "active": "Active",
     "draft": "Draft",
     "at": "at"
+  },
+  "ProductDetail": {
+    "backToProducts": "Back to Products",
+    "productNotFound": "Product Not Found",
+    "noImage": "No Image",
+    "priceUnavailable": "Price unavailable",
+    "color": "Color",
+    "selectOptions": "Select all options to see availability",
+    "sku": "SKU",
+    "availability": "Availability",
+    "outOfStock": "Out of Stock",
+    "inStock": "{count} in stock",
+    "qty": "Qty",
+    "addToOrder": "Add to Order",
+    "productDetails": "Product Details",
+    "showLess": "Show less",
+    "readFullDescription": "Read full description",
+    "addedToCart": "Added to Order",
+    "addedToCartDesc": "{count}x {title} added to your cart.",
+    "brand": "Brand",
+    "currentColor": "Current"
   }
 }

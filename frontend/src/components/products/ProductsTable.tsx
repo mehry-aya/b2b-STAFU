@@ -1,6 +1,7 @@
 import { Product } from "@/lib/types/product";
 import { Box, Tag, PackageOpen, RefreshCw } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Props {
   products: Product[];
@@ -28,6 +29,8 @@ function StatusBadge({ status }: { status: string }) {
 
 export function ProductsTable({ products, loading, searchQuery, syncing, onSync }: Props) {
   const t = useTranslations("ProductsTable");
+  const { formatPrice } = useCurrency();
+  const locale = useLocale();
   
   return (
     <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm">
@@ -146,11 +149,11 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                     <td className="px-6 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-zinc-900">
-                          {firstVariant?.price ? `₺${parseFloat(firstVariant.price).toFixed(2)}` : "-"}
+                          {firstVariant?.price ? formatPrice(parseFloat(firstVariant.price)) : "-"}
                         </span>
                         {firstVariant?.compareAtPrice && (
                           <span className="text-[10px] text-zinc-400 line-through font-medium">
-                            ₺{parseFloat(firstVariant.compareAtPrice).toFixed(2)}
+                            {formatPrice(parseFloat(firstVariant.compareAtPrice))}
                           </span>
                         )}
                       </div>
@@ -160,10 +163,10 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="block text-sm font-bold text-zinc-900 whitespace-nowrap">
-                        {new Date(product.syncedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                        {new Date(product.syncedAt).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })}
                       </span>
                       <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">
-                        {t("at")} {new Date(product.syncedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                        {t("at")} {new Date(product.syncedAt).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </td>
                   </tr>

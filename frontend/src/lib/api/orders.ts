@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import { getLocale } from 'next-intl/server';
 import { OrderStatus } from "../types/order";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
@@ -8,7 +9,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/a
 async function getAuthHeader(): Promise<Record<string, string>> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const locale = await getLocale();
+
+  const headers: Record<string, string> = {
+    'x-lang': locale || 'tr',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  return headers;
 }
 
 export async function fetchOrders(page: number = 1, limit: number = 10) {

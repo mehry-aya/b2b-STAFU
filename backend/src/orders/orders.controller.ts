@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Res,
   Query,
+  Headers,
 } from '@nestjs/common';
 import * as express from 'express';
 import { OrdersService } from './orders.service';
@@ -47,11 +48,12 @@ export class OrdersController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: any,
+    @Headers('x-lang') lang: string = 'tr',
   ) {
     if (user.role === Role.dealer) {
-      return this.ordersService.findOne(id, user.dealer.id);
+      return this.ordersService.findOne(id, user.dealer.id, lang);
     }
-    return this.ordersService.findOne(id);
+    return this.ordersService.findOne(id, undefined, lang);
   }
 
   @Patch(':id/status')

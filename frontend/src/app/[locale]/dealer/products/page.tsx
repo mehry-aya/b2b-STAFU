@@ -8,12 +8,14 @@ import { fetchProducts } from "@/lib/api/products";
 import debounce from "lodash.debounce";
 import { Search, ChevronRight, Package } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
-
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerProductsPage() {
   const router = useRouter();
   const t = useTranslations("DealerProducts");
+  const { formatPrice } = useCurrency();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
   const [products, setProducts] = useState<Product[]>([]);
@@ -72,13 +74,13 @@ export default function DealerProductsPage() {
     let minPrice: number | null = null;
     product.variants.forEach((v) => {
       if (v.price) {
-        const price = parseFloat(v.price as string);
-        if (minPrice === null || price < minPrice) {
-          minPrice = price;
+        const priceNum = parseFloat(v.price as string);
+        if (minPrice === null || priceNum < minPrice) {
+          minPrice = priceNum;
         }
       }
     });
-    return minPrice !== null ? (minPrice as number).toFixed(2) : "N/A";
+    return minPrice;
   };
 
   return (
@@ -184,10 +186,10 @@ export default function DealerProductsPage() {
                     </div>
                   )}
                   {/* Red price badge on hover */}
-                  {price && price !== "N/A" && (
+                  {price && price !== null && (
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <div className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-md">
-                        ₺{price}
+                        {formatPrice(price)}
                       </div>
                     </div>
                   )}
@@ -203,7 +205,7 @@ export default function DealerProductsPage() {
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-base font-black text-zinc-900">
-                        {price !== "N/A" ? `₺${price}` : "—"}
+                        {price !== null ? formatPrice(price) : "—"}
                       </span>
                       {product.variants && (
                         <span className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${

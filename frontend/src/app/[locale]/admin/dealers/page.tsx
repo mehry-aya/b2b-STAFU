@@ -104,7 +104,7 @@ export default function AdminDealersPage() {
       <StatsRow stats={stats} loading={loading} />
 
       {error && (
-        <div className="p-4 bg-red-950/30 border border-red-600/20 text-red-400 rounded-2xl text-sm font-medium flex items-center gap-3">
+        <div className="p-4 bg-red/30 border border-red-600/20 text-red-400 rounded-2xl text-sm font-medium flex items-center gap-3">
           <XCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>

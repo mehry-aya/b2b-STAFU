@@ -16,6 +16,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useTranslations } from "next-intl";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerProductDetailsPage({
   params: paramsPromise,
@@ -26,6 +28,8 @@ export default function DealerProductDetailsPage({
   const router = useRouter();
   const { toast } = useToast();
   const { addItem } = useCart();
+  const t = useTranslations("ProductDetail");
+  const { formatPrice } = useCurrency();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +62,7 @@ export default function DealerProductDetailsPage({
           });
         }
       } catch (err: any) {
-        setError(err.message || "Failed to load product details");
+        setError(err.message || t("productNotFound"));
       } finally {
         setLoading(false);
       }
@@ -97,8 +101,8 @@ export default function DealerProductDetailsPage({
   const handleAddToOrder = () => {
     if (!selectedVariant || !product) {
       toast({
-        title: "Cannot Add to Order",
-        description: "Please select a valid combination of options.",
+        title: t("productNotFound"),
+        description: t("selectOptions"),
         variant: "destructive",
       });
       return;
@@ -125,8 +129,8 @@ export default function DealerProductDetailsPage({
     });
 
     toast({
-      title: "Added to Order",
-      description: `${quantity}x ${product?.title} (${selectedVariant.title || "Default Variant"}) added to your cart.`,
+      title: t("addedToCart"),
+      description: t("addedToCartDesc", { count: quantity, title: product?.title }),
     });
   };
 
@@ -198,14 +202,14 @@ export default function DealerProductDetailsPage({
     return (
       <div className="max-w-5xl mx-auto flex flex-col items-center justify-center py-24 gap-4">
         <XCircle className="h-12 w-12 text-red-300" />
-        <h2 className="text-lg font-bold text-zinc-900">Product Not Found</h2>
-        <p className="text-sm text-zinc-500">{error || "This product could not be loaded."}</p>
+        <h2 className="text-lg font-bold text-zinc-900">{t("productNotFound")}</h2>
+        <p className="text-sm text-zinc-500">{error || t("productNotFound")}</p>
         <button
           onClick={() => router.push("/dealer/products")}
           className="mt-2 flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-red-600 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
-          Back to Products
+          {t("backToProducts")}
         </button>
       </div>
     );
@@ -219,7 +223,7 @@ export default function DealerProductDetailsPage({
         className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-zinc-900 transition-colors mb-8"
       >
         <ChevronLeft className="h-4 w-4" />
-        Back to Products
+        {t("backToProducts")}
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
@@ -236,7 +240,7 @@ export default function DealerProductDetailsPage({
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-zinc-300">
                 <Package className="h-14 w-14 mb-2" />
-                <span className="text-sm font-medium">No Image</span>
+                <span className="text-sm font-medium">{t("noImage")}</span>
               </div>
             )}
           </div>
@@ -270,7 +274,7 @@ export default function DealerProductDetailsPage({
           {/* Vendor + title */}
           <div>
             <p className="text-[11px] font-bold tracking-widest text-zinc-400 uppercase mb-1.5">
-              {product.vendor || "Brand"}
+              {product.vendor || t("brand")}
             </p>
             <h1 className="text-2xl font-black text-zinc-900 leading-tight">
               {product.title}
@@ -279,12 +283,12 @@ export default function DealerProductDetailsPage({
 
           {/* Price */}
           <div className="flex flex-col gap-1">
-            {price ? (
+            {selectedVariant?.price ? (
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-zinc-900">₺{price}</span>
+                <span className="text-3xl font-black text-zinc-900">{formatPrice(parseFloat(selectedVariant.price))}</span>
               </div>
             ) : (
-              <span className="text-base text-zinc-400 font-medium">Price unavailable</span>
+              <span className="text-base text-zinc-400 font-medium">{t("priceUnavailable")}</span>
             )}
           </div>
 
@@ -293,10 +297,10 @@ export default function DealerProductDetailsPage({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold tracking-widest uppercase text-zinc-500">
-                  Color
+                  {t("color")}
                 </label>
                 <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                  {product.title.split(' - ')[1] || "Current"}
+                  {product.title.split(' - ')[1] || t("currentColor")}
                 </span>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -345,7 +349,7 @@ export default function DealerProductDetailsPage({
                       {label}
                     </label>
                     <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                      {selectedOptions[key] || "Select one"}
+                      {selectedOptions[key] || t("brand")}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -407,21 +411,21 @@ export default function DealerProductDetailsPage({
                     ) : (
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                     )}
-                    <span className="text-zinc-500">Availability:</span>
+                    <span className="text-zinc-500">{t("availability")}:</span>
                   </div>
                   <span
                     className={`font-bold ${
                       isOutOfStock ? "text-red-600" : "text-emerald-600"
                     }`}
                   >
-                    {isOutOfStock ? "Out of Stock" : `${selectedVariant.inventoryQuantity || 0} in stock`}
+                    {isOutOfStock ? t("outOfStock") : t("inStock", { count: selectedVariant.inventoryQuantity || 0 })}
                   </span>
                 </div>
               </>
             ) : (
               <div className="flex items-center gap-2 text-sm text-amber-600 font-bold justify-center py-2">
                 <Layers className="h-4 w-4" />
-                Select all options to see availability
+                {t("selectOptions")}
               </div>
             )}
           </div>
@@ -429,7 +433,7 @@ export default function DealerProductDetailsPage({
           {/* Qty + Add to Order */}
           <div className="flex gap-3">
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase ml-1">Qty</span>
+              <span className="text-[10px] font-bold text-zinc-400 uppercase ml-1">{t("qty")}</span>
               <input
                 type="number"
                 min="1"
@@ -454,7 +458,7 @@ export default function DealerProductDetailsPage({
                 }`}
               >
                 <ShoppingCart className="h-4 w-4" />
-                {isOutOfStock ? "Out of Stock" : "Add to Order"}
+                {isOutOfStock ? t("outOfStock") : t("addToOrder")}
               </button>
             </div>
           </div>
@@ -465,7 +469,7 @@ export default function DealerProductDetailsPage({
       {product.description && (
         <div className="mt-12 pt-12 border-t border-zinc-100">
           <h2 className="text-xs font-bold tracking-widest uppercase text-zinc-500 mb-6">
-            Product Details
+            {t("productDetails")}
           </h2>
           <div className="relative">
             <div
@@ -490,12 +494,12 @@ export default function DealerProductDetailsPage({
             {descOpen ? (
               <>
                 <ChevronDown className="h-4 w-4 rotate-180" />
-                Show less
+                {t("showLess")}
               </>
             ) : (
               <>
                 <ChevronDown className="h-4 w-4" />
-                Read full description
+                {t("readFullDescription")}
               </>
             )}
           </button>

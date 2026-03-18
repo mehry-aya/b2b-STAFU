@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { COUNT_QUERY, GET_CATEGORIES_QUERY, GET_PRODUCTS_QUERY } from 'src/shopify/shopify-queries';
+import { COUNT_QUERY, GET_CATEGORIES_QUERY, GET_PRODUCTS_QUERY, SHOP_LOCALES_QUERY } from 'src/shopify/shopify-queries';
 import { ShopifyMapper } from 'src/shopify/shopify.mapper';
 
 export interface ShopifyProductSyncPayload {
@@ -17,6 +17,8 @@ export interface ShopifyProductSyncPayload {
   options: { name: string; values: string[] }[];
   variants: ShopifyVariantSyncPayload[];
   collections: { shopifyId: string; title: string; handle: string }[];
+  translationsTr?: any[];
+  translationsEn?: any[];
 }
 
 export interface ShopifyVariantSyncPayload {
@@ -30,6 +32,8 @@ export interface ShopifyVariantSyncPayload {
   option2: string | null;
   option3: string | null;
   imageUrl: string | null;
+  translationsTr?: any[];
+  translationsEn?: any[];
 }
 
 @Injectable()
@@ -134,7 +138,30 @@ const query = GET_CATEGORIES_QUERY;
     }
   }
 
- async fetchProductsPage(cursor: string | null): Promise<{
+  async getPrimaryLocale(): Promise<string> {
+    if (!this.storeDomain || !this.accessToken) {
+      throw new Error('Shopify credentials are not configured.');
+    }
+
+    const response = await firstValueFrom(
+      this.httpService.post(
+        this.apiUrl,
+        { query: SHOP_LOCALES_QUERY },
+        {
+          headers: {
+            'X-Shopify-Access-Token': this.accessToken,
+            'Content-Type': 'application/json',
+          },
+        },
+      ),
+    );
+
+    const locales = response.data?.data?.shopLocales || [];
+    const primaryLocale = locales.find((l: any) => l.primary);
+    return primaryLocale ? primaryLocale.locale.split('-')[0].toLowerCase() : 'en';
+  }
+
+  async fetchProductsPage(cursor: string | null): Promise<{
   products: ShopifyProductSyncPayload[];
   hasNextPage: boolean;
   endCursor: string | null;
@@ -157,9 +184,10 @@ const query = GET_CATEGORIES_QUERY;
   );
 
   const parsedData = response.data;
-  if (parsedData.errors?.length > 0) {
-    throw new Error('Shopify API Error');
-  }
+    if (parsedData.errors?.length > 0) {
+      this.logger.error(`Shopify API Error: ${JSON.stringify(parsedData.errors)}`);
+      throw new Error('Shopify API Error');
+    }
 
   const productsPage = parsedData.data?.products;
   if (!productsPage) return { products: [], hasNextPage: false, endCursor: null };

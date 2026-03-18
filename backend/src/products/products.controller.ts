@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Query, UseGuards, ParseIntPipe, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Param, Query, UseGuards, ParseIntPipe, Logger, Headers } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { SyncStatusService } from './sync-status.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -51,6 +51,7 @@ async syncProducts() {
     @Query('status') status?: string,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
+    @Headers('x-lang') lang: string = 'tr',
     @CurrentUser() user?: any,
   ) {
     const isAdmin = user?.role === Role.admin || user?.role === Role.master_admin;
@@ -66,13 +67,17 @@ async syncProducts() {
       status,
       parseInt(page, 10),
       parseInt(limit, 10),
+      lang
     );
   }
 
   @Get(':id')
-  async getProduct(@Param('id', ParseIntPipe) id: number) {
+  async getProduct(
+    @Param('id', ParseIntPipe) id: number,
+    @Headers('x-lang') lang: string = 'tr',
+  ) {
     try {
-      return await this.productsService.getProductById(id);
+      return await this.productsService.getProductById(id, lang);
     } catch (error: any) {
       console.error('[ProductsController] getProduct error:', error.message);
       throw error;

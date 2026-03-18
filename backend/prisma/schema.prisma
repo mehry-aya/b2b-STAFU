@@ -65,8 +65,8 @@ model Contract {
 model Product {
   id          Int              @id @default(autoincrement())
   shopifyId   String           @unique @map("shopify_id")
-  title       String
-  description String?
+  title       Json
+  description Json?
   handle      String?
   vendor      String?
   productType String?          @map("product_type")
@@ -129,7 +129,7 @@ model ProductVariant {
   id                Int         @id @default(autoincrement())
   shopifyVariantId  String      @unique @map("shopify_variant_id")
   productId         Int         @map("product_id")
-  title             String
+  title             Json
   sku               String?
   price             Decimal?
   compareAtPrice    Decimal?    @map("compare_at_price")

@@ -84,7 +84,7 @@ export class OrdersService {
     };
   }
 
-  async findOne(id: number, dealerId?: number) {
+  async findOne(id: number, dealerId?: number, lang: string = 'tr') {
     const order = await this.prisma.order.findUnique({
       where: { id },
       include: {
@@ -104,7 +104,28 @@ export class OrdersService {
       throw new NotFoundException(`Order #${id} not found`);
     }
 
-    return order;
+    // Extract locale-specific strings from JSON title fields
+    const getLang = (obj: any, fallback = '') => {
+      if (!obj) return fallback;
+      if (typeof obj === 'string') return obj;
+      return obj[lang] || obj['tr'] || obj['en'] || fallback;
+    };
+
+    return {
+      ...order,
+      items: order.items.map((item) => ({
+        ...item,
+        productVariant: {
+          ...item.productVariant,
+          title: getLang(item.productVariant.title, ''),
+          product: {
+            ...item.productVariant.product,
+            title: getLang(item.productVariant.product.title, ''),
+            description: getLang(item.productVariant.product.description, ''),
+          },
+        },
+      })),
+    };
   }
 
   async updateStatus(id: number, status: OrderStatus, adminEmail: string) {
@@ -173,7 +194,7 @@ export class OrdersService {
       'Total Amount': Number(order.totalAmount).toFixed(2),
       'Items Count': order.items.length,
       'Products': order.items
-        .map((i) => `${i.productVariant.product.title} (${i.quantity})`)
+        .map((i) => { const t = i.productVariant.product.title; const title = typeof t === 'string' ? t : (t as any)?.tr || (t as any)?.en || ''; return `${title} (${i.quantity})`; })
         .join(', '),
     }));
 

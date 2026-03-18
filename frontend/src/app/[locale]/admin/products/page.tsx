@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {error && (
-        <div className="p-4 bg-red-950/30 border border-red-600/20 text-red-400 rounded-2xl text-sm font-medium flex items-center gap-3">
+        <div className="p-4 bg-red/30 border border-red-600/20 text-red-400 rounded-2xl text-sm font-medium flex items-center gap-3">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <p>{error}</p>
         </div>
@@ -174,4 +174,4 @@ export default function AdminProductsPage() {
       </div>
     </div>
   );
-}
+}
