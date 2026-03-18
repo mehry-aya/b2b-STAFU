@@ -131,7 +131,8 @@
     "waiting": "Bekliyor",
     "details": "Detaylar",
     "pendingOrdersCount": "Onay bekleyen {count} sipariş bulunmaktadır.",
-    "viewOrders": "Siparişleri Görüntüle"
+    "viewOrders": "Siparişleri Görüntüle",
+    "admin": "Admin"
   },
   "MasterDashboard": {
     "title": "Master Yönetici Paneli",
@@ -386,11 +387,10 @@
     "skusOrdered": "{count} SKU SİPARİŞ EDİLDİ",
     "standardShipping": "Standart Nakliye",
     "financials": "Finansallar",
-    "settledViaCredit": "B2B Kredisi ile Ödendi",
     "inventoryItems": "Envanter Öğeleri",
     "verifySkus": "Sevkiyat öncesi SKU'ları doğrulayın",
     "sku": "SKU",
-    "grandTotal": "Genel Toplam",
+    "grandTotal": "Toplam",
     "cancelTitle": "Siparişi İptal Et",
     "cancelDescription": "Bu siparişi iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
     "cancelConfirm": "Siparişi İptal Et",

@@ -131,7 +131,8 @@
     "waiting": "Waiting",
     "details": "Details",
     "pendingOrdersCount": "There are {count} orders waiting for payment confirmation or approval.",
-    "viewOrders": "View Orders"
+    "viewOrders": "View Orders",
+    "admin": "Admin"
   },
   "MasterDashboard": {
     "title": "Master Admin Dashboard",
@@ -386,11 +387,10 @@
     "skusOrdered": "{count} SKUs ORDERED",
     "standardShipping": "Standard Shipping",
     "financials": "Financials",
-    "settledViaCredit": "Settled via B2B Credit",
     "inventoryItems": "Inventory Items",
     "verifySkus": "Verify SKUs before shipping",
     "sku": "SKU",
-    "grandTotal": "Grand Total",
+    "grandTotal": "Total",
     "cancelTitle": "Cancel Order",
     "cancelDescription": "Are you sure you want to cancel this order? This action cannot be undone.",
     "cancelConfirm": "Cancel Order",

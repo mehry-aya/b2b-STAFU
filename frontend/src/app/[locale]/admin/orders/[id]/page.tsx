@@ -337,7 +337,6 @@ export default function AdminOrderDetailPage({
             </h3>
             <div className="space-y-1">
               <p className="font-black text-3xl text-zinc-900 leading-tight font-mono tracking-tighter">{formatPrice(Number(order.totalAmount))}</p>
-              <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest">{t("settledViaCredit")}</p>
             </div>
           </div>
         </div>
