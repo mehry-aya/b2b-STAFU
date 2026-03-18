@@ -5,7 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { createOrder } from "@/lib/api/orders";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
 interface CartSidebarProps {
   isOpen: boolean;

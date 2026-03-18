@@ -1,0 +1,333 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { User as UserIcon, Building2, MapPin, Phone, Lock, Save, EyeIcon, EyeOffIcon } from "lucide-react";
+import { updateProfileAction, getMeAction } from "@/app/(auth)/actions";
+
+import { useTranslations } from "next-intl";
+
+export default function DealerProfilePage() {
+  const t = useTranslations("Profile");
+  const tErr = useTranslations("Errors");
+  const tSuc = useTranslations("Success");
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [profileData, setProfileData] = useState({
+    companyName: "",
+    phone: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const data = await getMeAction();
+        if (data && !data.error) {
+          setProfileData({
+            companyName: data.dealer?.companyName || "",
+            phone: data.dealer?.phone || "",
+            address: data.dealer?.address || "",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+      } finally {
+        setFetching(false);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const oldPassword = formData.get("oldPassword") as string;
+    const newPassword = formData.get("newPassword") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    const companyName = formData.get("companyName") as string;
+    const phone = formData.get("phone") as string;
+    const address = formData.get("address") as string;
+
+    if (newPassword && !oldPassword) {
+      setError(t("oldPasswordRequired"));
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setError(t("passwordsDoNotMatch", { fallback: "Passwords do not match" }));
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword && newPassword.length < 6) {
+      setError(t("passwordTooShort", { fallback: "Password must be at least 6 characters" }));
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const payload: any = {
+        companyName,
+        phone,
+        address,
+      };
+
+      if (newPassword) {
+        payload.oldPassword = oldPassword;
+        payload.password = newPassword;
+      }
+
+      const result = await updateProfileAction(payload);
+
+      if (result.error) {
+        setError(tErr(result.error));
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      if (newPassword) {
+        (e.target as HTMLFormElement).reset();
+        // keep input values for other fields
+        setProfileData({ companyName, phone, address });
+      }
+    } catch (err: any) {
+      setError(tErr("connectionError"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (fetching) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-8 animate-pulse text-zinc-400">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#0f0f0f] px-8 py-8">
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-red-600 via-red-500 to-transparent" />
+
+        <div className="relative">
+          <div className="flex items-center gap-2 text-red-400 text-xs font-semibold tracking-widest uppercase mb-3">
+            <UserIcon className="h-3.5 w-3.5" />
+            <span className="text-zinc-500">{t("dealer")}</span>
+            <span className="text-zinc-600">/</span>
+            <span className="text-red-400">{t("settings")}</span>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight">{t("title")}</h1>
+          <p className="text-zinc-400 text-sm mt-1 max-w-xl">
+            {t("subtitle")}
+          </p>
+        </div>
+      </div>
+
+      {/* Form Card */}
+      <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
+        <div className="p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {error && (
+              <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl text-sm font-medium border border-emerald-100">
+                {tSuc("updateSuccess")}
+              </div>
+            )}
+
+            {/* Company Info Section */}
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-6 border-b pb-4">
+                <Building2 className="w-5 h-5 text-red-600" />
+                {t("contractorInfo")}
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5 md:col-span-2">
+                  <label htmlFor="companyName" className="block text-sm font-bold text-zinc-700">
+                    {t("companyName")}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Building2 className="h-4 w-4 text-zinc-400" />
+                    </div>
+                    <input
+                      id="companyName"
+                      name="companyName"
+                      type="text"
+                      className="block w-full rounded-xl border-zinc-200 pl-11 pr-4 py-3 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
+                      defaultValue={profileData.companyName}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="phone" className="block text-sm font-bold text-zinc-700">
+                    {t("phone")}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Phone className="h-4 w-4 text-zinc-400" />
+                    </div>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      className="block w-full rounded-xl border-zinc-200 pl-11 pr-4 py-3 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
+                      defaultValue={profileData.phone}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <label htmlFor="address" className="block text-sm font-bold text-zinc-700">
+                    {t("shipmentAddress")}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute top-3.5 left-4 pointer-events-none">
+                      <MapPin className="h-4 w-4 text-zinc-400" />
+                    </div>
+                    <textarea
+                      id="address"
+                      name="address"
+                      rows={3}
+                      className="block w-full rounded-xl border-zinc-200 pl-11 pr-4 py-3 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm resize-none"
+                      defaultValue={profileData.address}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Section */}
+            <div className="pt-2">
+              <h2 className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-6 border-b pb-4">
+                <Lock className="w-5 h-5 text-red-600" />
+                {t("security")}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5 md:col-span-2 relative">
+                  <label htmlFor="oldPassword" className="block text-sm font-bold text-zinc-700">
+                    {t("oldPassword")}
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="oldPassword"
+                      name="oldPassword"
+                      type={showPassword ? "text" : "password"}
+                      className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
+                      placeholder={t("oldPasswordPlaceholder")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 relative">
+                  <label htmlFor="newPassword" className="block text-sm font-bold text-zinc-700">
+                    {t("newPassword")}
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="newPassword"
+                      name="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
+                      placeholder={t("newPasswordPlaceholder")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 relative">
+                  <label htmlFor="confirmPassword" className="block text-sm font-bold text-zinc-700">
+                    {t("confirmPassword")}
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
+                      placeholder={t("confirmPasswordPlaceholder")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold transition-all hover:shadow-lg hover:shadow-red-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  t("saving")
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {t("saveChanges")}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

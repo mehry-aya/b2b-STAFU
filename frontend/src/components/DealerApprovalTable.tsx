@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { approveDealerAction } from "@/app/(auth)/actions";
 import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useTranslations } from "next-intl";
 
 interface Dealer {
   id: number;
@@ -28,6 +28,9 @@ export default function DealerApprovalTable({
 }: {
   initialDealers: Dealer[];
 }) {
+  const t = useTranslations("DealerApprovalTable");
+  const tErr = useTranslations("Errors");
+  const tSuc = useTranslations("Success");
   const [dealers, setDealers] = useState(initialDealers);
 
   useEffect(() => {
@@ -49,26 +52,42 @@ export default function DealerApprovalTable({
 
   const performUpdate = async (id: number, status: string) => {
     setUpdatingId(id);
-    const result = await approveDealerAction(id, status);
-    if (result.success) {
-      setDealers(
-        dealers.map((d) =>
-          d.id === id
-            ? {
-                ...d,
-                contractStatus: status,
-                user: { ...d.user, isActive: status === "approved" },
-              }
-            : d
-        )
-      );
+    try {
+      const result = await approveDealerAction(id, status);
+      if (result.success) {
+        setDealers(
+          dealers.map((d) =>
+            d.id === id
+              ? {
+                  ...d,
+                  contractStatus: status,
+                  user: { ...d.user, isActive: status === "approved" },
+                }
+              : d
+          )
+        );
+      } else if (result.error) {
+        alert(tErr(result.error));
+      }
+    } catch (error) {
+      alert(tErr("connectionError"));
+    } finally {
+      setUpdatingId(null);
     }
-    setUpdatingId(null);
   };
 
   const pathname = usePathname();
   const isMaster = pathname?.startsWith("/master");
   const baseUrl = isMaster ? "/master" : "/admin";
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "approved": return t("approveStatus", { fallback: "Approved" });
+      case "pending": return t("pendingStatus", { fallback: "Pending" });
+      case "rejected": return t("rejectStatus", { fallback: "Rejected" });
+      default: return status;
+    }
+  };
 
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
@@ -77,22 +96,22 @@ export default function DealerApprovalTable({
           <thead>
             <tr className="bg-zinc-50/50 border-b border-zinc-200">
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                Dealer Info
+                {t("dealerInfo")}
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                Contact
+                {t("contact")}
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                Contract
+                {t("contract")}
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                Status
+                {t("status")}
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                Orders
+                {t("orders")}
               </th>
               <th className="px-6 py-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-right">
-                Actions
+                {t("actions")}
               </th>
             </tr>
           </thead>
@@ -129,12 +148,12 @@ export default function DealerApprovalTable({
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:underline transition-all"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      View Doc
+                      {t("viewDoc")}
                     </a>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-300 italic">
                       <FileText className="h-3.5 w-3.5" />
-                      No doc
+                      {t("noDoc")}
                     </span>
                   )}
                 </td>
@@ -150,7 +169,7 @@ export default function DealerApprovalTable({
                         : "text-zinc-400 bg-zinc-50 border-zinc-100"
                     }`}
                   >
-                    {dealer.contractStatus}
+                    {getStatusLabel(dealer.contractStatus)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-center">
@@ -163,7 +182,7 @@ export default function DealerApprovalTable({
                     <Link
                       href={`${baseUrl}/dealers/${dealer.id}`}
                       className="p-1.5 rounded-lg bg-zinc-50 text-zinc-600 hover:bg-zinc-900 hover:text-white transition-all border border-zinc-100"
-                      title="View Details"
+                      title={t("viewDetails")}
                     >
                       <Eye className="h-3.5 w-3.5" />
                     </Link>
@@ -174,7 +193,7 @@ export default function DealerApprovalTable({
                         dealer.contractStatus === "approved"
                       }
                       className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-30 transition-all border border-emerald-100"
-                      title="Approve"
+                      title={t("approve")}
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
@@ -185,7 +204,7 @@ export default function DealerApprovalTable({
                         dealer.contractStatus === "rejected"
                       }
                       className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-30 transition-all border border-red-100"
-                      title="Reject"
+                      title={t("reject")}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -200,10 +219,10 @@ export default function DealerApprovalTable({
       <ConfirmDialog
         isOpen={isRejectDialogOpen}
         onOpenChange={setIsRejectDialogOpen}
-        title="Reject Dealer"
-        description="Are you sure you want to reject this dealer? This will prevent them from accessing the platform."
+        title={t("rejectDealer")}
+        description={t("rejectDescription")}
         onConfirm={() => dealerToReject && performUpdate(dealerToReject, "rejected")}
-        confirmText="Reject"
+        confirmText={t("rejectConfirm")}
         variant="danger"
       />
     </div>

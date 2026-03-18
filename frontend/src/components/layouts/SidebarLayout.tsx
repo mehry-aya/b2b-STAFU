@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { Menu, LogOut, ChevronDown, ChevronRight, ShoppingBag } from "lucide-react";
 import { logoutAction, getMeAction } from "@/app/(auth)/actions";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { useCart } from "@/context/CartContext";
 import { Logo } from "@/components/ui/Logo";
+import { useTranslations } from "next-intl";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
 interface NavItem {
   icon?: React.ElementType;
@@ -33,6 +35,8 @@ export default function SidebarLayout({
   brandSubtitle,
   showCart = false,
 }: SidebarLayoutProps) {
+  const t = useTranslations("Navigation");
+  const tc = useTranslations("Common");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { totalItems } = useCart();
@@ -188,9 +192,9 @@ export default function SidebarLayout({
           >
             <div className="flex items-center gap-3">
               <ShoppingBag className="h-4 w-4 text-red-500" />
-              <span>My Cart</span>
+              <span>{tc("myCart")}</span>
             </div>
-            {totalItems > 0 && (
+            {totalItems > 1 && (
               <span className="bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
                 {totalItems}
               </span>
@@ -198,6 +202,12 @@ export default function SidebarLayout({
           </button>
         </div>
       )}
+
+      {/* Language & Currency Selectors */}
+      <div className="px-3 pb-4 space-y-2">
+        <LanguageSelector />
+        <CurrencySelector />
+      </div>
 
       {/* User section */}
       <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
@@ -221,7 +231,7 @@ export default function SidebarLayout({
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-red-600/10 hover:text-red-400 transition-all duration-150"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Sign Out
+          {tc("logout")}
         </button>
       </div>
     </div>

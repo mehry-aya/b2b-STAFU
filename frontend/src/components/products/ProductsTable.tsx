@@ -1,5 +1,6 @@
 import { Product } from "@/lib/types/product";
 import { Box, Tag, PackageOpen, RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   products: Product[];
@@ -10,32 +11,37 @@ interface Props {
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("ProductsTable");
   const s = status.toLowerCase();
+  
   if (s === "active") return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:text-emerald-400">Active</span>
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:text-emerald-400">{t("active")}</span>
   );
   if (s === "draft") return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:text-amber-400">Draft</span>
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:text-amber-400">{t("draft")}</span>
   );
+  
   return (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:text-gray-300 capitalize">{status}</span>
   );
 }
 
 export function ProductsTable({ products, loading, searchQuery, syncing, onSync }: Props) {
+  const t = useTranslations("ProductsTable");
+  
   return (
     <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left border-collapse">
           <thead className="bg-zinc-50 border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 font-bold">
             <tr>
-              <th className="px-6 py-4 rounded-tl-3xl">Product</th>
-              <th className="px-6 py-4">Details</th>
-              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">Variants</th>
-              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">Stock</th>
-              <th className="px-6 py-4 text-right text-xs font-black text-zinc-500 uppercase tracking-widest">Price</th>
-              <th className="px-6 py-4 text-center">Status</th>
-              <th className="px-6 py-4 text-right rounded-tr-3xl">Last Synced</th>
+              <th className="px-6 py-4 rounded-tl-3xl">{t("product")}</th>
+              <th className="px-6 py-4">{t("details")}</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">{t("variants")}</th>
+              <th className="px-6 py-4 text-center text-xs font-black text-zinc-500 uppercase tracking-widest">{t("stock")}</th>
+              <th className="px-6 py-4 text-right text-xs font-black text-zinc-500 uppercase tracking-widest">{t("price")}</th>
+              <th className="px-6 py-4 text-center">{t("status")}</th>
+              <th className="px-6 py-4 text-right rounded-tr-3xl">{t("lastSynced")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
@@ -57,16 +63,16 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
               ))
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-20 text-center">
+                <td colSpan={7} className="px-6 py-20 text-center">
                   <div className="flex flex-col items-center justify-center">
                     <div className="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mb-6">
                       <PackageOpen className="w-10 h-10 text-zinc-300" />
                     </div>
-                    <h3 className="text-xl font-bold text-zinc-900 mb-2">No Products Found</h3>
+                    <h3 className="text-xl font-bold text-zinc-900 mb-2">{t("noProducts")}</h3>
                     <p className="text-zinc-500 max-w-sm mx-auto mb-6">
                       {searchQuery
-                        ? `No results for "${searchQuery}". Try different keywords.`
-                        : "Your catalog is empty. Sync from Shopify to import products."}
+                        ? t("noResults", { query: searchQuery })
+                        : t("emptyCatalog")}
                     </p>
                     {!searchQuery && (
                       <button
@@ -75,7 +81,7 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                         className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md"
                       >
                         <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
-                        Sync Now
+                        {t("syncNow")}
                       </button>
                     )}
                   </div>
@@ -108,10 +114,10 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                       <div className="flex flex-col gap-1.5">
                         {firstVariant?.sku ? (
                           <span className="text-xs font-semibold text-zinc-500 bg-white border border-zinc-200 shadow-sm px-2.5 py-1 rounded-md max-w-fit truncate">
-                            SKU: {firstVariant.sku}
+                            {t("sku", { sku: firstVariant.sku })}
                           </span>
                         ) : (
-                          <span className="text-xs font-semibold text-red-400/70 bg-red-50/50 border border-red-100 px-2.5 py-1 rounded-md max-w-fit">No SKU</span>
+                          <span className="text-xs font-semibold text-red-400/70 bg-red-50/50 border border-red-100 px-2.5 py-1 rounded-md max-w-fit">{t("noSku")}</span>
                         )}
                         {product.productType ? (
                           <div className="flex items-center gap-1.5 text-xs text-zinc-500">
@@ -157,7 +163,7 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                         {new Date(product.syncedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
                       </span>
                       <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">
-                        at {new Date(product.syncedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                        {t("at")} {new Date(product.syncedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </td>
                   </tr>

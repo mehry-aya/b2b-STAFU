@@ -4,6 +4,7 @@ import { useState, ReactNode } from "react";
 import SidebarLayout from "./SidebarLayout";
 import { useSearchParams } from "next/navigation";
 import { useShopifyCategories } from "@/hooks/useShopifyCategories";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Package,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 
 export default function DealerSidebar({ children }: { children: ReactNode }) {
+  const t = useTranslations("Navigation");
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
@@ -20,9 +22,9 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
   const { categories, openGroups, toggleGroup } = useShopifyCategories(currentCategory);
 
   const navItems = [
-    { label: "Dashboard", href: "/dealer/dashboard", icon: LayoutDashboard },
+    { label: t("dashboard"), href: "/dealer/dashboard", icon: LayoutDashboard },
     {
-      label: "Products",
+      label: t("products"),
       href: "/dealer/products",
       icon: Package,
       isOpen: isProductsOpen,
@@ -41,9 +43,9 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
         })),
       })),
     },
-    { label: "Orders", href: "/dealer/orders", icon: ShoppingCart },
-    { label: "Contracts", href: "/dealer/contracts", icon: FileText },
-    { label: "Profile", href: "/dealer/profile", icon: User },
+    { label: t("orders"), href: "/dealer/orders", icon: ShoppingCart },
+    { label: t("contracts"), href: "/dealer/contracts", icon: FileText },
+    { label: t("profile"), href: "/dealer/profile", icon: User },
   ];
 
   const brandSubtitle = (
@@ -51,7 +53,7 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
       className="text-xs font-medium tracking-widest uppercase"
       style={{ color: "var(--sidebar-text)" }}
     >
-      Dealer Portal
+      {t("dealerPortal")}
     </span>
   );
 
