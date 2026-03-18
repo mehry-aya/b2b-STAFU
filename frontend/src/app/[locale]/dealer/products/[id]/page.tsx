@@ -285,7 +285,7 @@ export default function DealerProductDetailsPage({
           <div className="flex flex-col gap-1">
             {selectedVariant?.price ? (
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-zinc-900">{formatPrice(parseFloat(selectedVariant.price))}</span>
+                <span className="text-3xl font-black text-zinc-900">{formatPrice(selectedVariant.price)}</span>
               </div>
             ) : (
               <span className="text-base text-zinc-400 font-medium">{t("priceUnavailable")}</span>
@@ -397,6 +397,9 @@ export default function DealerProductDetailsPage({
               <>
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
+                    <span className="text-zinc-900 font-mono">
+                      {selectedVariant ? formatPrice(selectedVariant.price as string) : "—"}
+                    </span>
                     <Hash className="h-3.5 w-3.5 text-zinc-400" />
                     <span className="text-zinc-500">SKU:</span>
                   </div>

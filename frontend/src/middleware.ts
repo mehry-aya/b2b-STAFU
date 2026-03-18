@@ -9,6 +9,8 @@ const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const cookieStore = request.cookies;
+  const currency = cookieStore.get('NEXT_CURRENCY')?.value;
 
   // 1. Handle locale routing first
   const response = intlMiddleware(request);
@@ -18,10 +20,14 @@ export async function middleware(request: NextRequest) {
   const localeFromPath = segments[1];
   const locale = routing.locales.includes(localeFromPath as any) ? localeFromPath : routing.defaultLocale;
 
+  // 0. Ensure currency cookie exists for SSR consistency on the current response
+  if (!currency) {
+    response.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+  }
+
   // Get the pathname without the locale prefix for auth logic
   const pathnameWithoutLocale = pathname.replace(/^\/(tr|en)/, '') || '/';
 
-  const cookieStore = await request.cookies;
   const token = cookieStore.get('token')?.value;
 
   // 2. If trying to access protected routes and NOT logged in
@@ -32,7 +38,9 @@ export async function middleware(request: NextRequest) {
       pathnameWithoutLocale.startsWith('/dealer') ||
       pathnameWithoutLocale === '/'
     ) {
-      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+      const redirectResponse = NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+      if (!currency) redirectResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+      return redirectResponse;
     }
     return response;
   }
@@ -43,37 +51,40 @@ export async function middleware(request: NextRequest) {
 
     // 3. If logged in and visiting login/register page
     if (pathnameWithoutLocale === '/login' || pathnameWithoutLocale === '/register') {
-      if (role === 'master_admin') return NextResponse.redirect(new URL(`/${locale}/master/dashboard`, request.url));
-      if (role === 'admin') return NextResponse.redirect(new URL(`/${locale}/admin/dashboard`, request.url));
-      if (role === 'dealer') return NextResponse.redirect(new URL(`/${locale}/dealer/dashboard`, request.url));
+      return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
     // 4. Route specific protections
     if (pathnameWithoutLocale.startsWith('/master') && role !== 'master_admin') {
-      return redirectToCorrectDashboard(role, request, locale);
+      return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
     if (pathnameWithoutLocale.startsWith('/admin') && role !== 'admin' && role !== 'master_admin') {
-      return redirectToCorrectDashboard(role, request, locale);
+      return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
     if (pathnameWithoutLocale.startsWith('/dealer') && role !== 'dealer') {
-      return redirectToCorrectDashboard(role, request, locale);
+      return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
     return response;
   } catch {
     const errorResponse = NextResponse.redirect(new URL(`/${locale}/login`, request.url));
     errorResponse.cookies.delete('token');
+    if (!currency) errorResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
     return errorResponse;
   }
 }
 
-function redirectToCorrectDashboard(role: string, request: NextRequest, locale: string) {
-  if (role === 'master_admin') return NextResponse.redirect(new URL(`/${locale}/master/dashboard`, request.url));
-  if (role === 'admin') return NextResponse.redirect(new URL(`/${locale}/admin/dashboard`, request.url));
-  if (role === 'dealer') return NextResponse.redirect(new URL(`/${locale}/dealer/dashboard`, request.url));
-  return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
+function redirectToCorrectDashboard(role: string, request: NextRequest, locale: string, currency?: string) {
+  let targetPath = `/${locale}/login`;
+  if (role === 'master_admin') targetPath = `/${locale}/master/dashboard`;
+  else if (role === 'admin') targetPath = `/${locale}/admin/dashboard`;
+  else if (role === 'dealer') targetPath = `/${locale}/dealer/dashboard`;
+
+  const redirectResponse = NextResponse.redirect(new URL(targetPath, request.url));
+  if (!currency) redirectResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+  return redirectResponse;
 }
 
 export const config = {
@@ -85,3 +96,4 @@ export const config = {
     '/master/:path*', '/admin/:path*', '/dealer/:path*', '/login', '/register'
   ],
 };
+

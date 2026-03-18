@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useState, useRef, useEffect } from "react";
 
 const currencies = [
-  { code: "TRY", label: "Turkish Lira", flagCode: "tr" },
-  { code: "USD", label: "US Dollar", flagCode: "us" },
-  { code: "EUR", label: "Euro", flagCode: "eu" },
+  { code: "TRY", label: "Turkish Lira (₺)", flagCode: "tr" },
+  { code: "USD", label: "US Dollar ($)", flagCode: "us" },
+  { code: "EUR", label: "Euro (€)", flagCode: "eu" },
 ] as const;
 
 export function CurrencySelector() {
@@ -25,8 +25,6 @@ export function CurrencySelector() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const currentCurrency = currencies.find((c) => c.code === currency) || currencies[0];
-
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -36,8 +34,8 @@ export function CurrencySelector() {
         <div className="flex items-center gap-3">
           <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-zinc-800 shrink-0">
             <img 
-              src={`https://flagcdn.com/w40/${currentCurrency.flagCode}.png`}
-              alt={currentCurrency.label}
+              src={`https://flagcdn.com/w40/${currencies.find(c => c.code === currency)?.flagCode}.png`}
+              alt={currency}
               className="w-full h-full object-cover"
             />
           </div>
@@ -53,12 +51,12 @@ export function CurrencySelector() {
               <button
                 key={curr.code}
                 onClick={() => {
-                  setCurrency(curr.code as any);
+                  setCurrency(curr.code);
                   setIsOpen(false);
                 }}
                 className={`flex w-full items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   currency === curr.code
-                    ? "bg-red-600/10 text-red-400"
+                    ? "bg-blue-600/10 text-blue-400"
                     : "text-zinc-400 hover:bg-white/5 hover:text-white"
                 }`}
               >
@@ -66,11 +64,11 @@ export function CurrencySelector() {
                   <div className="w-5 h-3.5 rounded-sm overflow-hidden border border-white/10 shrink-0">
                     <img 
                       src={`https://flagcdn.com/w40/${curr.flagCode}.png`}
-                      alt={curr.label}
+                      alt={curr.code}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <span>{curr.code}</span>
+                  <span>{curr.label}</span>
                 </div>
                 {currency === curr.code && <Check className="h-3.5 w-3.5" />}
               </button>

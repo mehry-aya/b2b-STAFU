@@ -1,75 +1,97 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import Cookies from "js-cookie";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import Cookies from 'js-cookie';
 
-type Currency = "TRY" | "USD" | "EUR";
+type Currency = 'TRY' | 'USD' | 'EUR';
 
 interface CurrencyContextType {
   currency: Currency;
+  rates: Record<string, number>;
   setCurrency: (currency: Currency) => void;
-  formatPrice: (priceInTry: number) => string;
-  rates: Record<Currency, number>;
+  formatPrice: (amountInTry: number | string) => string;
+  convertPrice: (amountInTry: number | string) => { amount: number; symbol: string };
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
-const CURRENCY_COOKIE = "NEXT_CURRENCY";
+const CURRENCY_COOKIE_NAME = 'NEXT_CURRENCY';
+const DEFAULT_CURRENCY: Currency = 'TRY';
 
-export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrencyState] = useState<Currency>("TRY");
-  const [rates, setRates] = useState<Record<Currency, number>>({
-    TRY: 1,
-    USD: 0.029, // Mock rates, should be fetched from API
-    EUR: 0.027,
-  });
+const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  TRY: '₺',
+  USD: '$',
+  EUR: '€',
+};
+
+const LOCALE_MAP: Record<Currency, string> = {
+  TRY: 'tr-TR',
+  USD: 'en-US',
+  EUR: 'de-DE',
+};
+
+export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
+  const [currency, setCurrencyState] = useState<Currency>(DEFAULT_CURRENCY);
+  const [rates, setRates] = useState<Record<string, number>>({ TRY: 1, USD: 0.03, EUR: 0.028 }); // Placeholder initial rates
 
   useEffect(() => {
-    const savedCurrency = Cookies.get(CURRENCY_COOKIE) as Currency;
-    if (savedCurrency && ["TRY", "USD", "EUR"].includes(savedCurrency)) {
+    // 1. Initial currency from cookie
+    const savedCurrency = Cookies.get(CURRENCY_COOKIE_NAME) as Currency;
+    if (savedCurrency && ['TRY', 'USD', 'EUR'].includes(savedCurrency)) {
       setCurrencyState(savedCurrency);
     }
 
-    // Fetch live rates if possible
-    fetch("https://open.er-api.com/v6/latest/TRY")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.rates) {
-          setRates({
-            TRY: 1,
-            USD: data.rates.USD,
-            EUR: data.rates.EUR,
-          });
+    // 2. Fetch live rates from our backend
+    const fetchRates = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/exchange-rates`);
+        if (response.ok) {
+          const data = await response.json();
+          setRates(data);
         }
-      })
-      .catch((err) => console.error("Failed to fetch rates:", err));
+      } catch (error) {
+        console.error('Failed to fetch exchange rates:', error);
+      }
+    };
+
+    fetchRates();
   }, []);
 
   const setCurrency = (newCurrency: Currency) => {
     setCurrencyState(newCurrency);
-    Cookies.set(CURRENCY_COOKIE, newCurrency, { expires: 365 });
+    Cookies.set(CURRENCY_COOKIE_NAME, newCurrency, { expires: 365, path: '/' });
   };
 
-  const formatPrice = (priceInTry: number) => {
-    const amount = priceInTry * rates[currency];
-    
-    return new Intl.NumberFormat(currency === "TRY" ? "tr-TR" : "en-US", {
-      style: "currency",
+  const convertPrice = (amountInTry: number | string) => {
+    const numericAmount = typeof amountInTry === 'string' ? parseFloat(amountInTry) : amountInTry;
+    const rate = rates[currency] || 1;
+    return {
+      amount: numericAmount * rate,
+      symbol: CURRENCY_SYMBOLS[currency],
+    };
+  };
+
+  const formatPrice = (amountInTry: number | string) => {
+    const { amount } = convertPrice(amountInTry);
+    return new Intl.NumberFormat(LOCALE_MAP[currency], {
+      style: 'currency',
       currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, rates }}>
+    <CurrencyContext.Provider value={{ currency, rates, setCurrency, formatPrice, convertPrice }}>
       {children}
     </CurrencyContext.Provider>
   );
-}
+};
 
-export function useCurrency() {
+export const useCurrency = () => {
   const context = useContext(CurrencyContext);
   if (context === undefined) {
-    throw new Error("useCurrency must be used within a CurrencyProvider");
+    throw new Error('useCurrency must be used within a CurrencyProvider');
   }
   return context;
-}
+};

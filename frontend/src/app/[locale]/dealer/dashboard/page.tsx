@@ -95,10 +95,10 @@ export default function DealerDashboard() {
   }
 
   const dealerStats = [
-    { label: t("totalOrders"), value: stats?.totalOrders || 0, icon: ShoppingCart },
-    { label: t("pendingOrders"), value: stats?.pendingOrders || 0, icon: Clock },
-    { label: t("totalSpent"), value: formatPrice(stats?.totalSpent || 0), icon: DollarSign },
-    { label: t("contractStatus"), value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
+    { label: "Total Orders", value: stats?.totalOrders || 0, icon: ShoppingCart },
+    { label: "Pending Orders", value: stats?.pendingOrders || 0, icon: Clock },
+    { label: "Total Spent", value: formatPrice(stats?.totalSpent || 0), icon: DollarSign },
+    { label: "Contract Status", value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
   ];
 
   const quickLinks = [
@@ -191,7 +191,7 @@ export default function DealerDashboard() {
                   <p className="text-sm font-bold text-zinc-700">{stats.recentOrder.itemsCount} {t("productsCount")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">{t("total")}</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Total</p>
                   <p className="text-sm font-bold text-zinc-900">{formatPrice(stats.recentOrder.total)}</p>
                 </div>
               </div>

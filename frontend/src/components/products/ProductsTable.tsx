@@ -139,21 +139,21 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`text-sm font-black ${
-                        (product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
+                        (product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
                           ? "text-zinc-900" 
                           : "text-red-500"
                       }`}>
-                        {product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0}
+                        {product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-zinc-900">
-                          {firstVariant?.price ? formatPrice(parseFloat(firstVariant.price)) : "-"}
+                          {firstVariant?.price ? formatPrice(firstVariant.price) : "-"}
                         </span>
                         {firstVariant?.compareAtPrice && (
                           <span className="text-[10px] text-zinc-400 line-through font-medium">
-                            {formatPrice(parseFloat(firstVariant.compareAtPrice))}
+                            {formatPrice(firstVariant.compareAtPrice)}
                           </span>
                         )}
                       </div>

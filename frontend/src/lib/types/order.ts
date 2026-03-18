@@ -10,6 +10,7 @@ export interface OrderItem {
     title: string;
     sku: string | null;
     imageUrl: string | null;
+    compareAtPrice: string | number | null;
     product: {
       title: string;
       images: any; // Using any for Json field from Prisma
