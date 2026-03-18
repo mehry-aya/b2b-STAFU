@@ -203,12 +203,6 @@ export default function SidebarLayout({
         </div>
       )}
 
-      {/* Language & Currency Selectors */}
-      <div className="px-3 pb-4 space-y-2">
-        <LanguageSelector />
-        <CurrencySelector />
-      </div>
-
       {/* User section */}
       <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
         {user && (
@@ -284,8 +278,19 @@ export default function SidebarLayout({
           )}
         </header>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-7 lg:p-8">
-          {children}
+        <main className="flex-1 overflow-y-auto relative">
+          {/* Floating TopRight Selectors */}
+          <div className="max-w-6xl mx-auto relative px-5 md:p-7 lg:px-8">
+            <div className="hidden lg:flex absolute top-6 right-8 z-30 p-1.5 bg-white/40 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl shadow-zinc-200/50 items-center gap-2 hover:bg-white/80 transition-all duration-300">
+              <LanguageSelector variant="compact" />
+              <div className="w-px h-4 bg-zinc-200 mx-1" />
+              <CurrencySelector variant="compact" />
+            </div>
+          </div>
+          
+          <div className="p-5 md:p-7 lg:p-8">
+            {children}
+          </div>
         </main>
       </div>
 

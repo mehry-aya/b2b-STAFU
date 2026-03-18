@@ -186,14 +186,6 @@ export default function DealerProductsPage() {
                       <Package className="h-10 w-10 text-zinc-200" />
                     </div>
                   )}
-                  {/* Price badge on hover */}
-                  {price && price !== "N/A" && (
-                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <div className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-md">
-                        {formatPrice(price)}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Info */}

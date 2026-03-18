@@ -5,7 +5,9 @@
     "welcome": "Hoş Geldiniz",
     "loading": "Yükleniyor...",
     "save": "Kaydet",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "language": "Dil",
+    "currency": "Para Birimi"
   },
   "Navigation": {
     "dashboard": "Panel",
