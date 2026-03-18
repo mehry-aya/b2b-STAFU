@@ -141,11 +141,11 @@ export default function DealerOrderDetailPage({
         </button>
         <button 
           disabled={!["paid", "shipped"].includes(order.status)}
-          title={!["paid", "shipped"].includes(order.status) ? "Invoice available only for Paid or Shipped orders" : ""}
+          title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
           className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Printer className="h-3.5 w-3.5" />
-          Print Invoice
+          {t("printInvoice") || "Print Invoice"}
         </button>
       </div>
 

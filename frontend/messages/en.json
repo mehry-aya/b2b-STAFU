@@ -443,6 +443,7 @@
     "downloadFailed": "Download Failed",
     "totalItems": "Total Items",
     "backToHistory": "Back to History",
+    "printInvoice": "Print Invoice",
     "invoiceNote": "Invoice available only for Paid or Shipped orders",
     "orderNotFound": "Order not found",
     "backToOrders": "Back to Orders"

@@ -33,7 +33,7 @@ export class StatsService {
       this.prisma.dealer.count(),
       this.prisma.user.count({ where: { role: Role.dealer, isActive: true } }),
       this.prisma.user.count({ where: { role: { in: [Role.admin, Role.master_admin] } } }),
-      this.prisma.order.count(),
+      this.prisma.order.count({ where: { status: { not: OrderStatus.draft } } }),
       this.prisma.contract.findMany({
         where: { status: 'pending' },
         include: { 

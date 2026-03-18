@@ -443,6 +443,7 @@
     "downloadFailed": "İndirme Başarısız",
     "totalItems": "Toplam Ürün",
     "backToHistory": "Geri Dön",
+    "printInvoice": "Faturayı Yazdır",
     "invoiceNote": "Fatura sadece Ödendi veya Gönderildi durumundaki siparişler için mevcuttur",
     "orderNotFound": "Sipariş bulunamadı",
     "backToOrders": "Siparişlere Geri Dön"
