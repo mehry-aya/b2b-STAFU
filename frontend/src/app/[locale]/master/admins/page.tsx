@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useTranslations, useLocale } from "next-intl";
+import { toast } from "sonner";
 
 interface Admin {
   id: number;
@@ -76,8 +77,9 @@ export default function MasterAdminsPage() {
     const result = await deleteAdminAction(adminToDelete);
     if (result.success) {
       setAdmins((prev) => prev.filter((a) => a.id !== adminToDelete));
+      toast.success(t("deleteSuccess") || "Admin deleted successfully");
     } else {
-      alert(tErr(result.error || "deleteAdminFailed"));
+      toast.error(tErr(result.error || "deleteAdminFailed"));
     }
     setAdminToDelete(null);
   }

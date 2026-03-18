@@ -14,6 +14,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 export default function DealerProductsPage() {
   const router = useRouter();
   const t = useTranslations("DealerProducts");
+  const tErr = useTranslations("Errors");
   const locale = useLocale();
   const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
@@ -45,7 +46,7 @@ export default function DealerProductsPage() {
       setTotalPages(data.totalPages);
       setTotalCount(data.total);
     } catch (err: any) {
-      setError(err.message || "Failed to load products");
+      setError(err.message || tErr("fetchProductsFailed"));
     } finally {
       setLoading(false);
     }

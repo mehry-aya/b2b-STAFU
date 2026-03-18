@@ -21,7 +21,7 @@ import {
   X,
   Truck as ShippedIcon
 } from "lucide-react";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -39,6 +39,7 @@ export default function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const params = use(paramsPromise);
+  const router = useRouter();
   const t = useTranslations("OrderDetail");
   const tErr = useTranslations("Errors");
   const { formatPrice } = useCurrency();
@@ -184,13 +185,13 @@ export default function AdminOrderDetailPage({
     <div className="max-w-5xl mx-auto space-y-8 pb-20">
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Link 
-          href="/admin/orders" 
+        <button 
+          onClick={() => router.back()} 
           className="group flex items-center gap-2 text-zinc-500 hover:text-zinc-900 font-bold text-xs uppercase tracking-widest transition-colors"
         >
           <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          {t("backToList")}
-        </Link>
+          {t("backToList") || "Back to List"}
+        </button>
         <div className="flex gap-2">
           <button 
             onClick={() => handleDownload("pdf")}

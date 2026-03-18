@@ -219,7 +219,7 @@ export default function DealerProductDetailsPage({
     <div className="max-w-5xl mx-auto pb-12">
       {/* Back link */}
       <button
-        onClick={() => router.push("/dealer/products")}
+        onClick={() => router.back()}
         className="flex items-center gap-1.5 text-sm font-medium text-zinc-400 hover:text-zinc-900 transition-colors mb-8"
       >
         <ChevronLeft className="h-4 w-4" />

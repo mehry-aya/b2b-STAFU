@@ -80,7 +80,38 @@
     "statusPendingPayment": "Pending Payment",
     "statusPaid": "Paid",
     "statusShipped": "Shipped",
-    "statusCancelled": "Cancelled"
+    "statusCancelled": "Cancelled",
+    "remove": "Remove",
+    "removeConfirmTitle": "Delete Draft Order",
+    "removeConfirmDesc": "Are you sure you want to delete this draft order? This action cannot be undone.",
+    "removeSuccess": "Order deleted successfully",
+    "removeFailed": "Failed to delete order"
+  },
+  "DealerContracts": {
+    "title": "Contracts",
+    "subtitle": "UPLOAD AND MANAGE YOUR TRADING AGREEMENTS",
+    "tableTitle": "Uploaded Documents",
+    "itemsTotal": "{count} Items Total",
+    "fileName": "File Name",
+    "uploaded": "Uploaded",
+    "status": "Status",
+    "action": "Action",
+    "noDocuments": "No documents found",
+    "hydrating": "Hydrating data...",
+    "reviewDocument": "Review Document",
+    "contractId": "Contract ID",
+    "openFullscreen": "Open Fullscreen",
+    "dealer": "Dealer",
+    "uploadDate": "Upload Date",
+    "reviewNotes": "Review Notes (Optional)",
+    "reviewNotesPlaceholder": "Add any comments regarding your approval...",
+    "approve": "Approve & Sign",
+    "reject": "Reject",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "pending": "Pending",
+    "statusLabel": "STATUS",
+    "yourNotes": "Your Notes:"
   },
   "DealerDashboard": {
     "welcome": "Welcome back",
@@ -236,7 +267,14 @@
     "title": "Your Cart",
     "checkout": "Proceed to Checkout",
     "empty": "Your cart is empty",
-    "subtotal": "Subtotal"
+    "subtotal": "Subtotal",
+    "items": "{count} Items",
+    "continueShopping": "Continue Shopping",
+    "shippingTaxesNote": "Shipping & taxes calculated at checkout.",
+    "creatingOrder": "Creating Order...",
+    "orderCreated": "Order Created",
+    "orderCreatedDesc": "Draft order #{id} has been created successfully.",
+    "checkoutFailed": "Checkout Failed"
   },
   "Errors": {
     "emailPasswordRequired": "Email and password are required",
@@ -259,7 +297,8 @@
     "updateFailed": "Update failed",
     "createOrderFailed": "Failed to create order",
     "fetchOrdersFailed": "Failed to fetch orders",
-    "updateProfileFailed": "Failed to update profile"
+    "updateProfileFailed": "Failed to update profile",
+    "failedToSubmitReview": "Failed to submit review"
   },
   "Success": {
     "accountCreated": "Account created successfully. You can now login.",
@@ -400,6 +439,8 @@
     "downloadStarted": "Download Started",
     "downloadDescription": "Your invoice is being saved as {format}.",
     "downloadFailed": "Download Failed",
+    "totalItems": "Total Items",
+    "backToHistory": "Back to History",
     "invoiceNote": "Invoice available only for Paid or Shipped orders",
     "orderNotFound": "Order not found",
     "backToOrders": "Back to Orders"
@@ -480,7 +521,7 @@
     "at": "at"
   },
   "ProductDetail": {
-    "backToProducts": "Back to Products",
+    "backToProducts": "Go Back",
     "productNotFound": "Product Not Found",
     "noImage": "No Image",
     "priceUnavailable": "Price unavailable",

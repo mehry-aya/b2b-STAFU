@@ -6,6 +6,7 @@ import { Eye, Check, X, Mail, Phone, FileText } from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface Dealer {
   id: number;
@@ -67,10 +68,10 @@ export default function DealerApprovalTable({
           )
         );
       } else if (result.error) {
-        alert(tErr(result.error));
+        toast.error(tErr(result.error));
       }
     } catch (error) {
-      alert(tErr("connectionError"));
+      toast.error(tErr("connectionError"));
     } finally {
       setUpdatingId(null);
     }

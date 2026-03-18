@@ -10,6 +10,7 @@ import {
   Res,
   Query,
   Headers,
+  Delete,
 } from '@nestjs/common';
 import * as express from 'express';
 import { OrdersService } from './orders.service';
@@ -41,7 +42,16 @@ export class OrdersController {
     if (user.role === Role.dealer) {
       return this.ordersService.findAll(Number(page), Number(limit), user.dealer.id);
     }
-    return this.ordersService.findAll(Number(page), Number(limit));
+    // For admins, exclude drafts by default
+    return this.ordersService.findAll(Number(page), Number(limit), undefined, true);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: any) {
+    if (user.role === Role.dealer) {
+      return this.ordersService.remove(id, user.dealer.id);
+    }
+    return this.ordersService.remove(id);
   }
 
   @Get(':id')

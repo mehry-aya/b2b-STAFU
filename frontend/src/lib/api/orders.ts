@@ -86,3 +86,13 @@ export async function exportOrdersToExcel() {
   const blob = await response.blob();
   return blob;
 }
+
+export async function deleteOrder(id: number) {
+  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    method: "DELETE",
+    headers: await getAuthHeader(),
+    cache: 'no-store',
+  });
+  if (!response.ok) throw new Error("Failed to delete order");
+  return response.json();
+}

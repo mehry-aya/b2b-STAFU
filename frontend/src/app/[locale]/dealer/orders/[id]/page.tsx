@@ -1,26 +1,38 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { fetchOrderById, updateOrderStatus } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
 import { 
   ChevronLeft, 
   Calendar, 
-  Clock, 
-  ShoppingBag, 
+  Package, 
   CreditCard, 
   Truck, 
+  AlertCircle, 
   CheckCircle2, 
-  AlertCircle,
-  Package,
+  FileText,
+  Download,
+  AlertTriangle,
+  X,
+  Clock, 
+  ShoppingBag, 
   User,
   ArrowRight,
-  Printer
+  Printer,
+  Truck as ShippedIcon
 } from "lucide-react";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { format } from "date-fns";
+import { tr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/context/CurrencyContext";
+import * as htmlToImage from "html-to-image";
+import jsPDF from "jspdf";
+import InvoiceTemplate from "@/components/InvoiceTemplate";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+import { useTranslations, useLocale } from "next-intl";
 
 export default function DealerOrderDetailPage({
   params: paramsPromise,
@@ -28,6 +40,9 @@ export default function DealerOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const params = use(paramsPromise);
+  const t = useTranslations("OrderDetail");
+  const tErr = useTranslations("Errors");
+  const router = useRouter();
   const { toast } = useToast();
   const { formatPrice } = useCurrency();
   const [order, setOrder] = useState<Order | null>(null);
@@ -40,7 +55,7 @@ export default function DealerOrderDetailPage({
       const data = await fetchOrderById(parseInt(params.id));
       setOrder(data);
     } catch (err: any) {
-      setError(err.message || "Failed to load order details");
+      setError(err.message || tErr("fetchOrdersFailed"));
     } finally {
       setLoading(false);
     }
@@ -117,13 +132,13 @@ export default function DealerOrderDetailPage({
     <div className="max-w-4xl mx-auto space-y-8 pb-20">
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Link 
-          href="/dealer/orders" 
+        <button 
+          onClick={() => router.back()} 
           className="group flex items-center gap-2 text-zinc-500 hover:text-zinc-900 font-bold text-xs uppercase tracking-widest transition-colors"
         >
           <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back to History
-        </Link>
+          {t("backToHistory") || "Back to History"}
+        </button>
         <button 
           disabled={!["paid", "shipped"].includes(order.status)}
           title={!["paid", "shipped"].includes(order.status) ? "Invoice available only for Paid or Shipped orders" : ""}

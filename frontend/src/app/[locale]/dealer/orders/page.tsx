@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchOrders } from "@/lib/api/orders";
+import { fetchOrders, deleteOrder } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
-import { ShoppingBag, Calendar, Clock, Eye, CreditCard, Truck, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ShoppingBag, Calendar, Clock, Eye, Trash2, CreditCard, Truck, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
 import { useCurrency } from "@/context/CurrencyContext";
+import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 import { useTranslations } from "next-intl";
 
 export default function DealerOrdersPage() {
   const t = useTranslations("DealerOrders");
+  const tErr = useTranslations("Errors");
   const { formatPrice } = useCurrency();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +23,8 @@ export default function DealerOrdersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<number | null>(null);
   const pageSize = 10;
 
   const loadOrders = async () => {
@@ -31,7 +36,7 @@ export default function DealerOrdersPage() {
       setTotalPages(result.totalPages);
       setTotalCount(result.total);
     } catch (err: any) {
-      setError(err.message || "Failed to load orders");
+      setError(err.message || tErr("fetchOrdersFailed"));
     } finally {
       setLoading(false);
     }
@@ -40,6 +45,26 @@ export default function DealerOrdersPage() {
   useEffect(() => {
     loadOrders();
   }, [page]);
+
+  const handleDelete = (id: number) => {
+    setOrderToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (orderToDelete === null) return;
+    
+    try {
+      await deleteOrder(orderToDelete);
+      toast.success(t("removeSuccess"));
+      loadOrders();
+    } catch (err: any) {
+      toast.error(err.message || t("removeFailed"));
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setOrderToDelete(null);
+    }
+  };
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -166,13 +191,24 @@ export default function DealerOrdersPage() {
                       <span className="text-sm font-black text-zinc-900">{formatPrice(order.totalAmount)}</span>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <Link 
-                        href={`/dealer/orders/${order.id}`}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all group-hover:shadow-md"
-                      >
-                        <Eye className="h-3 w-3" />
-                        {t("details")}
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        {order.status === "draft" && (
+                          <button 
+                            onClick={() => handleDelete(order.id)}
+                            className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all border border-red-100"
+                            title={t("remove")}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <Link 
+                          href={`/dealer/orders/${order.id}`}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all group-hover:shadow-md"
+                        >
+                          <Eye className="h-3 w-3" />
+                          {t("details")}
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -189,6 +225,15 @@ export default function DealerOrdersPage() {
           />
         </div>
       )}
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title={t("removeConfirmTitle")}
+        description={t("removeConfirmDesc")}
+        onConfirm={confirmDelete}
+        confirmText={t("remove")}
+        variant="danger"
+      />
     </div>
   );
 }

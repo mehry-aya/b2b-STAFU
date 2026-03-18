@@ -16,6 +16,7 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { getMyContractsAction, reviewContractAction } from "@/app/(auth)/actions";
+import { useTranslations } from "next-intl";
 
 interface Contract {
   id: number;
@@ -33,6 +34,9 @@ export default function DealerContractsPage() {
   const [processingReview, setProcessingReview] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const t = useTranslations("DealerContracts");
+  const tErr = useTranslations("Errors");
+  const tSuc = useTranslations("Success");
 
   const fetchContracts = useCallback(async () => {
     try {
@@ -40,12 +44,12 @@ export default function DealerContractsPage() {
       if (result.error) throw new Error(result.error);
       setContracts(result.data || []);
     } catch (error) {
-      toast.error("Failed to load contracts");
+      toast.error(tErr("fetchContractsFailed"));
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tErr]);
 
   useEffect(() => {
     fetchContracts();
@@ -57,12 +61,12 @@ export default function DealerContractsPage() {
       const result = await reviewContractAction(id, status, reviewNotes);
       if (result.error) throw new Error(result.error);
       
-      toast.success(`Contract ${status} successfully`);
+      toast.success(tSuc("updateSuccess") || `Contract ${status} successfully`);
       setReviewNotes("");
       setSelectedContract(null);
       fetchContracts();
     } catch (error) {
-      toast.error("Failed to submit review");
+      toast.error(tErr("failedToSubmitReview"));
       console.error(error);
     } finally {
       setProcessingReview(false);
@@ -105,10 +109,10 @@ export default function DealerContractsPage() {
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black text-white tracking-tight uppercase italic">
-              Contracts
+              {t("title")}
             </h1>
             <p className="text-zinc-400 text-sm mt-2 font-medium tracking-wide">
-              UPLOAD AND MANAGE YOUR TRADING AGREEMENTS
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -122,10 +126,10 @@ export default function DealerContractsPage() {
             <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
               <h2 className="font-black text-zinc-900 uppercase tracking-widest text-sm flex items-center gap-3">
                 <FileText className="w-5 h-5 text-blue-600" />
-                Uploaded Documents
+                {t("tableTitle")}
               </h2>
               <span className="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black rounded-full uppercase tracking-widest">
-                {contracts.length} Items Total
+                {t("itemsTotal", { count: contracts.length })}
               </span>
             </div>
 
@@ -133,10 +137,10 @@ export default function DealerContractsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50/50">
-                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">File Name</th>
-                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">Uploaded</th>
-                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">Status</th>
-                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100 text-right">Action</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">{t("fileName")}</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">{t("uploaded")}</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100">{t("status")}</th>
+                    <th className="px-8 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] border-b border-zinc-100 text-right">{t("action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
@@ -145,7 +149,7 @@ export default function DealerContractsPage() {
                       <td colSpan={4} className="px-8 py-20 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <div className="w-8 h-8 border-4 border-zinc-200 border-t-blue-600 rounded-full animate-spin" />
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Hydrating data...</p>
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t("hydrating")}</p>
                         </div>
                       </td>
                     </tr>
@@ -154,7 +158,7 @@ export default function DealerContractsPage() {
                       <td colSpan={4} className="px-8 py-20 text-center">
                         <div className="flex flex-col items-center gap-4 opacity-30">
                           <FileText className="w-12 h-12 text-zinc-400" />
-                          <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">No documents found</p>
+                          <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">{t("noDocuments")}</p>
                         </div>
                       </td>
                     </tr>
@@ -186,7 +190,7 @@ export default function DealerContractsPage() {
                             ${getStatusStyles(contract.status)}
                           `}>
                             {getStatusIcon(contract.status)}
-                            {contract.status}
+                            {contract.status === "approved" ? t("approved") : contract.status === "rejected" ? t("rejected") : t("pending")}
                           </div>
                         </td>
                         <td className="px-8 py-5 text-right flex items-center justify-end gap-3">
@@ -211,8 +215,8 @@ export default function DealerContractsPage() {
               <div className="flex items-center gap-3 text-white">
                 <FileText className="w-5 h-5 text-blue-400" />
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-widest leading-none">Review Document</h3>
-                  <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-tight">Contract ID: DOC-{selectedContract.id}</p>
+                  <h3 className="text-sm font-black uppercase tracking-widest leading-none">{t("reviewDocument")}</h3>
+                  <p className="text-[10px] text-zinc-500 font-bold mt-1 uppercase tracking-tight">{t("contractId")}: DOC-{selectedContract.id}</p>
                 </div>
               </div>
               <button 
@@ -239,7 +243,7 @@ export default function DealerContractsPage() {
                   className="p-3 bg-white shadow-2xl rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 hover:bg-blue-600 hover:text-white transition-all"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Open Fullscreen
+                  {t("openFullscreen")}
                 </a>
               </div>
             </div>
@@ -249,13 +253,13 @@ export default function DealerContractsPage() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <User className="w-3 h-3" /> Dealer
+                    <User className="w-3 h-3" /> {t("dealer")}
                   </p>
                   <p className="text-sm font-black text-zinc-900 uppercase">Your Company</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Calendar className="w-3 h-3" /> Upload Date
+                    <Calendar className="w-3 h-3" /> {t("uploadDate")}
                   </p>
                   <p className="text-sm font-black text-zinc-900 uppercase">{format(new Date(selectedContract.createdAt), "MMM dd, yyyy")}</p>
                 </div>
@@ -265,11 +269,11 @@ export default function DealerContractsPage() {
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <AlertCircle className="w-3 h-3" /> Review Notes (Optional)
+                      <AlertCircle className="w-3 h-3" /> {t("reviewNotes")}
                     </label>
                     <textarea 
                       className="w-full h-24 bg-zinc-50 border border-zinc-100 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-                      placeholder="Add any comments regarding your approval..."
+                      placeholder={t("reviewNotesPlaceholder")}
                       value={reviewNotes}
                       onChange={(e) => setReviewNotes(e.target.value)}
                     />
@@ -280,14 +284,14 @@ export default function DealerContractsPage() {
                       disabled={processingReview}
                       className="h-14 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
                     >
-                      Approve & Sign
+                      {t("approve")}
                     </button>
                     <button 
                       onClick={() => handleReview(selectedContract.id, "rejected")}
                       disabled={processingReview}
                       className="h-14 bg-rose-50 text-rose-600 border border-rose-100 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50"
                     >
-                      Reject
+                      {t("reject")}
                     </button>
                   </div>
                 </div>
@@ -299,13 +303,13 @@ export default function DealerContractsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {selectedContract.status === "approved" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">STATUS | {selectedContract.status}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t("statusLabel")} | {selectedContract.status === "approved" ? t("approved") : t("rejected")}</p>
                       </div>
                       <Download className="w-4 h-4 opacity-50" />
                     </div>
                     {selectedContract.notes && (
                       <div className="p-4 bg-white/50 rounded-2xl border border-white/20">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">Your Notes:</p>
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">{t("yourNotes")}</p>
                         <p className="text-xs font-medium italic">{selectedContract.notes}</p>
                       </div>
                     )}

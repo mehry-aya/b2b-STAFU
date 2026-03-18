@@ -56,9 +56,13 @@ export class OrdersService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10, dealerId?: number) {
+  async findAll(page: number = 1, limit: number = 10, dealerId?: number, excludeDrafts: boolean = false) {
     const skip = (page - 1) * limit;
-    const where = dealerId ? { dealerId } : {};
+    let where: any = dealerId ? { dealerId } : {};
+
+    if (excludeDrafts) {
+      where.status = { not: OrderStatus.draft };
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.order.findMany({
@@ -205,5 +209,27 @@ export class OrdersService {
     // Generate buffer
     const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
     return buffer;
+  }
+
+  async remove(id: number, dealerId?: number) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
+    if (!order) throw new NotFoundException(`Order #${id} not found`);
+
+    // Dealers can only delete their own draft orders
+    if (dealerId) {
+      if (order.dealerId !== dealerId) {
+        throw new NotFoundException(`Order #${id} not found`);
+      }
+      if (order.status !== OrderStatus.draft) {
+        throw new Error('Only draft orders can be deleted');
+      }
+    }
+
+    return this.prisma.order.delete({
+      where: { id },
+    });
   }
 }

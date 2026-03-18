@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { usePathname } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { getDealerDetailAction, approveDealerAction } from "@/app/(auth)/actions";
 import { 
   Building2, 
@@ -22,7 +22,7 @@ import DashboardHeader from "@/components/ui/DashboardHeader";
 import { format } from "date-fns";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dealer } from "@/lib/types/dealer";
-
+import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 
 export default function DealerDetailPage() {
@@ -30,6 +30,7 @@ export default function DealerDetailPage() {
   const tErr = useTranslations("Errors");
   const tSuc = useTranslations("Success");
   const locale = useLocale();
+  const router = useRouter();
   const { id } = useParams();
   const pathname = usePathname();
   const isMaster = pathname?.startsWith("/master");
@@ -71,11 +72,12 @@ export default function DealerDetailPage() {
       const result = await approveDealerAction(Number(id), status);
       if (result.success) {
         setDealer(dealer ? { ...dealer, contractStatus: status as any } : null);
+        toast.success(tSuc("updateSuccess") || "Status updated successfully");
       } else {
-        alert(tErr(result.error || "updateFailed"));
+        toast.error(tErr(result.error || "updateFailed"));
       }
     } catch {
-      alert(tErr("connectionError"));
+      toast.error(tErr("connectionError"));
     } finally {
       setUpdating(false);
     }
@@ -94,9 +96,12 @@ export default function DealerDetailPage() {
       <div className="p-8 bg-red-50 border border-red-200 rounded-3xl text-red-600">
         <h2 className="text-lg font-bold">{t("errorTitle")}</h2>
         <p>{error || t("dealerNotFound")}</p>
-        <Link href={`${baseUrl}/dealers`} className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700 hover:underline">
+        <button 
+          onClick={() => router.back()} 
+          className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-700 hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" /> {t("backToList")}
-        </Link>
+        </button>
       </div>
     );
   }

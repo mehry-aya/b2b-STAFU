@@ -80,7 +80,38 @@
     "statusPendingPayment": "Ödeme Bekliyor",
     "statusPaid": "Ödendi",
     "statusShipped": "Gönderildi",
-    "statusCancelled": "İptal Edildi"
+    "statusCancelled": "İptal Edildi",
+    "remove": "Sil",
+    "removeConfirmTitle": "Taslak Siparişi Sil",
+    "removeConfirmDesc": "Bu taslak siparişi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "removeSuccess": "Sipariş başarıyla silindi",
+    "removeFailed": "Sipariş silinemedi"
+  },
+  "DealerContracts": {
+    "title": "Sözleşmeler",
+    "subtitle": "TİCARİ ANLAŞMALARINIZI YÜKLEYİN VE YÖNETİN",
+    "tableTitle": "Yüklenen Belgeler",
+    "itemsTotal": "Toplam {count} Öğe",
+    "fileName": "Dosya Adı",
+    "uploaded": "Yüklendi",
+    "status": "Durum",
+    "action": "İşlem",
+    "noDocuments": "Belge bulunamadı",
+    "hydrating": "Veriler yükleniyor...",
+    "reviewDocument": "Belgeyi İncele",
+    "contractId": "Sözleşme No",
+    "openFullscreen": "Tam Ekran Aç",
+    "dealer": "Bayi",
+    "uploadDate": "Yükleme Tarihi",
+    "reviewNotes": "İnceleme Notları (Opsiyonel)",
+    "reviewNotesPlaceholder": "Onayınızla ilgili yorumlarınızı ekleyin...",
+    "approve": "Onayla ve İmzala",
+    "reject": "Reddet",
+    "approved": "Onaylandı",
+    "rejected": "Reddedildi",
+    "pending": "Bekliyor",
+    "statusLabel": "DURUM",
+    "yourNotes": "Notlarınız:"
   },
   "DealerDashboard": {
     "welcome": "Tekrar hoş geldin",
@@ -234,9 +265,16 @@
   },
   "Cart": {
     "title": "Sepetiniz",
-    "checkout": "Ödeme Yap",
+    "checkout": "Siparişi Tamamla",
     "empty": "Sepetiniz boş",
-    "subtotal": "Ara Toplam"
+    "subtotal": "Ara Toplam",
+    "items": "{count} Ürün",
+    "continueShopping": "Alışverişe Devam Et",
+    "shippingTaxesNote": "Nakliye ve vergiler ödeme sırasında hesaplanır.",
+    "creatingOrder": "Sipariş Oluşturuluyor...",
+    "orderCreated": "Sipariş Oluşturuldu",
+    "orderCreatedDesc": "Taslak sipariş #{id} başarıyla oluşturuldu.",
+    "checkoutFailed": "Ödeme Başarısız"
   },
   "Errors": {
     "emailPasswordRequired": "E-posta ve şifre gereklidir",
@@ -259,7 +297,8 @@
     "updateFailed": "Güncelleme başarısız oldu",
     "createOrderFailed": "Sipariş oluşturulamadı",
     "fetchOrdersFailed": "Siparişler getirilemedi",
-    "updateProfileFailed": "Profil güncellenemedi"
+    "updateProfileFailed": "Profil güncellenemedi",
+    "failedToSubmitReview": "İnceleme gönderilemedi"
   },
   "Success": {
     "accountCreated": "Hesap başarıyla oluşturuldu. Şimdi giriş yapabilirsiniz.",
@@ -400,7 +439,9 @@
     "downloadStarted": "İndirme Başladı",
     "downloadDescription": "Faturanız {format} olarak kaydediliyor.",
     "downloadFailed": "İndirme Başarısız",
-    "invoiceNote": "Fatura yalnızca Ödenmiş veya Sevk Edilmiş siparişler için mevcuttur",
+    "totalItems": "Toplam Ürün",
+    "backToHistory": "Geri Dön",
+    "invoiceNote": "Fatura sadece Ödendi veya Gönderildi durumundaki siparişler için mevcuttur",
     "orderNotFound": "Sipariş bulunamadı",
     "backToOrders": "Siparişlere Geri Dön"
   },
@@ -480,7 +521,7 @@
     "at": "saat"
   },
   "ProductDetail": {
-    "backToProducts": "Ürünlere Dön",
+    "backToProducts": "Dön",
     "productNotFound": "Ürün Bulunamadı",
     "noImage": "Görsel Yok",
     "priceUnavailable": "Fiyat mevcut değil",

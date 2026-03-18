@@ -7,6 +7,7 @@ import { createOrder } from "@/lib/api/orders";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useTranslations } from "next-intl";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, removeItem, updateQuantity, totalAmount, totalItems, clearCart } = useCart();
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
+  const t = useTranslations("Cart");
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -33,8 +35,8 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       const order = await createOrder(orderItems);
       
       toast({
-        title: "Order Created",
-        description: `Draft order #${order.id} has been created successfully.`,
+        title: t("orderCreated"),
+        description: t("orderCreatedDesc", { id: order.id }),
       });
       
       clearCart();
@@ -42,7 +44,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       router.push(`/dealer/orders/${order.id}`);
     } catch (error: any) {
       toast({
-        title: "Checkout Failed",
+        title: t("checkoutFailed"),
         description: error.message || "An error occurred while creating your order.",
         variant: "destructive",
       });
@@ -67,9 +69,9 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-900 text-white">
           <div className="flex items-center gap-3">
             <ShoppingBag className="h-5 w-5 text-red-500" />
-            <h2 className="text-lg font-bold">Your Cart</h2>
+            <h2 className="text-lg font-bold">{t("title")}</h2>
             <span className="bg-red-600 text-[10px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">
-              {totalItems} Items
+              {t("items", { count: totalItems })}
             </span>
           </div>
           <button 
@@ -88,12 +90,12 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 <ShoppingBag className="h-10 w-10 text-zinc-300" />
               </div>
               <div>
-                <p className="text-zinc-500 font-medium">Your cart is empty</p>
+                <p className="text-zinc-500 font-medium">{t("empty")}</p>
                 <button 
                   onClick={onClose}
                   className="mt-2 text-sm font-bold text-red-600 hover:text-red-700"
                 >
-                  Continue Shopping
+                  {t("continueShopping")}
                 </button>
               </div>
             </div>
@@ -157,11 +159,11 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         {items.length > 0 && (
           <div className="p-6 bg-zinc-50 border-t border-zinc-100 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Subtotal</span>
+              <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">{t("subtotal")}</span>
               <span className="text-2xl font-black text-zinc-900">{formatPrice(totalAmount)}</span>
             </div>
             <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
-              Shipping & taxes calculated at checkout.
+              {t("shippingTaxesNote")}
             </p>
             <button 
               onClick={handleCheckout}
@@ -172,7 +174,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 : "bg-red-600 text-white hover:bg-red-700 shadow-xl shadow-red-200 hover:shadow-red-300 hover:-translate-y-0.5 active:translate-y-0"
               }`}
             >
-              {isSubmitting ? "Creating Order..." : "Proceed to Checkout"}
+              {isSubmitting ? t("creatingOrder") : t("checkout")}
             </button>
           </div>
         )}
