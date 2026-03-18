@@ -79,7 +79,7 @@ export function SearchableSelect({
       <div
         onClick={handleToggle}
         className={`
-          w-full bg-zinc-50 border-none rounded-2xl px-4 py-3.5 text-sm font-bold uppercase tracking-widest cursor-pointer
+          w-full bg-zinc-50 border-none rounded-2xl px-4 py-3.5 text-sm font-bold tracking-widest cursor-pointer
           flex items-center justify-between transition-all duration-300
           ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-zinc-100/80"}
           ${isOpen ? "ring-2 ring-blue-500/20 bg-white shadow-sm" : ""}

@@ -237,7 +237,7 @@ export default function AdminContractsPage() {
               <div className="flex items-center gap-3">
                 <Filter className="h-4 w-4 text-zinc-400" />
                 <select 
-                  className="bg-zinc-50 border-none rounded-2xl px-4 py-3 text-sm font-bold uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 outline-none"
+                  className="bg-zinc-50 border-none rounded-2xl px-4 py-3 text-sm font-bold tracking-widest focus:ring-2 focus:ring-blue-500/20 outline-none"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
