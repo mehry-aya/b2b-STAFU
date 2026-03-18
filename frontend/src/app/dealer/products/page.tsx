@@ -7,9 +7,11 @@ import { fetchProducts } from "@/lib/api/products";
 import debounce from "lodash.debounce";
 import { Search, ChevronRight, Package } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerProductsPage() {
   const router = useRouter();
+  const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category");
   const [products, setProducts] = useState<Product[]>([]);
@@ -179,11 +181,11 @@ export default function DealerProductsPage() {
                       <Package className="h-10 w-10 text-zinc-200" />
                     </div>
                   )}
-                  {/* Red price badge on hover */}
+                  {/* Price badge on hover */}
                   {price && price !== "N/A" && (
                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <div className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-md">
-                        ₺{price}
+                        {formatPrice(price)}
                       </div>
                     </div>
                   )}
@@ -199,15 +201,15 @@ export default function DealerProductsPage() {
                   <div className="mt-3 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-base font-black text-zinc-900">
-                        {price !== "N/A" ? `₺${price}` : "—"}
+                        {price && price !== "N/A" ? formatPrice(price) : "—"}
                       </span>
                       {product.variants && (
                         <span className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 ${
-                          product.variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) > 0 
+                          (product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
                             ? "text-emerald-600" 
                             : "text-red-500"
                         }`}>
-                          {product.variants.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0)} in stock
+                          {product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0} in stock
                         </span>
                       )}
                     </div>

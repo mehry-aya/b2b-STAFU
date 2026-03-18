@@ -6,6 +6,7 @@ import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { createOrder } from "@/lib/api/orders";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface CartSidebarProps {
 
 export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, removeItem, updateQuantity, totalAmount, totalItems, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -142,7 +144,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       </button>
                     </div>
                     <span className="text-sm font-black text-zinc-900">
-                      ₺{(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </span>
                   </div>
                 </div>
@@ -156,7 +158,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           <div className="p-6 bg-zinc-50 border-t border-zinc-100 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Subtotal</span>
-              <span className="text-2xl font-black text-zinc-900">₺{totalAmount.toFixed(2)}</span>
+              <span className="text-2xl font-black text-zinc-900">{formatPrice(totalAmount)}</span>
             </div>
             <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
               Shipping & taxes calculated at checkout.

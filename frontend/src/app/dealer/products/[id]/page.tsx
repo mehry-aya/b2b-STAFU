@@ -16,6 +16,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerProductDetailsPage({
   params: paramsPromise,
@@ -26,6 +27,7 @@ export default function DealerProductDetailsPage({
   const router = useRouter();
   const { toast } = useToast();
   const { addItem } = useCart();
+  const { formatPrice } = useCurrency();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -240,15 +242,10 @@ export default function DealerProductDetailsPage({
               </div>
             )}
             {/* Red price stamp */}
-            {price && (
+            {selectedVariant?.price && (
               <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
-                {selectedVariant?.compareAtPrice && (
-                  <div className="bg-zinc-900/80 text-white text-xs font-bold px-2 py-1 rounded-lg line-through shadow-lg backdrop-blur-sm">
-                    ₺{parseFloat(selectedVariant.compareAtPrice).toFixed(2)}
-                  </div>
-                )}
                 <div className="bg-red-600 text-white text-sm font-black px-3 py-1.5 rounded-xl shadow-lg">
-                  ₺{price}
+                  {formatPrice(selectedVariant.price)}
                 </div>
               </div>
             )}
@@ -292,9 +289,9 @@ export default function DealerProductDetailsPage({
 
           {/* Price */}
           <div className="flex flex-col gap-1">
-            {price ? (
+            {selectedVariant?.price ? (
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-black text-zinc-900">₺{price}</span>
+                <span className="text-3xl font-black text-zinc-900">{formatPrice(selectedVariant.price)}</span>
               </div>
             ) : (
               <span className="text-base text-zinc-400 font-medium">Price unavailable</span>
@@ -406,6 +403,9 @@ export default function DealerProductDetailsPage({
               <>
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
+                    <span className="text-zinc-900 font-mono">
+                      {selectedVariant ? formatPrice(selectedVariant.price as string) : "—"}
+                    </span>
                     <Hash className="h-3.5 w-3.5 text-zinc-400" />
                     <span className="text-zinc-500">SKU:</span>
                   </div>

@@ -143,3 +143,12 @@ model ProductVariant {
 
   @@map("product_variants")
 }
+
+model ExchangeRate {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique // USD, EUR, TRY
+  rate      Decimal  @db.Decimal(18, 6) // Rate relative to TRY (1.0 for TRY)
+  updatedAt DateTime @updatedAt
+
+  @@map("exchange_rates")
+}

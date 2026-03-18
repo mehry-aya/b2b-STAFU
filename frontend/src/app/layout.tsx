@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { CartProvider } from "@/context/CartContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 export default function RootLayout({
   children,
@@ -31,11 +32,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CartProvider>
-          {children}
-          <Toaster />
-          <SonnerToaster position="top-right" expand={true} richColors />
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            {children}
+            <Toaster />
+            <SonnerToaster position="top-right" expand={true} richColors />
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

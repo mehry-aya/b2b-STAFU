@@ -7,13 +7,23 @@ export async function middleware(request: NextRequest) {
   const cookieStore = await request.cookies;
   const token = cookieStore.get('token')?.value;
   const { pathname } = request.nextUrl;
+  const currency = cookieStore.get('NEXT_CURRENCY')?.value;
+
+  let response = NextResponse.next();
+
+  // 0. Ensure currency cookie exists for SSR consistency
+  if (!currency) {
+    response.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+  }
 
   // 1. If trying to access protected routes and NOT logged in
   if (!token) {
     if (pathname.startsWith('/master') || pathname.startsWith('/admin') || pathname.startsWith('/dealer')) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      if (!currency) redirectResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+      return redirectResponse;
     }
-    return NextResponse.next();
+    return response;
   }
 
   try {
@@ -40,19 +50,24 @@ export async function middleware(request: NextRequest) {
       return redirectToCorrectDashboard(role, request);
     }
 
-    return NextResponse.next();
-  } catch {
-    const response = NextResponse.redirect(new URL('/login', request.url));
-    response.cookies.delete('token');
     return response;
+  } catch {
+    const errorResponse = NextResponse.redirect(new URL('/login', request.url));
+    errorResponse.cookies.delete('token');
+    if (!currency) errorResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+    return errorResponse;
   }
 }
 
-function redirectToCorrectDashboard(role: string, request: NextRequest) {
-  if (role === 'master_admin') return NextResponse.redirect(new URL('/master/dashboard', request.url));
-  if (role === 'admin') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-  if (role === 'dealer') return NextResponse.redirect(new URL('/dealer/dashboard', request.url));
-  return NextResponse.redirect(new URL('/login', request.url));
+function redirectToCorrectDashboard(role: string, request: NextRequest, currency?: string) {
+  let targetUrl = '/login';
+  if (role === 'master_admin') targetUrl = '/master/dashboard';
+  else if (role === 'admin') targetUrl = '/admin/dashboard';
+  else if (role === 'dealer') targetUrl = '/dealer/dashboard';
+
+  const redirectResponse = NextResponse.redirect(new URL(targetUrl, request.url));
+  if (!currency) redirectResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
+  return redirectResponse;
 }
 
 export const config = {

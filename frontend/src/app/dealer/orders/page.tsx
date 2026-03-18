@@ -7,8 +7,10 @@ import { ShoppingBag, Calendar, Clock, Eye, CreditCard, Truck, AlertCircle, Chec
 import Link from "next/link";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerOrdersPage() {
+  const { formatPrice } = useCurrency();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -147,7 +149,7 @@ export default function DealerOrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="text-sm font-black text-zinc-900">₺{Number(order.totalAmount).toFixed(2)}</span>
+                      <span className="text-sm font-black text-zinc-900">{formatPrice(order.totalAmount)}</span>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <Link 

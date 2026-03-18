@@ -20,6 +20,7 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerOrderDetailPage({
   params: paramsPromise,
@@ -28,6 +29,7 @@ export default function DealerOrderDetailPage({
 }) {
   const params = use(paramsPromise);
   const { toast } = useToast();
+  const { formatPrice } = useCurrency();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -206,7 +208,7 @@ export default function DealerOrderDetailPage({
               Order Total
             </h3>
             <div className="space-y-1">
-              <p className="font-black text-3xl text-white leading-tight font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</p>
+              <p className="font-black text-3xl text-white leading-tight font-mono tracking-tighter">{formatPrice(order.totalAmount)}</p>
               <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Includes Tax & Fees</p>
             </div>
           </div>
@@ -249,12 +251,12 @@ export default function DealerOrderDetailPage({
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
                   <div className="text-xs font-bold text-zinc-400">
-                    <span className="text-zinc-900 font-mono">₺{Number(item.unitPrice).toFixed(2)}</span>
+                    <span className="text-zinc-900 font-mono">{formatPrice(item.unitPrice)}</span>
                     <span className="mx-2">×</span>
                     <span className="text-zinc-900 font-mono">{item.quantity}</span>
                   </div>
                   <div className="text-lg font-black text-zinc-900 font-mono tracking-tighter">
-                    ₺{(Number(item.unitPrice) * item.quantity).toFixed(2)}
+                    {formatPrice(Number(item.unitPrice) * item.quantity)}
                   </div>
                 </div>
               </div>
@@ -265,7 +267,7 @@ export default function DealerOrderDetailPage({
           <div className="p-8 bg-zinc-50 flex flex-col items-end gap-2">
              <div className="flex items-center gap-8 text-sm">
                 <span className="font-bold text-zinc-400 uppercase tracking-widest">Subtotal</span>
-                <span className="font-black text-zinc-900 font-mono">₺{Number(order.totalAmount).toFixed(2)}</span>
+                <span className="font-black text-zinc-900 font-mono">{formatPrice(order.totalAmount)}</span>
              </div>
              <div className="flex items-center gap-8 text-sm">
                 <span className="font-bold text-zinc-400 uppercase tracking-widest">Shipping</span>
@@ -274,7 +276,7 @@ export default function DealerOrderDetailPage({
              <div className="h-px w-48 bg-zinc-200 my-2" />
              <div className="flex items-center gap-8 text-xl">
                 <span className="font-black text-zinc-900 uppercase tracking-tighter">Total Amount</span>
-                <span className="font-black text-red-600 font-mono tracking-tighter">₺{Number(order.totalAmount).toFixed(2)}</span>
+                <span className="font-black text-red-600 font-mono tracking-tighter">{formatPrice(order.totalAmount)}</span>
              </div>
           </div>
       </div>

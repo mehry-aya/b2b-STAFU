@@ -9,6 +9,8 @@ import { OrdersModule } from './orders/orders.module';
 import { CarouselModule } from './carousel/carousel.module';
 import { StatsModule } from './stats/stats.module';
 import { ContractsModule } from './contracts/contracts.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
 
 
 @Module({
@@ -23,6 +25,8 @@ import { ContractsModule } from './contracts/contracts.module';
     CarouselModule,
     StatsModule,
     ContractsModule,
+    ScheduleModule.forRoot(),
+    ExchangeRatesModule,
   ],
 
 })

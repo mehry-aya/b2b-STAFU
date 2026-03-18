@@ -2,12 +2,14 @@ import React from 'react';
 import { Order } from '@/lib/types/order';
 import { format } from 'date-fns';
 import { Logo } from '@/components/ui/Logo';
+import { useCurrency } from '@/context/CurrencyContext';
 
 interface InvoiceTemplateProps {
   order: Order;
 }
 
 const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
+  const { formatPrice } = useCurrency();
   return (
     <div className="p-12 bg-white text-zinc-900 font-sans w-[800px] min-h-[1100px] border border-zinc-200">
       {/* Header */}
@@ -67,6 +69,11 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
               <td className="py-5 pr-4">
                 <p className="font-black text-[13px] uppercase leading-tight tracking-tight text-zinc-900">{item.productVariant.product.title}</p>
                 <p className="text-[10px] text-zinc-500 font-bold mt-1.5 uppercase tracking-wide">{item.productVariant.title}</p>
+                {item.productVariant.compareAtPrice && (
+                  <p className="text-[9px] text-zinc-400 line-through mt-1">
+                    Original: {formatPrice(item.productVariant.compareAtPrice as any)}
+                  </p>
+                )}
               </td>
               <td className="py-5 pl-4 align-top">
                 <p className="text-[10px] font-mono font-bold text-zinc-600 break-all leading-relaxed bg-zinc-50 p-1.5 rounded border border-zinc-100 italic">{item.productVariant.sku || "N/A"}</p>
@@ -75,10 +82,10 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
                 <span className="text-sm font-black text-zinc-900">{item.quantity}</span>
               </td>
               <td className="py-5 text-right align-top">
-                <span className="text-xs font-mono font-bold text-zinc-700">₺{Number(item.unitPrice).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-xs font-mono font-bold text-zinc-700">{formatPrice(item.unitPrice)}</span>
               </td>
               <td className="py-5 text-right align-top">
-                <span className="text-sm font-mono font-black text-zinc-900">₺{(Number(item.unitPrice) * item.quantity).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-sm font-mono font-black text-zinc-900">{formatPrice(Number(item.unitPrice) * item.quantity)}</span>
               </td>
             </tr>
           ))}
@@ -102,11 +109,11 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
           <div className="space-y-4">
             <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-widest">
               <span>Subtotal</span>
-              <span className="font-mono text-zinc-900">₺{Number(order.totalAmount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+              <span className="font-mono text-zinc-900">{formatPrice(order.totalAmount)}</span>
             </div>
             <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-widest">
               <span>Taxes (0%)</span>
-              <span className="font-mono text-zinc-900">₺0,00</span>
+              <span className="font-mono text-zinc-900">{formatPrice(0)}</span>
             </div>
             <div className="pt-6 border-t-4 border-zinc-900 flex justify-between items-center">
               <div className="flex flex-col">
@@ -114,7 +121,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
               </div>
               <div className="text-right">
                 <span className="text-red-600 font-mono text-2xl font-black tracking-tighter">
-                  ₺{Number(order.totalAmount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  {formatPrice(order.totalAmount)}
                 </span>
               </div>
             </div>

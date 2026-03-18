@@ -1,5 +1,6 @@
 import { Product } from "@/lib/types/product";
 import { Box, Tag, PackageOpen, RefreshCw } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface Props {
   products: Product[];
@@ -23,6 +24,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function ProductsTable({ products, loading, searchQuery, syncing, onSync }: Props) {
+  const { formatPrice } = useCurrency();
   return (
     <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
@@ -130,21 +132,21 @@ export function ProductsTable({ products, loading, searchQuery, syncing, onSync 
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`text-sm font-black ${
-                        (product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
+                        (product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0) > 0 
                           ? "text-zinc-900" 
                           : "text-red-500"
                       }`}>
-                        {product.variants?.reduce((sum, v) => sum + (v.inventoryQuantity || 0), 0) || 0}
+                        {product.variants?.reduce((sum: number, v: any) => sum + (v.inventoryQuantity || 0), 0) || 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-bold text-zinc-900">
-                          {firstVariant?.price ? `₺${parseFloat(firstVariant.price).toFixed(2)}` : "-"}
+                          {firstVariant?.price ? formatPrice(firstVariant.price) : "-"}
                         </span>
                         {firstVariant?.compareAtPrice && (
                           <span className="text-[10px] text-zinc-400 line-through font-medium">
-                            ₺{parseFloat(firstVariant.compareAtPrice).toFixed(2)}
+                            {formatPrice(firstVariant.compareAtPrice)}
                           </span>
                         )}
                       </div>

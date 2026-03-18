@@ -17,8 +17,10 @@ import {
   FileText,
   XCircle,
 } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerDashboard() {
+  const { formatPrice } = useCurrency();
   const [user, setUser] = useState<{ companyName: string; email: string } | null>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -39,12 +41,6 @@ export default function DealerDashboard() {
     });
   }, []);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
 
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
@@ -98,7 +94,7 @@ export default function DealerDashboard() {
   const dealerStats = [
     { label: "Total Orders", value: stats?.totalOrders || 0, icon: ShoppingCart },
     { label: "Pending Orders", value: stats?.pendingOrders || 0, icon: Clock },
-    { label: "Total Spent", value: formatCurrency(stats?.totalSpent || 0), icon: DollarSign },
+    { label: "Total Spent", value: formatPrice(stats?.totalSpent || 0), icon: DollarSign },
     { label: "Contract Status", value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
   ];
 
@@ -193,7 +189,7 @@ export default function DealerDashboard() {
                 </div>
                 <div>
                   <p className="text-[10px] text-zinc-400 font-bold uppercase">Total</p>
-                  <p className="text-sm font-bold text-zinc-900">{formatCurrency(stats.recentOrder.total)}</p>
+                  <p className="text-sm font-bold text-zinc-900">{formatPrice(stats.recentOrder.total)}</p>
                 </div>
               </div>
               <Link href="/dealer/orders" className="text-sm font-bold text-red-600 hover:text-red-700 flex items-center justify-center gap-1">

@@ -8,6 +8,7 @@ import { logoutAction, getMeAction } from "@/app/(auth)/actions";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { useCart } from "@/context/CartContext";
 import { Logo } from "@/components/ui/Logo";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
 interface NavItem {
   icon?: React.ElementType;
@@ -198,6 +199,11 @@ export default function SidebarLayout({
           </button>
         </div>
       )}
+
+      {/* Currency Selector */}
+      <div className="px-3 py-2">
+        <CurrencySelector />
+      </div>
 
       {/* User section */}
       <div className="p-4" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
