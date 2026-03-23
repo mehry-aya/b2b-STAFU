@@ -11,6 +11,7 @@ async function bootstrap() {
     origin: [
       'https://b2b-stafu.vercel.app',
       'https://b2b-stafu-git-main-ayamehri293-4414s-projects.vercel.app',
+      'https://b2b-stafu-production.up.railway.app',
       'http://localhost:3000',
       'http://localhost:3001',
     ],
@@ -22,9 +23,11 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`STAFUPRO API running on port ${port}`);
+  // Explicitly listen on '0.0.0.0' for Railway
+  await app.listen(port, '0.0.0.0');
+  console.log(`STAFUPRO API running on port ${port} (on 0.0.0.0)`);
 }
+
 
 bootstrap().catch((err) => {
   console.error(err);

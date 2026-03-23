@@ -17,13 +17,18 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:3001/api';
+    // Remove /api from the end for the uploads destination
+    const backendBase = backendUrl.replace(/\/api$/, '');
+    
     return [
       {
         source: '/uploads/:path*',
-        destination: 'http://127.0.0.1:3001/uploads/:path*',
+        destination: `${backendBase}/uploads/:path*`,
       },
     ];
   },
+
 };
 
 export default withNextIntl(nextConfig);
