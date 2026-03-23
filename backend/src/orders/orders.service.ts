@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus, Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
+import { ShopifyInventoryService } from '../shopify/shopify-inventory.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(OrdersService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private shopifyInventory: ShopifyInventoryService,
+  ) {}
 
   async create(dealerId: number, createOrderDto: CreateOrderDto) {
     // 1. Fetch current prices for all variants
@@ -133,10 +139,20 @@ export class OrdersService {
   }
 
   async updateStatus(id: number, status: OrderStatus, adminEmail: string) {
-    const order = await this.prisma.order.findUnique({ where: { id } });
+    const order = await this.prisma.order.findUnique({ 
+      where: { id },
+      include: {
+        items: {
+          include: {
+            productVariant: true,
+          },
+        },
+      },
+    });
     if (!order) throw new NotFoundException(`Order #${id} not found`);
 
-    return this.prisma.order.update({
+    // Update DB status first
+    const updatedOrder = await this.prisma.order.update({
       where: { id },
       data: { 
         status,
@@ -144,6 +160,32 @@ export class OrdersService {
         statusChangedAt: new Date(),
       } as any,
     });
+
+    // Trigger Shopify Inventory Sync if status is "shipped"
+    if (status === OrderStatus.shipped && !(order as any).inventorySynced) {
+      try {
+        const items = order.items.map(item => ({
+          shopifyVariantId: item.productVariant.shopifyVariantId,
+          quantity: item.quantity,
+        }));
+
+        await this.shopifyInventory.deductOrderInventory(items);
+
+        await this.prisma.order.update({
+          where: { id },
+          data: {
+            inventorySynced: true,
+            inventorySyncedAt: new Date(),
+          } as any,
+        });
+        
+        this.logger.log(`Successfully synced inventory for order #${id}`);
+      } catch (error) {
+        this.logger.error(`Failed to sync inventory for order #${id}: ${error.message}`);
+      }
+    }
+
+    return updatedOrder;
   }
 
   async exportOrdersToExcel(

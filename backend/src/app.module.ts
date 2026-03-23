@@ -11,6 +11,7 @@ import { StatsModule } from './stats/stats.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
+import { ShopifyModule } from './shopify/shopify.module';
 
 
 @Module({
@@ -27,6 +28,7 @@ import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
     ContractsModule,
     ScheduleModule.forRoot(),
     ExchangeRatesModule,
+    ShopifyModule,
   ],
 
 })

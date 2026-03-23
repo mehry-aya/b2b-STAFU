@@ -55,18 +55,23 @@ export default function AdminProductsPage() {
 
   const { syncing, syncStatus, startSync } = useProductSync(loadProducts);
 
+  // Load products when page or statusFilter changes
   useEffect(() => {
     loadProducts();
   }, [page, statusFilter, loadProducts]);
 
-  // Debounced search
+  // Reset to page 1 when search or statusFilter changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (page !== 1) setPage(1);
-      else loadProducts();
+      if (page !== 1) {
+        setPage(1);
+      } else {
+        loadProducts(); // Manually trigger if already on page 1
+      }
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, page, loadProducts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, statusFilter]); // page is intentionally omitted to avoid reset loop
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">

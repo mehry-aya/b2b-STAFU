@@ -105,6 +105,8 @@ model Order {
   status               OrderStatus @default(draft)
   statusChangedByEmail String?     @map("status_changed_by_email")
   statusChangedAt      DateTime?   @map("status_changed_at")
+  inventorySynced      Boolean     @default(false) @map("inventory_synced")
+  inventorySyncedAt    DateTime?   @map("inventory_synced_at")
   createdAt            DateTime    @default(now()) @map("created_at")
   updatedAt            DateTime    @updatedAt @map("updated_at")
   dealer      Dealer      @relation(fields: [dealerId], references: [id])

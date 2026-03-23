@@ -236,7 +236,7 @@ export class ProductsService {
     let products = await (this.prisma.product as any).findMany({
       where: whereClause,
       include: { variants: true },
-      // orderBy: { title: 'asc' }, // Order by JSON title is complex in Prisma, skipping for now
+      orderBy: { id: 'desc' },
       skip,
       take: limit,
     });
