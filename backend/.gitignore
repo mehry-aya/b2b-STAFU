@@ -44,6 +44,5 @@ lerna-debug.log*
 /uploads/contracts
 
 # prisma
-/prisma/migrations
 # Prisma seed
-prisma/seed.ts
+
