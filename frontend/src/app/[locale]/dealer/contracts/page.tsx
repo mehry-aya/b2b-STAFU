@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { getMyContractsAction, reviewContractAction } from "@/app/(auth)/actions";
 import { useTranslations } from "next-intl";
+import jsPDF from "jspdf";
 
 interface Contract {
   id: number;
@@ -37,6 +38,45 @@ export default function DealerContractsPage() {
   const t = useTranslations("DealerContracts");
   const tErr = useTranslations("Errors");
   const tSuc = useTranslations("Success");
+
+  const isImage = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext || '');
+  };
+
+  const handleDownload = async (fileUrl: string, fileName: string) => {
+    if (!isImage(fileName)) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    try {
+      const pdf = new jsPDF();
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = fileUrl;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg');
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (img.height * pdfWidth) / img.width;
+        
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        const pdfFileName = fileName.split('.').slice(0, -1).join('.') + '.pdf';
+        pdf.save(pdfFileName);
+        toast.success(tSuc("updateSuccess") || "Downloaded as PDF");
+      };
+    } catch (error) {
+      console.error("PDF generation failed", error);
+      toast.error(tErr("connectionError"));
+    }
+  };
 
   const fetchContracts = useCallback(async () => {
     try {
@@ -229,18 +269,26 @@ export default function DealerContractsPage() {
 
             {/* Preview Area */}
             <div className="aspect-4/5 bg-zinc-950 relative group overflow-hidden">
-              <iframe 
-                src={selectedContract.fileUrl} 
-                className="w-full h-full border-none shadow-inner"
-                title="Contract Preview"
-              />
+              {isImage(selectedContract.fileName) ? (
+                <img 
+                  src={selectedContract.fileUrl} 
+                  alt="Contract Preview"
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <iframe 
+                  src={`${selectedContract.fileUrl}#view=FitH`} 
+                  className="w-full h-full border-none shadow-inner"
+                  title="Contract Preview"
+                />
+              )}
               <div className="absolute inset-0 bg-transparent pointer-events-none border-12 border-white/20" />
               <div className="absolute bottom-6 right-6 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
                 <a 
                   href={selectedContract.fileUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="p-3 bg-white shadow-2xl rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 hover:bg-blue-600 hover:text-white transition-all"
+                  className="p-3 bg-white shadow-2xl rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 hover:bg-blue-600 hover:text-white transition-all font-bold"
                 >
                   <ExternalLink className="w-4 h-4" />
                   {t("openFullscreen")}
@@ -305,7 +353,13 @@ export default function DealerContractsPage() {
                         {selectedContract.status === "approved" ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                         <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t("statusLabel")} | {selectedContract.status === "approved" ? t("approved") : t("rejected")}</p>
                       </div>
-                      <Download className="w-4 h-4 opacity-50" />
+                      <button 
+                        onClick={() => handleDownload(selectedContract.fileUrl, selectedContract.fileName)}
+                        className="p-1 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
+                        title="Download as PDF"
+                      >
+                        <Download className="w-4 h-4 opacity-50" />
+                      </button>
                     </div>
                     {selectedContract.notes && (
                       <div className="p-4 bg-white/50 rounded-2xl border border-white/20">

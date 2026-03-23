@@ -7,22 +7,21 @@ import { getDealerStatsAction } from "@/app/dashboard/actions";
 import {
   ShoppingCart,
   Clock,
-  CheckCircle,
   ArrowRight,
   Package,
   TrendingUp,
   Anchor,
   DollarSign,
-  AlertCircle,
+
   FileText,
-  XCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DealerDashboard() {
   const t = useTranslations("DealerDashboard");
-  const tc = useTranslations("Common");
+  const tOrders = useTranslations("DealerOrders");
+  const tContracts = useTranslations("DealerContracts");
   const { formatPrice } = useCurrency();
   const [user, setUser] = useState<{ companyName: string; email: string } | null>(null);
   const [stats, setStats] = useState<any>(null);
@@ -81,6 +80,17 @@ export default function DealerDashboard() {
     }
   };
 
+  const translateOrderStatus = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "draft": return tOrders("statusDraft");
+      case "pending_payment": return tOrders("statusPendingPayment");
+      case "paid": return tOrders("statusPaid");
+      case "shipped": return tOrders("statusShipped");
+      case "cancelled": return tOrders("statusCancelled");
+      default: return status;
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto space-y-8 animate-pulse">
@@ -95,10 +105,10 @@ export default function DealerDashboard() {
   }
 
   const dealerStats = [
-    { label: "Total Orders", value: stats?.totalOrders || 0, icon: ShoppingCart },
-    { label: "Pending Orders", value: stats?.pendingOrders || 0, icon: Clock },
-    { label: "Total Spent", value: formatPrice(stats?.totalSpent || 0), icon: DollarSign },
-    { label: "Contract Status", value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
+    { label: t("totalOrders"), value: stats?.totalOrders || 0, icon: ShoppingCart },
+    { label: t("pendingOrders"), value: stats?.pendingOrders || 0, icon: Clock },
+    { label: t("totalSpent"), value: formatPrice(stats?.totalSpent || 0), icon: DollarSign },
+    { label: t("contractStatus"), value: stats?.contractStatus || "None", icon: FileText, type: "badge" },
   ];
 
   const quickLinks = [
@@ -154,7 +164,10 @@ export default function DealerDashboard() {
               <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{stat.label}</p>
               {stat.type === "badge" ? (
                 <span className={`inline-block mt-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase border shadow-xs ${styles?.badge}`}>
-                  {stat.value}
+                  {stat.value.toLowerCase() === "approved" ? tContracts("approved") : 
+                   stat.value.toLowerCase() === "pending" ? tContracts("pending") : 
+                   stat.value.toLowerCase() === "rejected" ? tContracts("rejected") : 
+                   stat.value}
                 </span>
               ) : (
                 <p className="text-2xl font-black text-zinc-900 mt-1">{stat.value}</p>
@@ -178,7 +191,7 @@ export default function DealerDashboard() {
                   <p className="text-lg font-black text-zinc-900">#{stats.recentOrder.id.toString().padStart(5, '0')}</p>
                 </div>
                 <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase border ${getOrderStatusColor(stats.recentOrder.status)}`}>
-                  {stats.recentOrder.status.replace('_', ' ')}
+                  {translateOrderStatus(stats.recentOrder.status)}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4 border-y border-zinc-50 py-4 mb-6">
@@ -191,10 +204,11 @@ export default function DealerDashboard() {
                   <p className="text-sm font-bold text-zinc-700">{stats.recentOrder.itemsCount} {t("productsCount")}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Total</p>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">{t("total")}</p>
                   <p className="text-sm font-bold text-zinc-900">{formatPrice(stats.recentOrder.total)}</p>
                 </div>
               </div>
+
               <Link href="/dealer/orders" className="text-sm font-bold text-red-600 hover:text-red-700 flex items-center justify-center gap-1">
                 {t("viewAll")} <ArrowRight className="h-4 w-4" />
               </Link>
