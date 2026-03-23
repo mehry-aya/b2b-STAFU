@@ -29,6 +29,7 @@ export default function DealerDetailPage() {
   const t = useTranslations("DealerDetail");
   const tErr = useTranslations("Errors");
   const tSuc = useTranslations("Success");
+  const tAdmin = useTranslations("AdminDealers");
   const locale = useLocale();
   const router = useRouter();
   const { id } = useParams();
@@ -114,7 +115,7 @@ export default function DealerDetailPage() {
         icon={Building2}
         breadcrumbs={[
           { label: isMaster ? "Master" : "Admin", href: isMaster ? "/master/dashboard" : "/admin/dashboard" },
-          { label: useTranslations("AdminDealers")("title"), href: `${baseUrl}/dealers` },
+          { label: tAdmin("title"), href: `${baseUrl}/dealers` },
           { label: dealer.companyName }
         ]}
         roleBadge={isMaster ? { label: "Master", type: "master" } : { label: "Admin", type: "admin" }}
@@ -290,7 +291,7 @@ export default function DealerDetailPage() {
                     </div>
                   </div>
                   <a 
-                    href={`http://localhost:3001${dealer.contractUrl}`} 
+                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${dealer.contractUrl}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 hover:text-red-700 transition-colors"
