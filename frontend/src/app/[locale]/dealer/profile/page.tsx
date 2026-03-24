@@ -1,25 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { User as UserIcon, Building2, MapPin, Phone, Lock, Save, EyeIcon, EyeOffIcon } from "lucide-react";
 import { updateProfileAction, getMeAction } from "@/app/(auth)/actions";
+import { PasswordValidator } from "@/components/ui/PasswordValidator";
+import { PhoneInput } from "@/components/ui/PhoneInput";
+import { isPasswordValid } from "@/lib/password-utils";
 
 import { useTranslations } from "next-intl";
 
 export default function DealerProfilePage() {
   const t = useTranslations("Profile");
+  const tCommon = useTranslations("Common");
   const tErr = useTranslations("Errors");
   const tSuc = useTranslations("Success");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    old: false,
+    new: false,
+    confirm: false
+  });
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+  const [phone, setPhone] = useState("");
   const [profileData, setProfileData] = useState({
     companyName: "",
     phone: "",
     address: "",
   });
+
+  const passwordsMatch = useMemo(() => {
+    return newPassword === confirmPassword;
+  }, [newPassword, confirmPassword]);
+
+  const isPasswordOk = useMemo(() => {
+    if (!newPassword) return true;
+    return isPasswordValid(newPassword) && passwordsMatch;
+  }, [newPassword, passwordsMatch]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -31,6 +53,8 @@ export default function DealerProfilePage() {
             phone: data.dealer?.phone || "",
             address: data.dealer?.address || "",
           });
+          const phoneVal = data.dealer?.phone || "";
+          setPhone(phoneVal.startsWith("+") ? phoneVal : `+${phoneVal}`);
         }
       } catch (err) {
         console.error("Failed to fetch profile", err);
@@ -43,13 +67,14 @@ export default function DealerProfilePage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!isPasswordOk) return;
+
     setLoading(true);
     setSuccess(false);
     setError("");
 
     const formData = new FormData(e.currentTarget);
     const oldPassword = formData.get("oldPassword") as string;
-    const newPassword = formData.get("newPassword") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
     const companyName = formData.get("companyName") as string;
     const phone = formData.get("phone") as string;
@@ -63,12 +88,6 @@ export default function DealerProfilePage() {
 
     if (newPassword && newPassword !== confirmPassword) {
       setError(t("passwordsDoNotMatch", { fallback: "Passwords do not match" }));
-      setLoading(false);
-      return;
-    }
-
-    if (newPassword && newPassword.length < 6) {
-      setError(t("passwordTooShort", { fallback: "Password must be at least 6 characters" }));
       setLoading(false);
       return;
     }
@@ -96,6 +115,7 @@ export default function DealerProfilePage() {
       setSuccess(true);
       if (newPassword) {
         (e.target as HTMLFormElement).reset();
+        setNewPassword("");
         // keep input values for other fields
         setProfileData({ companyName, phone, address });
       }
@@ -184,21 +204,13 @@ export default function DealerProfilePage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="phone" className="block text-sm font-bold text-zinc-700">
-                    {t("phone")}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Phone className="h-4 w-4 text-zinc-400" />
-                    </div>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      className="block w-full rounded-xl border-zinc-200 pl-11 pr-4 py-3 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
-                      defaultValue={profileData.phone}
-                    />
-                  </div>
+                  <PhoneInput
+                    value={phone}
+                    onChange={setPhone}
+                    variant="profile"
+                    label={t("phone")}
+                  />
+                  <input type="hidden" name="phone" value={phone} />
                 </div>
 
                 <div className="space-y-1.5 md:col-span-2">
@@ -237,16 +249,16 @@ export default function DealerProfilePage() {
                     <input
                       id="oldPassword"
                       name="oldPassword"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword.old ? "text" : "password"}
                       className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                       placeholder={t("oldPasswordPlaceholder")}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword(prev => ({ ...prev, old: !prev.old }))}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                     >
-                      {showPassword ? (
+                      {showPassword.old ? (
                         <EyeOffIcon className="h-5 w-5" />
                       ) : (
                         <EyeIcon className="h-5 w-5" />
@@ -263,22 +275,26 @@ export default function DealerProfilePage() {
                     <input
                       id="newPassword"
                       name="newPassword"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword.new ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      onBlur={() => setPasswordTouched(true)}
                       className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                       placeholder={t("newPasswordPlaceholder")}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword(prev => ({ ...prev, new: !prev.new }))}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                     >
-                      {showPassword ? (
+                      {showPassword.new ? (
                         <EyeOffIcon className="h-5 w-5" />
                       ) : (
                         <EyeIcon className="h-5 w-5" />
                       )}
                     </button>
                   </div>
+                  <PasswordValidator password={newPassword} show={passwordTouched} />
                 </div>
 
                 <div className="space-y-1.5 relative">
@@ -289,22 +305,34 @@ export default function DealerProfilePage() {
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword.confirm ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onBlur={() => setConfirmPasswordTouched(true)}
                       className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                       placeholder={t("confirmPasswordPlaceholder")}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-hidden"
                     >
-                      {showPassword ? (
+                      {showPassword.confirm ? (
                         <EyeOffIcon className="h-5 w-5" />
                       ) : (
                         <EyeIcon className="h-5 w-5" />
                       )}
                     </button>
                   </div>
+                  {confirmPasswordTouched && confirmPassword && (
+                    <div className="mt-2 px-1 animate-in fade-in slide-in-from-top-1 duration-300">
+                      <p className={`text-[11px] font-medium leading-relaxed ${passwordsMatch ? "text-emerald-500" : "text-red-500"}`}>
+                        <span className="font-bold mr-1 uppercase tracking-wider opacity-70">
+                          {passwordsMatch ? tCommon("passwordsMatch") : tErr("passwordsDoNotMatch")}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -312,7 +340,7 @@ export default function DealerProfilePage() {
             <div className="pt-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !isPasswordOk}
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold transition-all hover:shadow-lg hover:shadow-red-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

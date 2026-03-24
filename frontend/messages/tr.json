@@ -7,7 +7,14 @@
     "save": "Kaydet",
     "cancel": "İptal",
     "language": "Dil",
-    "currency": "Para Birimi"
+    "currency": "Para Birimi",
+    "passwordRequirementLength": "8 karakter",
+    "passwordRequirementUpper": "Bir büyük harf",
+    "passwordRequirementLower": "Bir küçük harf",
+    "passwordRequirementNumber": "Bir rakam",
+    "passwordRequirementSpecial": "Bir özel karakter",
+    "missing": "En az",
+    "passwordsMatch": "Şifreler eşleşiyor"
   },
   "Navigation": {
     "dashboard": "Panel",
@@ -41,6 +48,8 @@
     "emailPlaceholder": "bayi@stafupro.com",
     "passwordLabel": "Şifre",
     "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Şifreyi Onayla",
+    "confirmPasswordPlaceholder": "Şifreyi tekrar girin",
     "companyNameLabel": "Şirket Adı",
     "companyNamePlaceholder": "Şirketiniz Ltd. Şti.",
     "phoneLabel": "Telefon",
@@ -279,6 +288,8 @@
     "checkoutFailed": "Ödeme Başarısız"
   },
   "Errors": {
+    "passwordsDoNotMatch": "Şifreler eşleşmiyor",
+    "required": "Bu alan zorunludur",
     "emailPasswordRequired": "E-posta ve şifre gereklidir",
     "invalidCredentials": "Geçersiz kimlik bilgileri",
     "unknownUserRole": "Bilinmeyen kullanıcı rolü",
@@ -543,5 +554,10 @@
     "addedToCartDesc": "{count}x {title} sepetinize eklendi.",
     "brand": "Marka",
     "currentColor": "Güncel"
+  },
+  "Errors": {
+    "Email already exists": "Bu e-posta adresi zaten kayıtlı.",
+    "required": "Bu alan zorunludur.",
+    "passwordsDoNotMatch": "Şifreler uyuşmuyor."
   }
 }

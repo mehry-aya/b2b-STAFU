@@ -1,34 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Anchor, ArrowRight, Save, Lock, User as UserIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import { usePathname } from "@/i18n/routing";
 import { updateProfileAction } from "@/app/(auth)/actions";
+import { PasswordValidator } from "@/components/ui/PasswordValidator";
+import { isPasswordValid } from "@/lib/password-utils";
 import { useTranslations } from "next-intl";
 
 export default function AdminProfilePage() {
   const t = useTranslations("AdminProfile");
+  const tCommon = useTranslations("Common");
   const pathname = usePathname();
   const isMaster = pathname?.startsWith("/master");
   
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState({
     old: false,
     new: false,
     confirm: false
   });
 
+  const passwordsMatch = useMemo(() => {
+    return newPassword === confirmPassword;
+  }, [newPassword, confirmPassword]);
+
+  const isPasswordOk = useMemo(() => {
+    if (!newPassword) return true;
+    return isPasswordValid(newPassword) && passwordsMatch;
+  }, [newPassword, passwordsMatch]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!isPasswordOk) return;
+
     setLoading(true);
     setSuccess(false);
     setError("");
 
     const formData = new FormData(e.currentTarget);
     const oldPassword = formData.get("oldPassword") as string;
-    const newPassword = formData.get("newPassword") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (!oldPassword) {
@@ -43,12 +60,6 @@ export default function AdminProfilePage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError(t("passwordTooShort"));
-      setLoading(false);
-      return;
-    }
-
     try {
       const result = await updateProfileAction({ oldPassword, password: newPassword });
 
@@ -57,6 +68,7 @@ export default function AdminProfilePage() {
       }
 
       setSuccess(true);
+      setNewPassword("");
       (e.target as HTMLFormElement).reset();
     } catch (err: any) {
       setError(err.message || t("connectionError"));
@@ -160,6 +172,9 @@ export default function AdminProfilePage() {
                   name="newPassword"
                   type={showPassword.new ? "text" : "password"}
                   required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  onBlur={() => setPasswordTouched(true)}
                   className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                   placeholder={t("newPasswordPlaceholder")}
                 />
@@ -175,6 +190,7 @@ export default function AdminProfilePage() {
                   )}
                 </button>
               </div>
+              <PasswordValidator password={newPassword} show={passwordTouched} />
             </div>
 
             <div className="space-y-1.5 relative">
@@ -190,6 +206,9 @@ export default function AdminProfilePage() {
                   name="confirmPassword"
                   type={showPassword.confirm ? "text" : "password"}
                   required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => setConfirmPasswordTouched(true)}
                   className="block w-full rounded-xl border-zinc-200 px-4 py-3 pr-10 text-sm focus:border-red-500 focus:ring-red-500 transition-colors shadow-sm"
                   placeholder={t("confirmPasswordPlaceholder")}
                 />
@@ -205,12 +224,21 @@ export default function AdminProfilePage() {
                   )}
                 </button>
               </div>
+              {confirmPasswordTouched && confirmPassword && (
+                <div className="mt-2 px-1 animate-in fade-in slide-in-from-top-1 duration-300">
+                  <p className={`text-[11px] font-medium leading-relaxed ${passwordsMatch ? "text-emerald-500" : "text-red-500"}`}>
+                    <span className="font-bold mr-1 uppercase tracking-wider opacity-70">
+                      {passwordsMatch ? tCommon("passwordsMatch") : t("passwordsDoNotMatch")}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !isPasswordOk}
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-all hover:shadow-lg hover:shadow-red-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (

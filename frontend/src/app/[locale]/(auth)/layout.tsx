@@ -37,7 +37,7 @@ export default async function AuthLayout({
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-lg px-4 py-8">
+      <div className="relative z-10 w-full max-w-xl px-4 py-8">
         <div className="backdrop-blur-xl bg-white/25 border border-white/45 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden">
           {children}
         </div>

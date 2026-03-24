@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 import { getMeAction } from "@/app/(auth)/actions";
@@ -24,6 +24,9 @@ import {
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
+
+import { PasswordValidator } from "@/components/ui/PasswordValidator";
+import { isPasswordValid } from "@/lib/password-utils";
 
 interface Admin {
   id: number;
@@ -249,15 +252,28 @@ function AddAdminModal({
   onSuccess: () => void;
 }) {
   const t = useTranslations("MasterAdmins");
+  const tCommon = useTranslations("Common");
   const tErr = useTranslations("Errors");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const passwordsMatch = useMemo(() => {
+    return password === confirmPassword;
+  }, [password, confirmPassword]);
+
+  const isFormValid = useMemo(() => {
+    return email && isPasswordValid(password) && passwordsMatch && confirmPassword !== "";
+  }, [email, password, passwordsMatch, confirmPassword]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isFormValid) return;
     setLoading(true);
     setError(null);
 
@@ -322,6 +338,7 @@ function AddAdminModal({
                 placeholder={t("passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => setPasswordTouched(true)}
               />
               <button
                 type="button"
@@ -335,6 +352,32 @@ function AddAdminModal({
                 )}
               </button>
             </div>
+            <PasswordValidator password={password} show={passwordTouched} />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-zinc-700 mb-1.5 uppercase tracking-wider">
+              {t("confirmPassword")}
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                className="w-full px-4 py-2.5 border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-zinc-900 focus:outline-none pr-12"
+                placeholder={t("confirmPasswordPlaceholder") || "Confirm password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onBlur={() => setConfirmPasswordTouched(true)}
+              />
+            </div>
+            {confirmPasswordTouched && confirmPassword && (
+              <div className="mt-2 px-1 animate-in fade-in slide-in-from-top-1 duration-300">
+                <p className={`text-[11px] font-medium leading-relaxed ${passwordsMatch ? "text-emerald-500" : "text-red-500"}`}>
+                  <span className="font-bold mr-1 uppercase tracking-wider opacity-70">
+                    {passwordsMatch ? tCommon("passwordsMatch") : tErr("passwordsDoNotMatch")}
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex gap-3 pt-2">
             <button
@@ -346,7 +389,7 @@ function AddAdminModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isFormValid}
               className="flex-1 py-2.5 text-sm bg-zinc-900 text-white font-bold rounded-xl hover:bg-red-500 hover:text-black transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

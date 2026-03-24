@@ -433,7 +433,7 @@ export default function AdminContractsPage() {
                   href={selectedContract.fileUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="p-3 bg-white shadow-2xl rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 hover:bg-blue-600 hover:text-white transition-all font-bold"
+                  className="p-3 bg-white shadow-2xl rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-900 hover:bg-blue-600 hover:text-white transition-all"
                 >
                   <ExternalLink className="w-4 h-4" />
                   {t("openFullscreen")}

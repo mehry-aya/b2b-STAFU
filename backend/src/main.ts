@@ -7,8 +7,8 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = process.env.FRONTEND_ORIGINS
-    ? process.env.FRONTEND_ORIGINS.split(',')
+  const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS .split(',')
     : [];
 
   app.enableCors({

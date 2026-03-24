@@ -7,7 +7,14 @@
     "save": "Save",
     "cancel": "Cancel",
     "language": "Language",
-    "currency": "Currency"
+    "currency": "Currency",
+    "passwordRequirementLength": "8 characters",
+    "passwordRequirementUpper": "One uppercase letter",
+    "passwordRequirementLower": "One lowercase letter",
+    "passwordRequirementNumber": "One number",
+    "passwordRequirementSpecial": "One special character",
+    "missing": "At least",
+    "passwordsMatch": "Passwords match"
   },
   "Navigation": {
     "dashboard": "Dashboard",
@@ -41,6 +48,8 @@
     "emailPlaceholder": "dealer@stafupro.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
     "companyNameLabel": "Company Name",
     "companyNamePlaceholder": "Your Company Ltd.",
     "phoneLabel": "Phone",
@@ -279,6 +288,8 @@
     "checkoutFailed": "Checkout Failed"
   },
   "Errors": {
+    "passwordsDoNotMatch": "Passwords do not match",
+    "required": "This field is required",
     "emailPasswordRequired": "Email and password are required",
     "invalidCredentials": "Invalid credentials",
     "unknownUserRole": "Unknown user role",
@@ -541,7 +552,11 @@
     "readFullDescription": "Read full description",
     "addedToCart": "Added to Order",
     "addedToCartDesc": "{count}x {title} added to your cart.",
-    "brand": "Brand",
-    "currentColor": "Current"
+    "brand": "Brand"
+  },
+  "Errors": {
+    "Email already exists": "This email address is already registered.",
+    "required": "This field is required.",
+    "passwordsDoNotMatch": "Passwords do not match."
   }
 }
