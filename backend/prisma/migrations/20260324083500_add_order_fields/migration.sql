@@ -1,5 +1,5 @@
--- AlterTable
-ALTER TABLE "orders" ADD COLUMN "status_changed_by_email" TEXT,
-ADD COLUMN "status_changed_at" TIMESTAMP(3),
-ADD COLUMN "inventory_synced" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN "inventory_synced_at" TIMESTAMP(3);
+-- AlterTable (Idempotent)
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "status_changed_by_email" TEXT;
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "status_changed_at" TIMESTAMP(3);
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "inventory_synced" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "inventory_synced_at" TIMESTAMP(3);
