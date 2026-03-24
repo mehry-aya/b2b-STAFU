@@ -262,20 +262,24 @@ export default function SidebarLayout({
             </button>
             <Logo variant="white" width={90} height={24} className="h-6" />
           </div>
-          {/* Cart icon in mobile header — dealer only */}
-          {showCart && (
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="p-2 relative text-zinc-400 hover:text-white transition-colors"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full text-white">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-          )}
+          <div className="flex items-center gap-1 sm:gap-2">
+            <LanguageSelector variant="compact" />
+            <CurrencySelector variant="compact" />
+            {/* Cart icon in mobile header — dealer only */}
+            {showCart && (
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="p-2 relative text-zinc-400 hover:text-white transition-colors ml-1"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full text-white">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto relative">

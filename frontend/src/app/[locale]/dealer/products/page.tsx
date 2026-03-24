@@ -141,7 +141,7 @@ export default function DealerProductsPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="bg-white border border-zinc-100 overflow-hidden animate-pulse">
               <div className="w-full h-52 bg-zinc-100" />
@@ -162,7 +162,7 @@ export default function DealerProductsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
           {products.map((product) => {
             const firstImage = product.images?.[0]?.src;
             const price = getLowestPrice(product);

@@ -182,7 +182,7 @@ export default function AdminOrderDetailPage({
   );
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+    <div className="max-w-7xl mx-auto space-y-8 pb-20">
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <button 

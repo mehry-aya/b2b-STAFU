@@ -168,7 +168,7 @@ export default function DealerContractsPage() {
                 <FileText className="w-5 h-5 text-blue-600" />
                 {t("tableTitle")}
               </h2>
-              <span className="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black rounded-full uppercase tracking-widest">
+              <span className="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black rounded-full  tracking-widest">
                 {t("itemsTotal", { count: contracts.length })}
               </span>
             </div>

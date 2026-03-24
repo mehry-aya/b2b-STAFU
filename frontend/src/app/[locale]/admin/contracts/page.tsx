@@ -194,7 +194,7 @@ export default function AdminContractsPage() {
   };
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 px-10 py-12 shadow-2xl">
         <div className="absolute inset-0 opacity-[0.08]" style={{ 
@@ -239,7 +239,7 @@ export default function AdminContractsPage() {
         <div className={`flex-1 space-y-6 transition-all duration-500 ${selectedContract ? "lg:w-3/5" : "w-full"}`}>
           {/* Controls */}
           <div className="bg-white rounded-4xl border border-zinc-200 p-6 shadow-sm flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
               <div className="flex-1 space-y-2">
                 <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">{t("selectDealer")}</label>
                 <SearchableSelect

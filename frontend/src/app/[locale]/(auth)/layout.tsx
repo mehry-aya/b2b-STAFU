@@ -6,15 +6,14 @@ export default async function AuthLayout({
   children: React.ReactNode;
 }) {
   let images: string[] = [];
-  
+
   try {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001/api";
     const url = `${backendUrl}/carousel-images?page=login`;
-        
-    const response = await fetch(url, {
-      next: { revalidate: 3600 }
-    });
 
+    const response = await fetch(url, {
+      next: { revalidate: 3600 },
+    });
 
     if (response.ok) {
       images = await response.json();

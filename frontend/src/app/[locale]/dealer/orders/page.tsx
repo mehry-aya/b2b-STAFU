@@ -3,7 +3,17 @@
 import { useEffect, useState } from "react";
 import { fetchOrders, deleteOrder } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
-import { ShoppingBag, Calendar, Clock, Eye, Trash2, CreditCard, Truck, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  ShoppingBag,
+  Calendar,
+  Clock,
+  Eye,
+  Trash2,
+  CreditCard,
+  Truck,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
@@ -59,7 +69,7 @@ export default function DealerOrdersPage() {
 
   const confirmDelete = async () => {
     if (orderToDelete === null) return;
-    
+
     try {
       const result = await deleteOrder(orderToDelete);
       if (result && result.error) {
@@ -95,28 +105,40 @@ export default function DealerOrdersPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "draft": return <AlertCircle className="h-3 w-3" />;
-      case "pending_payment": return <CreditCard className="h-3 w-3" />;
-      case "paid": return <CheckCircle2 className="h-3 w-3" />;
-      case "shipped": return <Truck className="h-3 w-3" />;
-      case "cancelled": return <AlertCircle className="h-3 w-3" />;
-      default: return null;
+      case "draft":
+        return <AlertCircle className="h-3 w-3" />;
+      case "pending_payment":
+        return <CreditCard className="h-3 w-3" />;
+      case "paid":
+        return <CheckCircle2 className="h-3 w-3" />;
+      case "shipped":
+        return <Truck className="h-3 w-3" />;
+      case "cancelled":
+        return <AlertCircle className="h-3 w-3" />;
+      default:
+        return null;
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "draft": return t("statusDraft", { fallback: "Draft" });
-      case "pending_payment": return t("statusPendingPayment", { fallback: "Pending Payment" });
-      case "paid": return t("statusPaid", { fallback: "Paid" });
-      case "shipped": return t("statusShipped", { fallback: "Shipped" });
-      case "cancelled": return t("statusCancelled", { fallback: "Cancelled" });
-      default: return status.replace('_', ' ');
+      case "draft":
+        return t("statusDraft", { fallback: "Draft" });
+      case "pending_payment":
+        return t("statusPendingPayment", { fallback: "Pending Payment" });
+      case "paid":
+        return t("statusPaid", { fallback: "Paid" });
+      case "shipped":
+        return t("statusShipped", { fallback: "Shipped" });
+      case "cancelled":
+        return t("statusCancelled", { fallback: "Cancelled" });
+      default:
+        return status.replace("_", " ");
     }
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="bg-zinc-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-2xl">
         <div className="relative z-10">
@@ -141,7 +163,10 @@ export default function DealerOrdersPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-white rounded-2xl animate-pulse border border-zinc-100" />
+            <div
+              key={i}
+              className="h-24 bg-white rounded-2xl animate-pulse border border-zinc-100"
+            />
           ))}
         </div>
       ) : error ? (
@@ -154,9 +179,16 @@ export default function DealerOrdersPage() {
           <div className="p-4 bg-zinc-50 rounded-full w-fit mx-auto mb-6">
             <ShoppingBag className="h-12 w-12 text-zinc-300" />
           </div>
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">{t("noOrders")}</h2>
-          <p className="text-zinc-500 mb-8 max-w-xs mx-auto text-sm">{t("noOrdersDesc")}</p>
-          <Link href="/dealer/products" className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200">
+          <h2 className="text-xl font-bold text-zinc-900 mb-2">
+            {t("noOrders")}
+          </h2>
+          <p className="text-zinc-500 mb-8 max-w-xs mx-auto text-sm">
+            {t("noOrdersDesc")}
+          </p>
+          <Link
+            href="/dealer/products"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200"
+          >
             {t("browseButton")}
           </Link>
         </div>
@@ -166,20 +198,35 @@ export default function DealerOrdersPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-100">
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t("orderId")}</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t("date")}</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t("status")}</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">{t("total")}</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">{t("actions")}</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    {t("orderId")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    {t("date")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    {t("status")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                    {t("total")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">
+                    {t("actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {orders.map((order: Order) => (
-                  <tr key={order.id} className="hover:bg-zinc-50/50 transition-colors group">
-                    <td className="px-6 py-5">
-                      <span className="font-mono text-xs font-black text-zinc-900">#{order.id.toString().padStart(5, '0')}</span>
+                  <tr
+                    key={order.id}
+                    className="hover:bg-zinc-50/50 transition-colors group"
+                  >
+                    <td className="px-4 py-2">
+                      <span className="font-mono text-xs font-black text-zinc-900">
+                        #{order.id.toString().padStart(5, "0")}
+                      </span>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-2">
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-700">
                           <Calendar className="h-3 w-3 text-zinc-400" />
@@ -191,19 +238,23 @@ export default function DealerOrdersPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${getStatusStyle(order.status)}`}>
+                    <td className="px-4 py-2">
+                      <div
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${getStatusStyle(order.status)}`}
+                      >
                         {getStatusIcon(order.status)}
                         {getStatusLabel(order.status)}
                       </div>
                     </td>
-                    <td className="px-6 py-5">
-                      <span className="text-sm font-black text-zinc-900">{formatPrice(order.totalAmount)}</span>
+                    <td className="px-4 py-2">
+                      <span className="text-sm font-black text-zinc-900">
+                        {formatPrice(order.totalAmount)}
+                      </span>
                     </td>
-                    <td className="px-6 py-5 text-right">
+                    <td className="px-4 py-2 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {order.status === "draft" && (
-                          <button 
+                          <button
                             onClick={() => handleDelete(order.id)}
                             className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all border border-red-100"
                             title={t("remove")}
@@ -211,7 +262,7 @@ export default function DealerOrdersPage() {
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         )}
-                        <Link 
+                        <Link
                           href={`/dealer/orders/${order.id}`}
                           className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all group-hover:shadow-md"
                         >

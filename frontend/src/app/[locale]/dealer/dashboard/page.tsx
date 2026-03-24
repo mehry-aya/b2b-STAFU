@@ -119,7 +119,7 @@ export default function DealerDashboard() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
       {/* Hero welcome */}
       <div className="relative overflow-hidden rounded-3xl bg-[#0f0f0f] px-8 py-10 shadow-2xl shadow-zinc-200">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />

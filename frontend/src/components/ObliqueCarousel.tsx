@@ -26,21 +26,21 @@ export default function ObliqueCarousel({ images }: ObliqueCarouselProps) {
   ];
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-white z-0">
+    <div className="fixed inset-0 overflow-hidden bg-black/80 z-0">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-15deg] flex flex-col gap-3 items-start justify-center w-[250vw] h-[250vh]">
         {lanes.map((lane, li) => (
           <div key={li} className={`flex gap-2 shrink-0 w-max ${lane.cls}`}>
             {lane.imgs.map((url, i) => (
               <div
                 key={i}
-                className="relative shrink-0 overflow-hidden w-[280px] h-[380px]"
+                className="relative shrink-0 overflow-hidden w-[140px] h-[200px] sm:w-[200px] sm:h-[280px] md:w-[240px] md:h-[340px] lg:w-[280px] lg:h-[380px]"
               >
                 <Image
                   src={url}
                   alt=""
                   fill
                   className="object-cover"
-                  sizes="280px"
+                  sizes="(max-width: 640px) 140px, (max-width: 768px) 200px, (max-width: 1024px) 240px, 280px"
                 />
               </div>
             ))}

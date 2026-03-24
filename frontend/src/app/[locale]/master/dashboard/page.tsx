@@ -68,7 +68,7 @@ export default function MasterDashboard() {
   const hasAlerts = (stats?.alerts?.pendingContracts?.length > 0) || (stats?.alerts?.pendingOrdersCount > 0);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12">
       <DashboardHeader
         title={t("title")}
         subtitle={t("subtitle")}

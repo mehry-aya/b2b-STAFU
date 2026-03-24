@@ -216,7 +216,7 @@ export default function DealerProductDetailsPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
+    <div className="max-w-7xl mx-auto pb-12">
       {/* Back link */}
       <button
         onClick={() => router.back()}
