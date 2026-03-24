@@ -1,4 +1,5 @@
 import ObliqueCarousel from "@/components/ObliqueCarousel";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 export default async function AuthLayout({
   children,
@@ -28,6 +29,14 @@ export default async function AuthLayout({
   return (
     <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
       <ObliqueCarousel images={images} />
+      
+      {/* Language Switcher */}
+      <div className="absolute top-6 left-6 z-20">
+        <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/10 p-1">
+          <LanguageSelector variant="compact" />
+        </div>
+      </div>
+
       <div className="relative z-10 w-full max-w-lg px-4 py-8">
         <div className="backdrop-blur-xl bg-white/25 border border-white/45 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden">
           {children}
