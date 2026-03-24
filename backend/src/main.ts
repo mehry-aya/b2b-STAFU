@@ -23,9 +23,8 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   const port = process.env.PORT || 3001;
-  // Explicitly listen on '0.0.0.0' for Railway
-  await app.listen(port, '0.0.0.0');
-  console.log(`STAFUPRO API running on port ${port} (on 0.0.0.0)`);
+  await app.listen(port);
+  console.log(`STAFUPRO API running on port ${port}`);
 }
 
 

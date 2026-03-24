@@ -52,8 +52,14 @@ export default function DealerOrderDetailPage({
 
   const loadOrder = async () => {
     try {
-      const data = await fetchOrderById(parseInt(params.id));
-      setOrder(data);
+      const result = await fetchOrderById(parseInt(params.id));
+      if (result && result.error) {
+        setError(result.error);
+      } else if (result) {
+        setOrder(result);
+      } else {
+        setError(tErr("fetchOrdersFailed"));
+      }
     } catch (err: any) {
       setError(err.message || tErr("fetchOrdersFailed"));
     } finally {
@@ -69,12 +75,20 @@ export default function DealerOrderDetailPage({
     if (!order) return;
     setSubmitting(true);
     try {
-      await updateOrderStatus(order.id, "pending_payment");
-      toast({
-        title: "Order Submitted",
-        description: "Your order has been submitted for payment processing.",
-      });
-      await loadOrder(); // Refresh data
+      const result = await updateOrderStatus(order.id, "pending_payment");
+      if (result && result.error) {
+        toast({
+          title: "Submission Failed",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Order Submitted",
+          description: "Your order has been submitted for payment processing.",
+        });
+        await loadOrder(); // Refresh data
+      }
     } catch (err: any) {
       toast({
         title: "Submission Failed",

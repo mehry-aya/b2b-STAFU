@@ -44,7 +44,7 @@ export async function fetchProducts(
   const queryString = params.toString() ? `?${params.toString()}` : '';
   const url = `${API_BASE_URL}/products${queryString}`;
   
-  console.log(`[Server Action] fetchProducts calling: ${url}`);
+  //console.log(`[Server Action] fetchProducts calling: ${url}`);
   
   try {
     const response = await fetch(url, {
@@ -54,21 +54,21 @@ export async function fetchProducts(
 
     if (!response.ok) {
       const text = await response.text();
-      console.error(`[Server Action] fetchProducts failed: ${response.status} ${response.statusText}`, text.substring(0, 200));
+      //console.error(`[Server Action] fetchProducts failed: ${response.status} ${response.statusText}`, text.substring(0, 200));
       throw new Error('Failed to fetch products');
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error(`[Server Action] fetchProducts exception:`, (error as Error).message);
+    //console.error(`[Server Action] fetchProducts exception:`, (error as Error).message);
     throw error;
   }
 }
 
 export async function fetchCategories(): Promise<any[]> {
   const url = `${API_BASE_URL}/products/categories`;
-  console.log(`[Server Action] fetchCategories calling: ${url}`);
+  //console.log(`[Server Action] fetchCategories calling: ${url}`);
 
   try {
     const response = await fetch(url, {
@@ -77,20 +77,20 @@ export async function fetchCategories(): Promise<any[]> {
     });
 
     if (!response.ok) {
-      console.error(`[Server Action] fetchCategories failed: ${response.status} ${response.statusText}`);
+      //console.error(`[Server Action] fetchCategories failed: ${response.status} ${response.statusText}`);
       throw new Error('Failed to fetch categories');
     }
 
     return response.json();
   } catch (error) {
-    console.error(`[Server Action] fetchCategories exception:`, error);
+   // console.error(`[Server Action] fetchCategories exception:`, error);
     throw error;
   }
 }
 
 export async function fetchProductById(id: number | string): Promise<Product> {
   const url = `${API_BASE_URL}/products/${id}`;
-  console.log(`[Server Action] fetchProductById calling: ${url}`);
+  //console.log(`[Server Action] fetchProductById calling: ${url}`);
 
   try {
     const response = await fetch(url, {
@@ -99,20 +99,20 @@ export async function fetchProductById(id: number | string): Promise<Product> {
     });
 
     if (!response.ok) {
-      console.error(`[Server Action] fetchProductById failed: ${response.status} ${response.statusText}`);
+     // console.error(`[Server Action] fetchProductById failed: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to fetch product ${id}`);
     }
 
     return response.json();
   } catch (error) {
-    console.error(`[Server Action] fetchProductById exception:`, error);
+    //console.error(`[Server Action] fetchProductById exception:`, error);
     throw error;
   }
 }
 
 export async function syncShopifyProducts(): Promise<void> {
   const url = `${API_BASE_URL}/products/sync`;
-  console.log(`[Server Action] syncShopifyProducts calling: ${url}`);
+ // console.log(`[Server Action] syncShopifyProducts calling: ${url}`);
 
   try {
     const response = await fetch(url, {
@@ -123,12 +123,12 @@ export async function syncShopifyProducts(): Promise<void> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      console.error(`[Server Action] syncShopifyProducts failed:`, errorData);
+     // console.error(`[Server Action] syncShopifyProducts failed:`, errorData);
       throw new Error(errorData?.message || 'Failed to sync Shopify products');
     }
     // Completion is detected via polling /sync/status
   } catch (error) {
-    console.error(`[Server Action] syncShopifyProducts exception:`, (error as Error).message);
+   // console.error(`[Server Action] syncShopifyProducts exception:`, (error as Error).message);
     throw error;
   }
 }
@@ -154,7 +154,7 @@ export async function fetchSyncStatus(): Promise<{
 
     return response.json();
   } catch (error) {
-    console.error(`[Server Action] fetchSyncStatus exception:`, error);
+   // console.error(`[Server Action] fetchSyncStatus exception:`, error);
     throw error;
   }
 }

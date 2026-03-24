@@ -32,9 +32,15 @@ export default function DealerOrdersPage() {
     setError("");
     try {
       const result = await fetchOrders(page, pageSize);
-      setOrders(result.data);
-      setTotalPages(result.totalPages);
-      setTotalCount(result.total);
+      if (result && result.error) {
+        setError(result.error);
+      } else if (result && result.data) {
+        setOrders(result.data);
+        setTotalPages(result.totalPages);
+        setTotalCount(result.total);
+      } else {
+        setError(tErr("fetchOrdersFailed"));
+      }
     } catch (err: any) {
       setError(err.message || tErr("fetchOrdersFailed"));
     } finally {
@@ -55,9 +61,13 @@ export default function DealerOrdersPage() {
     if (orderToDelete === null) return;
     
     try {
-      await deleteOrder(orderToDelete);
-      toast.success(t("removeSuccess"));
-      loadOrders();
+      const result = await deleteOrder(orderToDelete);
+      if (result && result.error) {
+        toast.error(result.error || t("removeFailed"));
+      } else {
+        toast.success(t("removeSuccess"));
+        loadOrders();
+      }
     } catch (err: any) {
       toast.error(err.message || t("removeFailed"));
     } finally {

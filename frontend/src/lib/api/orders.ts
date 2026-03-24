@@ -23,76 +23,137 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 }
 
 export async function fetchOrders(page: number = 1, limit: number = 10) {
-  const params = new URLSearchParams();
-  params.append('page', page.toString());
-  params.append('limit', limit.toString());
-  
-  const response = await fetch(`${API_BASE_URL}/orders?${params.toString()}`, {
-    headers: await getAuthHeader(),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error("Failed to fetch orders");
-  return response.json();
+  try {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    const response = await fetch(`${API_BASE_URL}/orders?${params.toString()}`, {
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Server Action] fetchOrders failed: ${response.status} ${response.statusText}`, errorText);
+      return { error: 'Failed to fetch orders' };
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('[Server Action] fetchOrders exception:', error.message);
+    return { error: error.message || 'connectionError' };
+  }
 }
 
 export async function fetchOrderById(id: number) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
-    headers: await getAuthHeader(),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error("Failed to fetch order details");
-  return response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Server Action] fetchOrderById failed: ${response.status} ${response.statusText}`, errorText);
+      return { error: `Failed to fetch order ${id}` };
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('[Server Action] fetchOrderById exception:', error.message);
+    return { error: error.message || 'connectionError' };
+  }
 }
 
 export async function createOrder(items: { variantId: number; quantity: number }[]) {
-  const response = await fetch(`${API_BASE_URL}/orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(await getAuthHeader()),
-    },
-    body: JSON.stringify({ items }),
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to create order");
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
+      body: JSON.stringify({ items }),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error(`[Server Action] createOrder failed:`, errorData);
+      return { error: errorData.message || "Failed to create order" };
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('[Server Action] createOrder exception:', error.message);
+    return { error: error.message || 'connectionError' };
   }
-  return response.json();
 }
 
 export async function updateOrderStatus(id: number, status: OrderStatus) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...(await getAuthHeader()),
-    },
-    body: JSON.stringify({ status }),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error("Failed to update order status");
-  return response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
+      body: JSON.stringify({ status }),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Server Action] updateOrderStatus failed: ${response.status}`, errorText);
+      return { error: "Failed to update order status" };
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('[Server Action] updateOrderStatus exception:', error.message);
+    return { error: error.message || 'connectionError' };
+  }
 }
 
 export async function exportOrdersToExcel() {
-  const response = await fetch(`${API_BASE_URL}/orders/export/excel`, {
-    headers: await getAuthHeader(),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error("Failed to export orders");
-  
-  // Return the blob for the client to handle
-  const blob = await response.blob();
-  return blob;
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/export/excel`, {
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      console.error(`[Server Action] exportOrdersToExcel failed: ${response.status}`);
+      return { error: "Failed to export orders" };
+    }
+    
+    // Return the blob for the client to handle
+    const blob = await response.blob();
+    return blob;
+  } catch (error: any) {
+    console.error('[Server Action] exportOrdersToExcel exception:', error.message);
+    return { error: error.message || 'connectionError' };
+  }
 }
 
 export async function deleteOrder(id: number) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
-    method: "DELETE",
-    headers: await getAuthHeader(),
-    cache: 'no-store',
-  });
-  if (!response.ok) throw new Error("Failed to delete order");
-  return response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+      method: "DELETE",
+      headers: await getAuthHeader(),
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Server Action] deleteOrder failed: ${response.status}`, errorText);
+      return { error: "Failed to delete order" };
+    }
+    
+    return await response.json();
+  } catch (error: any) {
+    console.error('[Server Action] deleteOrder exception:', error.message);
+    return { error: error.message || 'connectionError' };
+  }
 }
