@@ -7,14 +7,12 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const allowedOrigins = process.env.FRONTEND_ORIGINS
+    ? process.env.FRONTEND_ORIGINS.split(',')
+    : [];
+
   app.enableCors({
-    origin: [
-      'https://b2b-stafu.vercel.app',
-      'https://b2b-stafu-git-main-ayamehri293-4414s-projects.vercel.app',
-      'https://b2b-stafu-production.up.railway.app',
-      'http://localhost:3000',
-      'http://localhost:3001',
-    ],
+    origin: allowedOrigins,
     credentials: true,
   });
 
