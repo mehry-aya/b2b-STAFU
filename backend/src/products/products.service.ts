@@ -41,9 +41,9 @@ export class ProductsService {
         let debugCount = 0;
         for (const p of page.products) {
           if (debugCount < 5) {
-              console.log(`--- DEBUG Product ${p.shopifyId} ---`);
-              console.log(`translationsTr: ${JSON.stringify(p.translationsTr, null, 2)}`);
-              console.log(`translationsEn: ${JSON.stringify(p.translationsEn, null, 2)}`);
+              // console.log(`--- DEBUG Product ${p.shopifyId} ---`);
+              // console.log(`translationsTr: ${JSON.stringify(p.translationsTr, null, 2)}`);
+              // console.log(`translationsEn: ${JSON.stringify(p.translationsEn, null, 2)}`);
               debugCount++;
           }
           try {
