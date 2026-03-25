@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AuthPayload } from "@/lib/auth";
 import { decodeJwt } from "jose";
+import { mapBackendError } from "@/lib/utils";
 
 const API_BASE = process.env.BACKEND_URL || 'http://127.0.0.1:3001/api';
 
@@ -24,8 +25,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
 
     if (!response.ok) {
       const data = await response.json();
-      // If the backend returns a specific message, we use that, otherwise generic invalid credentials
-      return { error: data.message ? (data.message === "Invalid credentials" ? "invalidCredentials" : data.message) : "invalidCredentials" };
+      return { error: mapBackendError(data.message) };
     }
 
     const { access_token } = await response.json();
@@ -84,7 +84,7 @@ export async function registerAction(prevState: unknown, formData: FormData) {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "registrationFailed" };
+      return { error: mapBackendError(data.message || "registrationFailed") };
     }
 
     return { success: "accountCreated" };
@@ -111,7 +111,7 @@ export async function createAdminAction(email: string, password: string) {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "createAdminFailed" };
+      return { error: mapBackendError(data.message || "createAdminFailed") };
     }
 
     return { success: "adminCreated" };
@@ -157,7 +157,7 @@ export async function deleteAdminAction(id: number) {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "deleteAdminFailed" };
+      return { error: mapBackendError(data.message || "deleteAdminFailed") };
     }
 
     return { success: "adminDeleted" };
@@ -180,7 +180,7 @@ export async function getProductsAction() {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "fetchProductsFailed" };
+      return { error: mapBackendError(data.message || "fetchProductsFailed") };
     }
 
     return { products: await response.json() };
@@ -248,7 +248,7 @@ export async function uploadContractAction(formData: FormData) {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "uploadFailed" };
+      return { error: mapBackendError(data.message || "uploadFailed") };
     }
 
     return { success: "uploadSuccess", contract: await response.json() };
@@ -405,7 +405,7 @@ export async function createOrderAction(items: { productId: number; variantId: n
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "createOrderFailed" };
+      return { error: mapBackendError(data.message || "createOrderFailed") };
     }
 
     return { success: "orderCreated", order: await response.json() };
@@ -520,7 +520,7 @@ export async function updateProfileAction(payload: any) {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "updateProfileFailed" };
+      return { error: mapBackendError(data.message || "updateProfileFailed") };
     }
 
     return { success: "updateSuccess" };

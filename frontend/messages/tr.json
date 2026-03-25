@@ -291,7 +291,14 @@
     "passwordsDoNotMatch": "Şifreler eşleşmiyor",
     "required": "Bu alan zorunludur",
     "emailPasswordRequired": "E-posta ve şifre gereklidir",
-    "invalidCredentials": "Geçersiz kimlik bilgileri",
+    "invalidCredentials": "Geçersiz e-posta veya şifre",
+    "accountInactive": "Hesabınız aktif değil. Lütfen destek ile iletişime geçin.",
+    "emailAlreadyExists": "Bu e-posta adresi zaten kayıtlı.",
+    "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
+    "invalidPassword": "Geçersiz şifre",
+    "itemNotFound": "Bir veya daha fazla ürün artık mevcut değil",
+    "orderNotFound": "Sipariş bulunamadı",
+    "onlyDraftsDeletable": "Sadece taslak siparişler silinebilir",
     "unknownUserRole": "Bilinmeyen kullanıcı rolü",
     "connectionError": "Sunucuya bağlanılamadı",
     "registrationFailed": "Kayıt işlemi başarısız oldu",
@@ -552,12 +559,6 @@
     "readFullDescription": "Tam açıklamayı oku",
     "addedToCart": "Sepete Eklendi",
     "addedToCartDesc": "{count}x {title} sepetinize eklendi.",
-    "brand": "Marka",
-    "currentColor": "Güncel"
-  },
-  "Errors": {
-    "Email already exists": "Bu e-posta adresi zaten kayıtlı.",
-    "required": "Bu alan zorunludur.",
-    "passwordsDoNotMatch": "Şifreler uyuşmuyor."
+    "brand": "Marka"
   }
 }

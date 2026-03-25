@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { mapBackendError } from "@/lib/utils";
 
 const API_URL = "http://127.0.0.1:3001/api";
 
@@ -21,7 +22,7 @@ export async function getAdminStatsAction() {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "Failed to fetch admin stats" };
+      return { error: mapBackendError(data.message || "Failed to fetch admin stats") };
     }
 
     return { stats: await response.json() };
@@ -42,7 +43,7 @@ export async function getDealerStatsAction() {
 
     if (!response.ok) {
       const data = await response.json();
-      return { error: data.message || "Failed to fetch dealer stats" };
+      return { error: mapBackendError(data.message || "Failed to fetch dealer stats") };
     }
 
     return { stats: await response.json() };

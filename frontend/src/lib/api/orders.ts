@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { getLocale } from 'next-intl/server';
 import { OrderStatus } from "../types/order";
+import { mapBackendError } from '@/lib/utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
 
@@ -81,7 +82,7 @@ export async function createOrder(items: { variantId: number; quantity: number }
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error(`[Server Action] createOrder failed:`, errorData);
-      return { error: errorData.message || "Failed to create order" };
+      return { error: mapBackendError(errorData.message || "Failed to create order") };
     }
     
     return await response.json();

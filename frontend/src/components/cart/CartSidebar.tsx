@@ -19,6 +19,7 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { formatPrice } = useCurrency();
   const { toast } = useToast();
   const t = useTranslations("Cart");
+  const tErr = useTranslations("Errors");
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -32,20 +33,29 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
         quantity: item.quantity
       }));
       
-      const order = await createOrder(orderItems);
+      const result = await createOrder(orderItems);
+      
+      if (result.error) {
+        toast({
+          title: t("checkoutFailed"),
+          description: tErr(result.error),
+          variant: "destructive",
+        });
+        return;
+      }
       
       toast({
         title: t("orderCreated"),
-        description: t("orderCreatedDesc", { id: order.id }),
+        description: t("orderCreatedDesc", { id: result.id }),
       });
       
       clearCart();
       onClose();
-      router.push(`/dealer/orders/${order.id}`);
+      router.push(`/dealer/orders/${result.id}`);
     } catch (error: any) {
       toast({
         title: t("checkoutFailed"),
-        description: error.message || "An error occurred while creating your order.",
+        description: "An error occurred while creating your order.",
         variant: "destructive",
       });
     } finally {

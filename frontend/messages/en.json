@@ -291,7 +291,14 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "required": "This field is required",
     "emailPasswordRequired": "Email and password are required",
-    "invalidCredentials": "Invalid credentials",
+    "invalidCredentials": "Invalid email or password",
+    "accountInactive": "Your account is inactive. Please contact support.",
+    "emailAlreadyExists": "This email address is already registered.",
+    "invalidEmail": "Please enter a valid email address",
+    "invalidPassword": "Invalid password",
+    "itemNotFound": "One or more items are no longer available",
+    "orderNotFound": "Order not found",
+    "onlyDraftsDeletable": "Only draft orders can be deleted",
     "unknownUserRole": "Unknown user role",
     "connectionError": "Failed to connect to server",
     "registrationFailed": "Registration failed",
@@ -551,12 +558,6 @@
     "showLess": "Show less",
     "readFullDescription": "Read full description",
     "addedToCart": "Added to Order",
-    "addedToCartDesc": "{count}x {title} added to your cart.",
-    "brand": "Brand"
-  },
-  "Errors": {
-    "Email already exists": "This email address is already registered.",
-    "required": "This field is required.",
-    "passwordsDoNotMatch": "Passwords do not match."
+    "addedToCartDesc": "{count}x {title} added to your cart."
   }
 }
