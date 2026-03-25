@@ -1,43 +1,48 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { decodeJwt } from 'jose';
+import { jwtVerify } from 'jose';
 import { AuthPayload } from '@/lib/auth';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
+async function verifyToken(token: string) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is not set');
+  return await jwtVerify(token, new TextEncoder().encode(secret));
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookieStore = request.cookies;
   const currency = cookieStore.get('NEXT_CURRENCY')?.value;
 
-  // 1. Handle locale routing first
   const response = intlMiddleware(request);
-  
-  // Get the current locale from the path, or fallback to default
+
   const segments = pathname.split('/');
   const localeFromPath = segments[1];
   const locale = routing.locales.includes(localeFromPath as any) ? localeFromPath : routing.defaultLocale;
 
-  // 0. Ensure currency cookie exists for SSR consistency on the current response
   if (!currency) {
     response.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
   }
 
-  // Get the pathname without the locale prefix for auth logic
-  const pathnameWithoutLocale = pathname.replace(/^\/(tr|en)/, '') || '/';
+  const pathnameWithoutLocale = pathname.replace(new RegExp(`^\\/(${routing.locales.join('|')})($|\\/)`), '/') || '/';
+  const cleanPathname = pathnameWithoutLocale.replace(/\/+$/, '') || '/';
 
   const token = cookieStore.get('token')?.value;
 
-  // 2. If trying to access protected routes and NOT logged in
+  const isProtectedRoute =
+    cleanPathname.startsWith('/master') ||
+    cleanPathname.startsWith('/admin') ||
+    cleanPathname.startsWith('/dealer') ||
+    cleanPathname === '/';
+
+  const isAuthPage = cleanPathname === '/login' || cleanPathname === '/register';
+
   if (!token) {
-    if (
-      pathnameWithoutLocale.startsWith('/master') || 
-      pathnameWithoutLocale.startsWith('/admin') || 
-      pathnameWithoutLocale.startsWith('/dealer') ||
-      pathnameWithoutLocale === '/'
-    ) {
+    if (isProtectedRoute) {
       const redirectResponse = NextResponse.redirect(new URL(`/${locale}/login`, request.url));
       if (!currency) redirectResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
       return redirectResponse;
@@ -46,29 +51,32 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const payload = decodeJwt(token) as AuthPayload;
-    const { role } = payload;
+    const { payload } = await verifyToken(token);
+    const { role } = payload as unknown as AuthPayload;
 
-    // 3. If logged in and visiting login/register page
-    if (pathnameWithoutLocale === '/login' || pathnameWithoutLocale === '/register') {
+    if (isAuthPage) {
       return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
-    // 4. Route specific protections
-    if (pathnameWithoutLocale.startsWith('/master') && role !== 'master_admin') {
+    if (cleanPathname.startsWith('/master') && role !== 'master_admin') {
       return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
-    if (pathnameWithoutLocale.startsWith('/admin') && role !== 'admin' && role !== 'master_admin') {
+    if (cleanPathname.startsWith('/admin') && role !== 'admin' && role !== 'master_admin') {
       return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
-    if (pathnameWithoutLocale.startsWith('/dealer') && role !== 'dealer') {
+    if (cleanPathname.startsWith('/dealer') && role !== 'dealer') {
       return redirectToCorrectDashboard(role, request, locale, currency);
     }
 
     return response;
   } catch {
+    if (isAuthPage) {
+      response.cookies.delete('token');
+      return response;
+    }
+
     const errorResponse = NextResponse.redirect(new URL(`/${locale}/login`, request.url));
     errorResponse.cookies.delete('token');
     if (!currency) errorResponse.cookies.set('NEXT_CURRENCY', 'TRY', { maxAge: 60 * 60 * 24 * 365 });
@@ -89,11 +97,7 @@ function redirectToCorrectDashboard(role: string, request: NextRequest, locale: 
 
 export const config = {
   matcher: [
-    // Next-intl paths
     '/', '/(tr|en)/:path*',
-    
-    // Original paths (for safety during transition or if accessed directly)
     '/master/:path*', '/admin/:path*', '/dealer/:path*', '/login', '/register'
   ],
 };
-

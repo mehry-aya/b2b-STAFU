@@ -40,13 +40,14 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     });
 
     const payload = decodeJwt(access_token) as AuthPayload;
+    const locale = cookieStore.get("NEXT_LOCALE")?.value || "tr";
 
     if (payload.role === "master_admin") {
-      redirect("/master/dashboard");
+      redirect(`/${locale}/master/dashboard`);
     } else if (payload.role === "admin") {
-      redirect("/admin/dashboard");
+      redirect(`/${locale}/admin/dashboard`);
     } else if (payload.role === "dealer") {
-      redirect("/dealer/dashboard");
+      redirect(`/${locale}/dealer/dashboard`);
     } else {
       return { error: "unknownUserRole" };
     }
