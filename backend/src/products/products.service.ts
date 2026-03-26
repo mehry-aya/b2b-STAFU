@@ -172,6 +172,51 @@ export class ProductsService {
     return count;
   }
 
+  // Instant sync from webhook payload
+  async syncProductFromWebhook(payload: any) {
+    const shopifyId = payload.id?.toString();
+    if (!shopifyId) return;
+
+    const syncedAt = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+        const productGid = `gid://shopify/Product/${shopifyId}`;
+        
+        // Update product status
+        await tx.product.updateMany({
+            where: { shopifyId: productGid },
+            data: {
+                status: payload.status,
+                syncedAt,
+            }
+        });
+
+      for (const v of payload.variants || []) {
+        const variantGid = `gid://shopify/ProductVariant/${v.id}`;
+        
+        await tx.productVariant.updateMany({
+          where: { shopifyVariantId: variantGid },
+          data: {
+            inventoryQuantity: v.inventory_quantity ?? 0,
+            price: v.price ? new Prisma.Decimal(v.price) : undefined,
+            compareAtPrice: v.compare_at_price ? new Prisma.Decimal(v.compare_at_price) : undefined,
+          }
+        });
+      }
+    });
+
+    this.logger.log(`Instant sync: Updated inventory for product ${shopifyId} from webhook`);
+  }
+
+  async deleteProductByShopifyId(shopifyId: string) {
+    if (!shopifyId) return;
+    const gid = `gid://shopify/Product/${shopifyId}`;
+    await this.prisma.product.deleteMany({
+      where: { shopifyId: gid }
+    });
+    this.logger.log(`Deleted product ${gid} via webhook`);
+  }
+
   // Fetch Shopify categories
   async getCategories() {
     return this.shopifyService.getCategories();

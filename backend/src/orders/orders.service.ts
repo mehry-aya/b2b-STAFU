@@ -161,6 +161,36 @@ export class OrdersService {
       } as any,
     });
 
+    // Automatically deduct local inventory when order is submitted (draft -> pending_payment)
+    if (order.status === OrderStatus.draft && status === OrderStatus.pending_payment) {
+      this.logger.log(`Order #${id} submitted. Deducting local inventory.`);
+      for (const item of order.items) {
+        await this.prisma.productVariant.update({
+          where: { id: item.productVariant.id },
+          data: {
+            inventoryQuantity: {
+              decrement: item.quantity
+            }
+          }
+        });
+      }
+    }
+
+    // Automatically restore local inventory if an active order is cancelled
+    if (order.status !== OrderStatus.draft && order.status !== OrderStatus.cancelled && status === OrderStatus.cancelled) {
+      this.logger.log(`Order #${id} cancelled. Restoring local inventory.`);
+      for (const item of order.items) {
+        await this.prisma.productVariant.update({
+          where: { id: item.productVariant.id },
+          data: {
+            inventoryQuantity: {
+              increment: item.quantity
+            }
+          }
+        });
+      }
+    }
+
     // Trigger Shopify Inventory Sync if status is "shipped"
     if (status === OrderStatus.shipped && !(order as any).inventorySynced) {
       try {
