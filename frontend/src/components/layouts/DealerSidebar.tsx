@@ -2,6 +2,7 @@
 
 import { useState, ReactNode } from "react";
 import SidebarLayout from "./SidebarLayout";
+import DealerStatusBanner from "@/components/ui/DealerStatusBanner";
 import { useSearchParams } from "next/navigation";
 import { useShopifyCategories } from "@/hooks/useShopifyCategories";
 import { useTranslations } from "next-intl";
@@ -59,6 +60,7 @@ export default function DealerSidebar({ children }: { children: ReactNode }) {
 
   return (
     <SidebarLayout navItems={navItems} brandSubtitle={brandSubtitle} showCart={true}>
+      <DealerStatusBanner />
       {children}
     </SidebarLayout>
   );

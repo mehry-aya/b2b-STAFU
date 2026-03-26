@@ -28,7 +28,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.isActive && user.role !== 'dealer') {
+    if (!user.isActive) {
+      if (user.role === 'dealer') {
+        throw new ForbiddenException('Account pending approval');
+      }
       throw new ForbiddenException('Account is inactive');
     }
 
@@ -68,7 +71,7 @@ export class AuthService {
         email: registerDto.email,
         password: hashedPassword,
         role: 'dealer',
-        isActive: true,
+        isActive: false,
         dealer: {
           create: {
             companyName: registerDto.companyName,
@@ -79,7 +82,7 @@ export class AuthService {
       },
     });
 
-    return { message: 'Account created successfully. You can now login.' };
+    return { message: 'Account created successfully. Pending admin approval.' };
   }
 
   async getProfile(id: number) {

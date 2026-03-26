@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useRef } from "react";
 import { fetchOrderById, updateOrderStatus } from "@/lib/api/orders";
 import { Order } from "@/lib/types/order";
 import { 
@@ -49,6 +49,8 @@ export default function DealerOrderDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
     try {
@@ -70,6 +72,47 @@ export default function DealerOrderDetailPage({
   useEffect(() => {
     loadOrder();
   }, [params.id]);
+
+  const handleDownload = async (format: "pdf" | "png") => {
+    if (!invoiceRef.current || !order) return;
+    setDownloading(format);
+    
+    try {
+      const element = invoiceRef.current;
+      const fileName = `invoice-order-${order.id}-${new Date().toISOString().split('T')[0]}`;
+
+      if (format === "png") {
+        const dataUrl = await htmlToImage.toPng(element, { quality: 1.0, pixelRatio: 3 });
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = `${fileName}.png`;
+        link.click();
+      } else {
+        const dataUrl = await htmlToImage.toPng(element, { quality: 1.0, pixelRatio: 3 });
+        const pdf = new jsPDF("p", "mm", "a4");
+        
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${fileName}.pdf`);
+      }
+
+      toast({
+        title: t("downloadStarted") || "Download Started",
+        description: (t("downloadDescription", { format: format.toUpperCase() }) as string) || `Generating ${format.toUpperCase()} invoice...`,
+      });
+    } catch (err: any) {
+      toast({
+        title: t("downloadFailed") || "Download Failed",
+        description: tErr(err.message || "updateFailed"),
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   const handleSubmitForPayment = async () => {
     if (!order) return;
@@ -153,15 +196,25 @@ export default function DealerOrderDetailPage({
           <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           {t("backToHistory") || "Back to History"}
         </button>
-        <button 
-          disabled={!["paid", "shipped"].includes(order.status)}
-          title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Printer className="h-3.5 w-3.5" />
-          {t("printInvoice") || "Print Invoice"}
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => handleDownload("pdf")}
+            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
+            title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
+            {downloading === 'pdf' ? t("generatingPdf") || "Generating PDF..." : t("printInvoice") || "PDF Invoice"}
+          </button>
+        </div>
       </div>
+
+        {/* Hidden Invoice Template for Export */}
+        <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
+          <div ref={invoiceRef}>
+            <InvoiceTemplate order={order} />
+          </div>
+        </div>
 
         {/* Order Hero */}
         <div className="bg-zinc-900 rounded-3xl p-8 md:p-10 text-white relative overflow-hidden shadow-2xl">

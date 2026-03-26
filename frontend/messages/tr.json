@@ -1,4 +1,9 @@
 {
+  "AccountStatus": {
+    "suspended": "Hesabınız askıya alındı. Yardım için destek ile iletişime geçin.",
+    "rejected": "Bayi başvurunuz reddedildi. Daha fazla bilgi için destek ile iletişime geçin.",
+    "pending": "Hesabınız onay bekliyor. Yönetici hesabınızı onaylayana kadar özellikler kısıtlı olabilir."
+  },
   "Common": {
     "myCart": "Sepetim",
     "logout": "Çıkış Yap",
@@ -293,6 +298,7 @@
     "emailPasswordRequired": "E-posta ve şifre gereklidir",
     "invalidCredentials": "Geçersiz e-posta veya şifre",
     "accountInactive": "Hesabınız aktif değil. Lütfen destek ile iletişime geçin.",
+    "accountPendingApproval": "Hesabınız yönetici onayı bekliyor. Onaylandıktan sonra giriş yapabileceksiniz.",
     "emailAlreadyExists": "Bu e-posta adresi zaten kayıtlı.",
     "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
     "invalidPassword": "Geçersiz şifre",
@@ -321,7 +327,7 @@
     "failedToSubmitReview": "İnceleme gönderilemedi"
   },
   "Success": {
-    "accountCreated": "Hesap başarıyla oluşturuldu. Şimdi giriş yapabilirsiniz.",
+    "accountCreated": "Başvurunuz gönderildi! Yönetici hesabınızı onayladıktan sonra giriş yapabileceksiniz.",
     "adminCreated": "Yönetici başarıyla oluşturuldu.",
     "adminDeleted": "Yönetici başarıyla silindi.",
     "productsSynced": "Ürünler senkronize edildi.",

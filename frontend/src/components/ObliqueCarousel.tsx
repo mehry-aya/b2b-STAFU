@@ -26,7 +26,7 @@ export default function ObliqueCarousel({ images }: ObliqueCarouselProps) {
   ];
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-black/80 z-0">
+    <div className="fixed inset-0 overflow-hidden bg-gray-50 z-0">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-15deg] flex flex-col gap-3 items-start justify-center w-[250vw] h-[250vh]">
         {lanes.map((lane, li) => (
           <div key={li} className={`flex gap-2 shrink-0 w-max ${lane.cls}`}>

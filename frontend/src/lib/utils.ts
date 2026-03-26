@@ -11,6 +11,7 @@ export function mapBackendError(message: string): string {
   const mapping: Record<string, string> = {
     "Invalid credentials": "invalidCredentials",
     "Account is inactive": "accountInactive",
+    "Account pending approval": "accountPendingApproval",
     "Email already exists": "emailAlreadyExists",
     "One or more product variants not found": "itemNotFound",
     "Only draft orders can be deleted": "onlyDraftsDeletable",

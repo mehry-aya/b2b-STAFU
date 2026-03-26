@@ -1,4 +1,9 @@
 {
+  "AccountStatus": {
+    "suspended": "Your account has been suspended. Please contact support for assistance.",
+    "rejected": "Your dealer application has been rejected. Please contact support for more information.",
+    "pending": "Your account is pending approval. Features are limited until an admin approves your account."
+  },
   "Common": {
     "myCart": "My Cart",
     "logout": "Sign Out",
@@ -293,6 +298,7 @@
     "emailPasswordRequired": "Email and password are required",
     "invalidCredentials": "Invalid email or password",
     "accountInactive": "Your account is inactive. Please contact support.",
+    "accountPendingApproval": "Your account is pending admin approval. You will be able to log in once approved.",
     "emailAlreadyExists": "This email address is already registered.",
     "invalidEmail": "Please enter a valid email address",
     "invalidPassword": "Invalid password",
@@ -321,7 +327,7 @@
     "failedToSubmitReview": "Failed to submit review"
   },
   "Success": {
-    "accountCreated": "Account created successfully. You can now login.",
+    "accountCreated": "Your application has been submitted! You will be able to log in once an admin approves your account.",
     "adminCreated": "Admin created successfully.",
     "adminDeleted": "Admin deleted successfully.",
     "productsSynced": "Products synced successfully.",
