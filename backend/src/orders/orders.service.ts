@@ -138,7 +138,7 @@ export class OrdersService {
     };
   }
 
-  async updateStatus(id: number, status: OrderStatus, adminEmail: string) {
+  async updateStatus(id: number, status: OrderStatus, adminEmail: string, paymentAmount?: number) {
     const order = await this.prisma.order.findUnique({ 
       where: { id },
       include: {
@@ -153,8 +153,13 @@ export class OrdersService {
 
     // Determine auto-note based on transition
     let additionalNote = '';
-    if (status === OrderStatus.half_payment_received) {
-      additionalNote = `[${new Date().toLocaleString()}] Half payment received and confirmed.\n`;
+    if (status === OrderStatus.first_payment_received) {
+      if (paymentAmount !== undefined) {
+        const remaining = Number(order.totalAmount) - paymentAmount;
+        additionalNote = `[${new Date().toLocaleString()}] First payment done with the amount ${paymentAmount.toFixed(2)} and still the rest of the order amount ${remaining.toFixed(2)} left.\n`;
+      } else {
+        additionalNote = `[${new Date().toLocaleString()}] First payment received and confirmed.\n`;
+      }
     } else if (status === OrderStatus.paid) {
       additionalNote = `[${new Date().toLocaleString()}] Remaining balance paid. Order fully settled.\n`;
     }
@@ -166,12 +171,14 @@ export class OrdersService {
         status,
         statusChangedByEmail: adminEmail,
         statusChangedAt: new Date(),
-        notes: additionalNote ? (order.notes ? (order as any).notes + additionalNote : additionalNote) : undefined
+        notes: additionalNote ? (order.notes ? (order as any).notes + additionalNote : additionalNote) : undefined,
+        firstPaymentAmount: status === OrderStatus.first_payment_received ? paymentAmount : undefined,
+        remainingAmount: status === OrderStatus.first_payment_received ? (Number(order.totalAmount) - (paymentAmount || 0)) : undefined
       } as any,
     });
 
-    // Deduct local inventory when dealer submits the order (draft → pending_half_payment)
-    if (order.status === OrderStatus.draft && status === OrderStatus.pending_half_payment) {
+    // Deduct local inventory when dealer submits the order (draft → pending_first_payment)
+    if (order.status === OrderStatus.draft && status === OrderStatus.pending_first_payment) {
       this.logger.log(`Order #${id} submitted. Deducting local inventory.`);
       for (const item of order.items) {
         await this.prisma.productVariant.update({
@@ -187,8 +194,8 @@ export class OrdersService {
 
     // Restore local inventory if order is cancelled after being active
     const activeStatuses: OrderStatus[] = [
-      OrderStatus.pending_half_payment,
-      OrderStatus.half_payment_received,
+      OrderStatus.pending_first_payment,
+      OrderStatus.first_payment_received,
       OrderStatus.shipped,
       OrderStatus.received,
       OrderStatus.pending_rest_payment,

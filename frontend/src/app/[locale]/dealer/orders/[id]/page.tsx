@@ -146,8 +146,8 @@ export default function DealerOrderDetailPage({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "draft": return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_half_payment": return "bg-amber-100 text-amber-700 border-amber-200";
-      case "half_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "pending_first_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "first_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "pending_rest_payment": return "bg-purple-100 text-purple-700 border-purple-200";
       case "shipped": return "bg-blue-100 text-blue-700 border-blue-200";
@@ -160,8 +160,8 @@ export default function DealerOrderDetailPage({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "draft": return <AlertCircle className="h-4 w-4" />;
-      case "pending_half_payment": return <CreditCard className="h-4 w-4" />;
-      case "half_payment_received": return <CheckCircle2 className="h-4 w-4" />;
+      case "pending_first_payment": return <CreditCard className="h-4 w-4" />;
+      case "first_payment_received": return <CheckCircle2 className="h-4 w-4" />;
       case "paid": return <CheckCircle2 className="h-4 w-4" />;
       case "shipped": return <Truck className="h-4 w-4" />;
       case "received": return <CheckCircle2 className="h-4 w-4" />;
@@ -205,8 +205,8 @@ export default function DealerOrderDetailPage({
         <div className="flex gap-2">
           <button 
             onClick={() => handleDownload("pdf")}
-            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
-            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
@@ -251,13 +251,13 @@ export default function DealerOrderDetailPage({
               </div>
               {order.status === "draft" && (
                 <button 
-                  onClick={() => handleUpdateStatus("pending_half_payment")}
+                  onClick={() => handleUpdateStatus("pending_first_payment")}
                   disabled={submitting}
                   className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95 disabled:opacity-50"
                 >
                   {submitting ? "Processing..." : (
                     <>
-                      {t("markAsHalfPaid") || "Submit & Pay Half"}
+                      {t("markAsFirstPaid") || "Submit & Pay First Payment"}
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}
@@ -291,8 +291,8 @@ export default function DealerOrderDetailPage({
                   )}
                 </button>
               )}
-              {/* Waiting state — half payment submitted, admin hasn't confirmed yet */}
-              {order.status === "pending_half_payment" && (
+              {/* Waiting state — first payment submitted, admin hasn't confirmed yet */}
+              {order.status === "pending_first_payment" && (
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
                   <div className="flex items-center gap-2 px-6 py-3 bg-amber-50 text-amber-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-amber-100 shadow-sm whitespace-nowrap">
                     <Clock className="h-3 w-3 text-amber-500" />
@@ -304,12 +304,12 @@ export default function DealerOrderDetailPage({
                   </div>
                 </div>
               )}
-              {/* Waiting state — half payment confirmed by admin, waiting for shipment */}
-              {order.status === "half_payment_received" && (
+              {/* Waiting state — first payment confirmed by admin, waiting for shipment */}
+              {order.status === "first_payment_received" && (
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
                   <div className="flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-emerald-100 shadow-sm whitespace-nowrap">
                     <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                    {t("waitingForShipment") || "Half Payment Confirmed — Awaiting Shipment"}
+                    {t("waitingForShipment") || "First Payment Confirmed — Awaiting Shipment"}
                   </div>
                   <div className="flex items-center gap-2 px-6 py-3 bg-zinc-50 text-zinc-400 rounded-xl font-black text-[10px] uppercase tracking-widest border border-zinc-100 opacity-60 whitespace-nowrap">
                     <X className="h-3 w-3 text-zinc-300" />
@@ -408,20 +408,37 @@ export default function DealerOrderDetailPage({
           </div>
           
           {/* Footer Area */}
-          <div className="p-8 bg-zinc-50 flex flex-col items-end gap-2">
+          <div className="p-8 bg-zinc-50 flex flex-col items-end gap-3">
              <div className="flex items-center gap-8 text-sm">
-                <span className="font-bold text-zinc-400 uppercase tracking-widest">Subtotal</span>
+                <span className="font-bold text-zinc-400 uppercase tracking-widest">{t("grandTotal") || "Total Amount"}</span>
                 <span className="font-black text-zinc-900 font-mono">{formatPrice(order.totalAmount)}</span>
              </div>
-             <div className="flex items-center gap-8 text-sm">
-                <span className="font-bold text-zinc-400 uppercase tracking-widest">Shipping</span>
-                <span className="font-bold text-emerald-600 uppercase tracking-widest">Calculated</span>
-             </div>
-             <div className="h-px w-48 bg-zinc-200 my-2" />
-             <div className="flex items-center gap-8 text-xl">
-                <span className="font-black text-zinc-900 uppercase tracking-tighter">Total Amount</span>
-                <span className="font-black text-red-600 font-mono tracking-tighter">{formatPrice(order.totalAmount)}</span>
-             </div>
+             {order.firstPaymentAmount && (
+               <>
+                 <div className="flex items-center gap-8 text-sm">
+                    <span className="font-bold text-zinc-400 uppercase tracking-widest">{t("firstAmountReceived")}</span>
+                    <span className="font-black text-emerald-600 font-mono">{formatPrice(Number(order.firstPaymentAmount))}</span>
+                 </div>
+                 <div className="h-px w-48 bg-zinc-200 my-1" />
+                 <div className="flex items-center gap-8 text-xl">
+                    <span className="font-black text-zinc-900 uppercase tracking-tighter">{t("restToPay")}</span>
+                    <span className="font-black text-red-600 font-mono tracking-tighter">{formatPrice(Number(order.remainingAmount))}</span>
+                 </div>
+               </>
+             )}
+             {!order.firstPaymentAmount && (
+               <>
+                 <div className="flex items-center gap-8 text-sm">
+                    <span className="font-bold text-zinc-400 uppercase tracking-widest">Shipping</span>
+                    <span className="font-bold text-emerald-600 uppercase tracking-widest">Calculated</span>
+                 </div>
+                 <div className="h-px w-48 bg-zinc-200 my-2" />
+                 <div className="flex items-center gap-8 text-xl">
+                    <span className="font-black text-zinc-900 uppercase tracking-tighter">Total Amount</span>
+                    <span className="font-black text-red-600 font-mono tracking-tighter">{formatPrice(order.totalAmount)}</span>
+                 </div>
+               </>
+             )}
           </div>
       </div>
     </div>

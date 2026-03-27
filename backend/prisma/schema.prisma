@@ -7,19 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  master_admin
-  admin
-  dealer
-}
-
-enum ContractStatus {
-  pending
-  approved
-  rejected
-  suspended
-}
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -32,19 +19,19 @@ model User {
 }
 
 model Dealer {
-  id             Int            @id @default(autoincrement())
-  userId         Int            @unique
-  companyName    String
-  phone          String?
-  address        String?
-  contractUrl    String?
-  contractStatus ContractStatus @default(pending)
+  id                   Int            @id @default(autoincrement())
+  userId               Int            @unique
+  companyName          String
+  phone                String?
+  address              String?
+  contractUrl          String?
+  contractStatus       ContractStatus @default(pending)
+  createdAt            DateTime       @default(now())
   statusChangedByEmail String?
   statusChangedAt      DateTime?
-  createdAt            DateTime       @default(now())
   user                 User           @relation(fields: [userId], references: [id])
-  orders         Order[]
-  contracts      Contract[]
+  contracts            Contract[]
+  orders               Order[]
 }
 
 model Contract {
@@ -72,8 +59,8 @@ model Product {
   productType String?          @map("product_type")
   status      String
   images      Json?
-  options     Json?
   syncedAt    DateTime         @default(now()) @map("synced_at")
+  options     Json?
   variants    ProductVariant[]
   collections Collection[]     @relation("ProductToCollection")
 
@@ -90,31 +77,22 @@ model Collection {
   @@map("collections")
 }
 
-enum OrderStatus {
-  draft
-  pending_half_payment
-  half_payment_received
-  shipped
-  received
-  pending_rest_payment
-  paid
-  cancelled
-}
-
 model Order {
-  id          Int         @id @default(autoincrement())
-  dealerId    Int         @map("dealer_id")
-  totalAmount Decimal     @map("total_amount") @db.Decimal(10, 2)
+  id                   Int         @id @default(autoincrement())
+  dealerId             Int         @map("dealer_id")
+  totalAmount          Decimal     @map("total_amount") @db.Decimal(10, 2)
   status               OrderStatus @default(draft)
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
   statusChangedByEmail String?     @map("status_changed_by_email")
   statusChangedAt      DateTime?   @map("status_changed_at")
   inventorySynced      Boolean     @default(false) @map("inventory_synced")
   inventorySyncedAt    DateTime?   @map("inventory_synced_at")
-  createdAt            DateTime    @default(now()) @map("created_at")
-  updatedAt            DateTime    @updatedAt @map("updated_at")
-  notes                String?     @db.Text
-  dealer      Dealer      @relation(fields: [dealerId], references: [id])
-  items       OrderItem[]
+  notes                String?
+  firstPaymentAmount   Decimal?    @map("first_payment_amount") @db.Decimal(10, 2)
+  remainingAmount      Decimal?    @map("remaining_amount") @db.Decimal(10, 2)
+  items                OrderItem[]
+  dealer               Dealer      @relation(fields: [dealerId], references: [id])
 
   @@map("orders")
 }
@@ -144,17 +122,41 @@ model ProductVariant {
   option2           String?
   option3           String?
   imageUrl          String?     @map("image_url")
-  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems        OrderItem[]
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_variants")
 }
 
 model ExchangeRate {
   id        Int      @id @default(autoincrement())
-  code      String   @unique // USD, EUR, TRY
-  rate      Decimal  @db.Decimal(18, 6) // Rate relative to TRY (1.0 for TRY)
+  code      String   @unique
+  rate      Decimal  @db.Decimal(18, 6)
   updatedAt DateTime @updatedAt
 
   @@map("exchange_rates")
+}
+
+enum Role {
+  master_admin
+  admin
+  dealer
+}
+
+enum ContractStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum OrderStatus {
+  draft
+  pending_first_payment
+  first_payment_received
+  shipped
+  received
+  pending_rest_payment
+  paid
+  cancelled
 }

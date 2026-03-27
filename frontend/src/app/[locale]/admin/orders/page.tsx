@@ -71,9 +71,9 @@ export default function AdminOrdersPage() {
     switch (status) {
       case "draft":
         return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_half_payment":
+      case "pending_first_payment":
         return "bg-amber-100 text-amber-700 border-amber-200";
-      case "half_payment_received":
+      case "first_payment_received":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -184,11 +184,11 @@ export default function AdminOrdersPage() {
                   >
                     <option value="all">{t("allStatuses")}</option>
                     <option value="draft">{t("draft")}</option>
-                    <option value="pending_half_payment">
-                      {t("pendingHalfPayment")}
+                    <option value="pending_first_payment">
+                      {t("pendingFirstPayment")}
                     </option>
-                    <option value="half_payment_received">
-                      {t("halfPaymentReceived")}
+                    <option value="first_payment_received">
+                      {t("firstPaymentReceived")}
                     </option>
                     <option value="shipped">{t("shipped")}</option>
                     <option value="received">{t("received")}</option>
@@ -370,10 +370,10 @@ export default function AdminOrdersPage() {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${getStatusStyle(order.status)}`}
                         >
                           {t(
-                            order.status === "pending_half_payment"
-                              ? "pendingHalfPayment"
-                              : order.status === "half_payment_received"
-                                ? "halfPaymentReceived"
+                            order.status === "pending_first_payment"
+                              ? "pendingFirstPayment"
+                              : order.status === "first_payment_received"
+                                ? "firstPaymentReceived"
                                 : order.status === "pending_rest_payment"
                                   ? "pendingRestPayment"
                                   : order.status,

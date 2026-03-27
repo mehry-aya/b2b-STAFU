@@ -92,7 +92,7 @@ export async function createOrder(items: { variantId: number; quantity: number }
   }
 }
 
-export async function updateOrderStatus(id: number, status: OrderStatus) {
+export async function updateOrderStatus(id: number, status: OrderStatus, paymentAmount?: number) {
   try {
     const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
       method: "PATCH",
@@ -100,7 +100,7 @@ export async function updateOrderStatus(id: number, status: OrderStatus) {
         "Content-Type": "application/json",
         ...(await getAuthHeader()),
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, paymentAmount }),
       cache: 'no-store',
     });
     

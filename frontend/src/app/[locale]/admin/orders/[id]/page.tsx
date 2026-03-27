@@ -32,6 +32,7 @@ import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import InvoiceTemplate from "@/components/InvoiceTemplate";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PaymentAmountDialog } from "@/components/ui/PaymentAmountDialog";
 
 import { useTranslations, useLocale } from "next-intl";
 
@@ -53,6 +54,7 @@ export default function AdminOrderDetailPage({
   const [updating, setUpdating] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isPaymentAmountDialogOpen, setIsPaymentAmountDialogOpen] = useState(false);
   const invoiceRef = React.useRef<HTMLDivElement>(null);
 
   const loadOrder = async () => {
@@ -80,14 +82,20 @@ export default function AdminOrderDetailPage({
       setIsCancelDialogOpen(true);
       return;
     }
+
+    if (newStatus === "first_payment_received") {
+      setIsPaymentAmountDialogOpen(true);
+      return;
+    }
+
     await performStatusUpdate(newStatus);
   };
 
-  const performStatusUpdate = async (newStatus: OrderStatus) => {
+  const performStatusUpdate = async (newStatus: OrderStatus, paymentAmount?: number) => {
     if (!order) return;
     setUpdating(newStatus);
     try {
-      await updateOrderStatus(order.id, newStatus);
+      await updateOrderStatus(order.id, newStatus, paymentAmount);
       toast({
         title: t("statusUpdated"),
         description: t("statusDescription", { status: newStatus.replace('_', ' ') }),
@@ -148,8 +156,8 @@ export default function AdminOrderDetailPage({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "draft": return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_half_payment": return "bg-amber-100 text-amber-700 border-amber-200";
-      case "half_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "pending_first_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "first_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "shipped": return "bg-blue-100 text-blue-700 border-blue-200";
       case "received": return "bg-indigo-100 text-indigo-700 border-indigo-200";
@@ -162,8 +170,8 @@ export default function AdminOrderDetailPage({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "draft": return <AlertCircle className="h-4 w-4" />;
-      case "pending_half_payment": return <CreditCard className="h-4 w-4" />;
-      case "half_payment_received": return <CheckCircle2 className="h-4 w-4" />;
+      case "pending_first_payment": return <CreditCard className="h-4 w-4" />;
+      case "first_payment_received": return <CheckCircle2 className="h-4 w-4" />;
       case "paid": return <CheckCircle2 className="h-4 w-4" />;
       case "shipped": return <Truck className="h-4 w-4" />;
       case "received": return <CheckCircle2 className="h-4 w-4" />;
@@ -207,8 +215,8 @@ export default function AdminOrderDetailPage({
         <div className="flex gap-2">
           <button 
             onClick={() => handleDownload("pdf")}
-            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
-            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
@@ -216,8 +224,8 @@ export default function AdminOrderDetailPage({
           </button>
           <button 
             onClick={() => handleDownload("png")}
-            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
-            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["first_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className={`h-3.5 w-3.5 ${downloading === 'png' ? 'animate-pulse' : ''}`} />
@@ -276,19 +284,19 @@ export default function AdminOrderDetailPage({
                 </div>
               )}
               
-              {/* Admin Actions — Step 2: Confirm half payment */}
-              {order.status === "pending_half_payment" && (
+              {/* Admin Actions — Step 2: Confirm first payment */}
+              {order.status === "pending_first_payment" && (
                 <button 
-                  onClick={() => handleStatusUpdate("half_payment_received")}
+                  onClick={() => handleStatusUpdate("first_payment_received")}
                   disabled={!!updating}
                   className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
                 >
                   <Check className="h-3.5 w-3.5" />
-                  {updating === "half_payment_received" ? t("marking") : t("markAsHalfPaid")}
+                  {updating === "first_payment_received" ? t("marking") : t("markAsFirstPaid")}
                 </button>
               )}
               {/* Admin Actions — Step 3: Mark as shipped */}
-              {order.status === "half_payment_received" && (
+              {order.status === "first_payment_received" && (
                 <button 
                   onClick={() => handleStatusUpdate("shipped")}
                   disabled={!!updating}
@@ -425,11 +433,24 @@ export default function AdminOrderDetailPage({
           </div>
           
           {/* Footer Area */}
-          <div className="p-8 bg-zinc-50/50 flex flex-col items-end gap-2 border-t border-zinc-100">
+          <div className="p-8 bg-zinc-50/50 flex flex-col items-end gap-3 border-t border-zinc-100">
              <div className="flex items-center gap-8 text-xs font-bold text-zinc-400 uppercase tracking-widest">
                 <span>{t("grandTotal")}</span>
-                <span className="text-2xl font-black text-red-600 font-mono tracking-tighter">{formatPrice(Number(order.totalAmount))}</span>
+                <span className="text-xl font-black text-zinc-900 font-mono tracking-tighter">{formatPrice(Number(order.totalAmount))}</span>
              </div>
+             {order.firstPaymentAmount && (
+               <>
+                 <div className="flex items-center gap-8 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                    <span>{t("firstAmountReceived")}</span>
+                    <span className="text-xl font-black text-emerald-600 font-mono tracking-tighter">{formatPrice(Number(order.firstPaymentAmount))}</span>
+                 </div>
+                 <div className="h-px w-48 bg-zinc-200 my-1" />
+                 <div className="flex items-center gap-8 text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                    <span>{t("restToPay")}</span>
+                    <span className="text-2xl font-black text-red-600 font-mono tracking-tighter">{formatPrice(Number(order.remainingAmount))}</span>
+                 </div>
+               </>
+             )}
           </div>
         </div>
 
@@ -470,6 +491,13 @@ export default function AdminOrderDetailPage({
           onConfirm={() => performStatusUpdate("cancelled")}
           confirmText={t("cancelConfirm")}
           variant="danger"
+        />
+
+        <PaymentAmountDialog
+          isOpen={isPaymentAmountDialogOpen}
+          onOpenChange={setIsPaymentAmountDialogOpen}
+          maxAmount={Number(order.totalAmount)}
+          onConfirm={(amount) => performStatusUpdate("first_payment_received", amount)}
         />
     </div>
   );

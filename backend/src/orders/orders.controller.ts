@@ -78,8 +78,8 @@ export class OrdersController {
       const order = await this.ordersService.findOne(id, user.dealer.id);
       
       const allowedTransitions: Record<string, string[]> = {
-        'draft': ['pending_half_payment'],
-        'pending_half_payment': ['half_payment_received'],
+        'draft': ['pending_first_payment'],
+        'pending_first_payment': ['first_payment_received'],
         'shipped': ['received'],
         'received': ['pending_rest_payment']
       };
@@ -92,7 +92,7 @@ export class OrdersController {
       }
     }
 
-    return this.ordersService.updateStatus(id, updateOrderStatusDto.status, user.email);
+    return this.ordersService.updateStatus(id, updateOrderStatusDto.status, user.email, updateOrderStatusDto.paymentAmount);
   }
 
   @Get('export/excel')

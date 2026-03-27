@@ -90,9 +90,9 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_half_payment":
+      case "pending_first_payment":
         return "bg-amber-100 text-amber-700 border-amber-200";
-      case "half_payment_received":
+      case "first_payment_received":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
@@ -113,9 +113,9 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return <AlertCircle className="h-3 w-3" />;
-      case "pending_half_payment":
+      case "pending_first_payment":
         return <CreditCard className="h-3 w-3" />;
-      case "half_payment_received":
+      case "first_payment_received":
         return <CheckCircle2 className="h-3 w-3" />;
       case "paid":
         return <CheckCircle2 className="h-3 w-3" />;
@@ -136,10 +136,10 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return t("statusDraft", { fallback: "Draft" });
-      case "pending_half_payment":
-        return t("statusPendingHalfPayment", { fallback: "Pending Half Payment" });
-      case "half_payment_received":
-        return t("statusHalfPaymentReceived", { fallback: "Half Payment Confirmed" });
+      case "pending_first_payment":
+        return t("statusPendingFirstPayment", { fallback: "Pending First Payment" });
+      case "first_payment_received":
+        return t("statusFirstPaymentReceived", { fallback: "First Payment Confirmed" });
       case "pending_rest_payment":
         return t("statusPendingRestPayment", { fallback: "Pending Rest Payment" });
       case "paid":

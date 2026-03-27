@@ -49,7 +49,7 @@ export class StatsService {
         take: 5,
       }),
       this.prisma.contract.count({ where: { status: 'pending' } }),
-      this.prisma.order.count({ where: { status: { in: [OrderStatus.pending_half_payment, OrderStatus.half_payment_received, OrderStatus.pending_rest_payment] } } }),
+      this.prisma.order.count({ where: { status: { in: [OrderStatus.pending_first_payment, OrderStatus.first_payment_received, OrderStatus.pending_rest_payment] } } }),
       this.prisma.order.findMany({
         where: { 
           status: OrderStatus.shipped,
@@ -92,7 +92,7 @@ export class StatsService {
       recentOrder,
     ] = await Promise.all([
       this.prisma.order.count({ where: { dealerId } }),
-      this.prisma.order.count({ where: { dealerId, status: { in: [OrderStatus.pending_half_payment, OrderStatus.half_payment_received, OrderStatus.shipped, OrderStatus.received, OrderStatus.pending_rest_payment] } } }),
+      this.prisma.order.count({ where: { dealerId, status: { in: [OrderStatus.pending_first_payment, OrderStatus.first_payment_received, OrderStatus.shipped, OrderStatus.received, OrderStatus.pending_rest_payment] } } }),
       this.prisma.order.aggregate({
         where: { dealerId, status: { in: [OrderStatus.paid, OrderStatus.shipped] } },
         _sum: { totalAmount: true },
