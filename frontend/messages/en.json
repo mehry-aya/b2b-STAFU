@@ -93,9 +93,12 @@
     "details": "Details",
     "ordersLabel": "orders",
     "statusDraft": "Draft",
-    "statusPendingPayment": "Pending Payment",
-    "statusPaid": "Paid",
+    "statusPendingHalfPayment": "Awaiting Half Payment",
+    "statusHalfPaymentReceived": "Half Payment Confirmed",
     "statusShipped": "Shipped",
+    "statusReceived": "Received",
+    "statusPendingRestPayment": "Pending Rest Payment",
+    "statusPaid": "Paid",
     "statusCancelled": "Cancelled",
     "remove": "Remove",
     "removeConfirmTitle": "Delete Draft Order",
@@ -179,7 +182,12 @@
     "details": "Details",
     "pendingOrdersCount": "There are {count} orders waiting for payment confirmation or approval.",
     "viewOrders": "View Orders",
-    "admin": "Admin"
+    "admin": "Admin",
+    "staleShipments": "Stale Shipments",
+    "staleOrders": "Stale Orders",
+    "order": "Order",
+    "lastUpdated": "Last Updated",
+    "viewOrder": "View Order"
   },
   "MasterDashboard": {
     "title": "Master Admin Dashboard",
@@ -204,7 +212,12 @@
     "ordersRequiringAction": "Orders Requiring Action",
     "ordersAwaiting": "There are {count} orders awaiting master approval or payment confirmation.",
     "manageTransactions": "Manage Transactions",
-    "details": "Details"
+    "details": "Details",
+    "staleShipments": "Stale Shipments",
+    "staleOrders": "Stale Orders",
+    "order": "Order",
+    "lastUpdated": "Last Updated",
+    "viewOrder": "View Order"
   },
   "AdminDealers": {
     "title": "Dealers",
@@ -426,7 +439,7 @@
     "suspendTitle": "Suspend Account",
     "suspendDescription": "Are you sure you want to suspend this dealer account? They will lose access to the platform until reactivated.",
     "suspendConfirm": "Suspend",
-    "performedBy": "{status} by {email}"
+    "performedBy": "Marked {status} by {email}"
   },
   "OrderDetail": {
     "title": "Order {id}",
@@ -439,9 +452,15 @@
     "admin": "Admin",
     "order": "ORDER",
     "status": "Status",
-    "performedBy": "{status} by {email}",
+    "notes": "Order Logs",
+    "performedBy": "Marked {status} by {email}",
+    "waitingForShipment": "Waiting for Shipment",
+    "restPaymentBlocked": "Fulfill rest payment",
     "markAsPaid": "Mark as Paid",
+    "markAsHalfPaid": "Confirm Half Payment",
     "markAsShipped": "Mark as Shipped",
+    "markAsReceived": "Confirm Receipt",
+    "markAsPaidByDealer": "Pay Remaining Balance",
     "cancelOrder": "Cancel Order",
     "marking": "Marking...",
     "cancelling": "Cancelling...",
@@ -468,9 +487,10 @@
     "totalItems": "Total Items",
     "backToHistory": "Back to History",
     "printInvoice": "Print Invoice",
-    "invoiceNote": "Invoice available only for Paid or Shipped orders",
+    "invoiceNote": "Invoice available starting from Half Payment Confirmed",
     "orderNotFound": "Order not found",
-    "backToOrders": "Back to Orders"
+    "backToOrders": "Back to Orders",
+    "staleOrderAlert": "ATTENTION: This order was shipped over 3 months ago and the dealer still hasn't confirmed receipt."
   },
   "AdminOrders": {
     "title": "Order Control",
@@ -484,9 +504,12 @@
     "to": "To",
     "allStatuses": "All Statuses",
     "draft": "Draft",
-    "pendingPayment": "Pending Payment",
-    "paid": "Paid",
+    "pendingHalfPayment": "Awaiting Half Payment",
+    "halfPaymentReceived": "Half Payment Confirmed",
     "shipped": "Shipped",
+    "received": "Received",
+    "pendingRestPayment": "Pending Rest Payment",
+    "paid": "Paid",
     "cancelled": "Cancelled",
     "export": "Export",
     "exporting": "Exporting...",

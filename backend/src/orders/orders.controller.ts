@@ -76,11 +76,19 @@ export class OrdersController {
     // Admins can change to anything.
     if (user.role === Role.dealer) {
       const order = await this.ordersService.findOne(id, user.dealer.id);
-      if (order.status !== 'draft') {
-        throw new Error('Only draft orders can be submitted for payment');
-      }
-      if (updateOrderStatusDto.status !== 'pending_payment') {
-        throw new Error('Dealers can only submit orders for payment');
+      
+      const allowedTransitions: Record<string, string[]> = {
+        'draft': ['pending_half_payment'],
+        'pending_half_payment': ['half_payment_received'],
+        'shipped': ['received'],
+        'received': ['pending_rest_payment']
+      };
+
+      const currentStatus = order.status;
+      const targetStatus = updateOrderStatusDto.status;
+
+      if (!allowedTransitions[currentStatus]?.includes(targetStatus)) {
+        throw new Error(`Unauthorized status transition from ${currentStatus} to ${targetStatus}`);
       }
     }
 

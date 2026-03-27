@@ -151,18 +151,27 @@ export class OrdersService {
     });
     if (!order) throw new NotFoundException(`Order #${id} not found`);
 
-    // Update DB status first
+    // Determine auto-note based on transition
+    let additionalNote = '';
+    if (status === OrderStatus.half_payment_received) {
+      additionalNote = `[${new Date().toLocaleString()}] Half payment received and confirmed.\n`;
+    } else if (status === OrderStatus.paid) {
+      additionalNote = `[${new Date().toLocaleString()}] Remaining balance paid. Order fully settled.\n`;
+    }
+
+    // Update DB status and append notes
     const updatedOrder = await this.prisma.order.update({
       where: { id },
       data: { 
         status,
         statusChangedByEmail: adminEmail,
         statusChangedAt: new Date(),
+        notes: additionalNote ? (order.notes ? (order as any).notes + additionalNote : additionalNote) : undefined
       } as any,
     });
 
-    // Automatically deduct local inventory when order is submitted (draft -> pending_payment)
-    if (order.status === OrderStatus.draft && status === OrderStatus.pending_payment) {
+    // Deduct local inventory when dealer submits the order (draft → pending_half_payment)
+    if (order.status === OrderStatus.draft && status === OrderStatus.pending_half_payment) {
       this.logger.log(`Order #${id} submitted. Deducting local inventory.`);
       for (const item of order.items) {
         await this.prisma.productVariant.update({
@@ -176,8 +185,16 @@ export class OrdersService {
       }
     }
 
-    // Automatically restore local inventory if an active order is cancelled
-    if (order.status !== OrderStatus.draft && order.status !== OrderStatus.cancelled && status === OrderStatus.cancelled) {
+    // Restore local inventory if order is cancelled after being active
+    const activeStatuses: OrderStatus[] = [
+      OrderStatus.pending_half_payment,
+      OrderStatus.half_payment_received,
+      OrderStatus.shipped,
+      OrderStatus.received,
+      OrderStatus.pending_rest_payment,
+      OrderStatus.paid,
+    ];
+    if (activeStatuses.includes(order.status) && status === OrderStatus.cancelled) {
       this.logger.log(`Order #${id} cancelled. Restoring local inventory.`);
       for (const item of order.items) {
         await this.prisma.productVariant.update({
@@ -191,7 +208,7 @@ export class OrdersService {
       }
     }
 
-    // Trigger Shopify Inventory Sync if status is "shipped"
+    // Trigger Shopify Inventory Sync when admin marks as shipped
     if (status === OrderStatus.shipped && !(order as any).inventorySynced) {
       try {
         const items = order.items.map(item => ({

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderStatus, Role } from '@prisma/client';
-import { startOfWeek, startOfMonth, startOfYear } from 'date-fns';
+import { startOfWeek, startOfMonth, startOfYear, subMonths, endOfDay } from 'date-fns';
 
 @Injectable()
 export class StatsService {
@@ -12,6 +12,9 @@ export class StatsService {
     const weekStart = startOfWeek(now);
     const monthStart = startOfMonth(now);
     const yearStart = startOfYear(now);
+    
+    // Include the entire day exactly 3 months ago by using endOfDay
+    const threeMonthsAgo = endOfDay(subMonths(now, 3));
 
     const [
       weekRevenue,
@@ -25,6 +28,7 @@ export class StatsService {
       pendingContracts,
       pendingContractsCount,
       pendingOrdersCount,
+      staleShipments,
     ] = await Promise.all([
       this.getRevenue(weekStart),
       this.getRevenue(monthStart),
@@ -45,7 +49,16 @@ export class StatsService {
         take: 5,
       }),
       this.prisma.contract.count({ where: { status: 'pending' } }),
-      this.prisma.order.count({ where: { status: 'pending_payment' } }),
+      this.prisma.order.count({ where: { status: { in: [OrderStatus.pending_half_payment, OrderStatus.half_payment_received, OrderStatus.pending_rest_payment] } } }),
+      this.prisma.order.findMany({
+        where: { 
+          status: OrderStatus.shipped,
+          updatedAt: { lt: threeMonthsAgo }
+        },
+        include: { dealer: true },
+        orderBy: { updatedAt: 'asc' },
+        take: 10,
+      }),
     ]);
 
     return {
@@ -65,6 +78,7 @@ export class StatsService {
       alerts: {
         pendingContracts,
         pendingOrdersCount,
+        staleShipments,
       },
     };
   }
@@ -78,7 +92,7 @@ export class StatsService {
       recentOrder,
     ] = await Promise.all([
       this.prisma.order.count({ where: { dealerId } }),
-      this.prisma.order.count({ where: { dealerId, status: 'pending_payment' } }),
+      this.prisma.order.count({ where: { dealerId, status: { in: [OrderStatus.pending_half_payment, OrderStatus.half_payment_received, OrderStatus.shipped, OrderStatus.received, OrderStatus.pending_rest_payment] } } }),
       this.prisma.order.aggregate({
         where: { dealerId, status: { in: [OrderStatus.paid, OrderStatus.shipped] } },
         _sum: { totalAmount: true },

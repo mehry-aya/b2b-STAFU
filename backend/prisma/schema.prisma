@@ -92,9 +92,12 @@ model Collection {
 
 enum OrderStatus {
   draft
-  pending_payment
-  paid
+  pending_half_payment
+  half_payment_received
   shipped
+  received
+  pending_rest_payment
+  paid
   cancelled
 }
 
@@ -109,6 +112,7 @@ model Order {
   inventorySyncedAt    DateTime?   @map("inventory_synced_at")
   createdAt            DateTime    @default(now()) @map("created_at")
   updatedAt            DateTime    @updatedAt @map("updated_at")
+  notes                String?     @db.Text
   dealer      Dealer      @relation(fields: [dealerId], references: [id])
   items       OrderItem[]
 

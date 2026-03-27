@@ -64,7 +64,7 @@ export default function AdminDashboard() {
     { label: t("totalAdmins"), value: stats?.platform?.totalAdmins || 0, icon: Anchor, href: "/master/admins" },
   ];
 
-  const hasAlerts = (stats?.alerts?.pendingContracts?.length > 0) || (stats?.alerts?.pendingOrdersCount > 0);
+  const hasAlerts = (stats?.alerts?.pendingContracts?.length > 0) || (stats?.alerts?.pendingOrdersCount > 0) || (stats?.alerts?.staleShipments?.length > 0);
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -198,6 +198,40 @@ export default function AdminDashboard() {
                   {t("viewOrders")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
+              </div>
+            )}
+
+            {/* Stale Shipments */}
+            {stats?.alerts?.staleShipments?.length > 0 && (
+              <div className="bg-white border border-rose-100 rounded-2xl overflow-hidden shadow-sm shadow-rose-100/20 lg:col-span-2">
+                <div className="px-6 py-4 border-b border-rose-100 bg-rose-50/50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-rose-500" />
+                    <span className="font-bold text-rose-900">{t("staleShipments")}</span>
+                  </div>
+                  <span className="bg-rose-100 text-rose-700 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                    {stats.alerts.staleShipments.length} {t("staleOrders")}
+                  </span>
+                </div>
+                <div className="divide-y divide-rose-50">
+                  {stats.alerts.staleShipments.map((order: any) => (
+                    <div key={order.id} className="px-6 py-4 flex items-center justify-between hover:bg-rose-50/30 transition-colors">
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900">{t("order")} #{order.id.toString().padStart(5, '0')}</p>
+                        <p className="text-xs text-zinc-500">{order.dealer?.companyName || "Unknown Dealer"} &mdash; {order.dealer?.user?.email}</p>
+                        <p className="text-[10px] text-zinc-400 mt-1 uppercase tracking-tighter text-rose-400/80 font-mono">
+                          {t("lastUpdated")}: {new Date(order.updatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-rose-700 transition-colors"
+                      >
+                        {t("viewOrder")}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

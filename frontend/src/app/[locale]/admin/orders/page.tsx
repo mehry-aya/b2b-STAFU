@@ -71,12 +71,18 @@ export default function AdminOrdersPage() {
     switch (status) {
       case "draft":
         return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_payment":
+      case "pending_half_payment":
         return "bg-amber-100 text-amber-700 border-amber-200";
+      case "half_payment_received":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "shipped":
         return "bg-blue-100 text-blue-700 border-blue-200";
+      case "received":
+        return "bg-indigo-100 text-indigo-700 border-indigo-200";
+      case "pending_rest_payment":
+        return "bg-purple-100 text-purple-700 border-purple-200";
       case "cancelled":
         return "bg-red-100 text-red-700 border-red-200";
       default:
@@ -178,11 +184,18 @@ export default function AdminOrdersPage() {
                   >
                     <option value="all">{t("allStatuses")}</option>
                     <option value="draft">{t("draft")}</option>
-                    <option value="pending_payment">
-                      {t("pendingPayment")}
+                    <option value="pending_half_payment">
+                      {t("pendingHalfPayment")}
+                    </option>
+                    <option value="half_payment_received">
+                      {t("halfPaymentReceived")}
+                    </option>
+                    <option value="shipped">{t("shipped")}</option>
+                    <option value="received">{t("received")}</option>
+                    <option value="pending_rest_payment">
+                      {t("pendingRestPayment")}
                     </option>
                     <option value="paid">{t("paid")}</option>
-                    <option value="shipped">{t("shipped")}</option>
                     <option value="cancelled">{t("cancelled")}</option>
                   </select>
                   <Filter className="h-3.5 w-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
@@ -357,9 +370,13 @@ export default function AdminOrdersPage() {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${getStatusStyle(order.status)}`}
                         >
                           {t(
-                            order.status === "pending_payment"
-                              ? "pendingPayment"
-                              : order.status,
+                            order.status === "pending_half_payment"
+                              ? "pendingHalfPayment"
+                              : order.status === "half_payment_received"
+                                ? "halfPaymentReceived"
+                                : order.status === "pending_rest_payment"
+                                  ? "pendingRestPayment"
+                                  : order.status,
                           )}
                         </div>
                       </td>

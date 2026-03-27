@@ -90,12 +90,18 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_payment":
+      case "pending_half_payment":
         return "bg-amber-100 text-amber-700 border-amber-200";
+      case "half_payment_received":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid":
         return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "pending_rest_payment":
+        return "bg-purple-100 text-purple-700 border-purple-200";
       case "shipped":
         return "bg-blue-100 text-blue-700 border-blue-200";
+      case "received":
+        return "bg-indigo-100 text-indigo-700 border-indigo-200";
       case "cancelled":
         return "bg-red-100 text-red-700 border-red-200";
       default:
@@ -107,12 +113,18 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return <AlertCircle className="h-3 w-3" />;
-      case "pending_payment":
+      case "pending_half_payment":
         return <CreditCard className="h-3 w-3" />;
+      case "half_payment_received":
+        return <CheckCircle2 className="h-3 w-3" />;
       case "paid":
         return <CheckCircle2 className="h-3 w-3" />;
+      case "pending_rest_payment":
+        return <CreditCard className="h-3 w-3" />;
       case "shipped":
         return <Truck className="h-3 w-3" />;
+      case "received":
+        return <CheckCircle2 className="h-3 w-3" />;
       case "cancelled":
         return <AlertCircle className="h-3 w-3" />;
       default:
@@ -124,12 +136,18 @@ export default function DealerOrdersPage() {
     switch (status) {
       case "draft":
         return t("statusDraft", { fallback: "Draft" });
-      case "pending_payment":
-        return t("statusPendingPayment", { fallback: "Pending Payment" });
+      case "pending_half_payment":
+        return t("statusPendingHalfPayment", { fallback: "Pending Half Payment" });
+      case "half_payment_received":
+        return t("statusHalfPaymentReceived", { fallback: "Half Payment Confirmed" });
+      case "pending_rest_payment":
+        return t("statusPendingRestPayment", { fallback: "Pending Rest Payment" });
       case "paid":
         return t("statusPaid", { fallback: "Paid" });
       case "shipped":
         return t("statusShipped", { fallback: "Shipped" });
+      case "received":
+        return t("statusReceived", { fallback: "Received" });
       case "cancelled":
         return t("statusCancelled", { fallback: "Cancelled" });
       default:

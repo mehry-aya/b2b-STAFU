@@ -1,4 +1,4 @@
-export type OrderStatus = "draft" | "pending_payment" | "paid" | "shipped" | "cancelled";
+export type OrderStatus = "draft" | "pending_half_payment" | "half_payment_received" | "shipped" | "received" | "pending_rest_payment" | "paid" | "cancelled";
 
 export interface OrderItem {
   id: number;
@@ -28,6 +28,7 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
+  notes?: string | null;
   dealer?: {
     companyName: string;
     address: string | null;

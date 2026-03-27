@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState } from "react";
 import { fetchOrderById, updateOrderStatus } from "@/lib/api/orders";
-import { Order } from "@/lib/types/order";
+import { Order, OrderStatus } from "@/lib/types/order";
 import { 
   ChevronLeft, 
   Calendar, 
@@ -12,6 +12,7 @@ import {
   Truck, 
   CheckCircle2, 
   AlertCircle,
+  AlertTriangle,
   Package,
   User as UserIcon,
   ArrowRight,
@@ -19,10 +20,11 @@ import {
   MoreVertical,
   Check,
   X,
-  Truck as ShippedIcon
+  Truck as ShippedIcon,
+  FileText
 } from "lucide-react";
 import { Link, useRouter } from "@/i18n/routing";
-import { format } from "date-fns";
+import { format, subMonths, isBefore } from "date-fns";
 import { tr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -56,6 +58,10 @@ export default function AdminOrderDetailPage({
   const loadOrder = async () => {
     try {
       const data = await fetchOrderById(parseInt(params.id));
+      if (data?.error) {
+        setError(data.error);
+        return;
+      }
       setOrder(data);
     } catch (err: any) {
       setError(tErr(err.message || "fetchOrdersFailed"));
@@ -68,7 +74,7 @@ export default function AdminOrderDetailPage({
     loadOrder();
   }, [params.id, tErr]);
 
-  const handleStatusUpdate = async (newStatus: "paid" | "shipped" | "cancelled") => {
+  const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!order) return;
     if (newStatus === "cancelled") {
       setIsCancelDialogOpen(true);
@@ -77,7 +83,7 @@ export default function AdminOrderDetailPage({
     await performStatusUpdate(newStatus);
   };
 
-  const performStatusUpdate = async (newStatus: "paid" | "shipped" | "cancelled") => {
+  const performStatusUpdate = async (newStatus: OrderStatus) => {
     if (!order) return;
     setUpdating(newStatus);
     try {
@@ -142,9 +148,12 @@ export default function AdminOrderDetailPage({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "draft": return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "pending_half_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "half_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "shipped": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "received": return "bg-indigo-100 text-indigo-700 border-indigo-200";
+      case "pending_rest_payment": return "bg-purple-100 text-purple-700 border-purple-200";
       case "cancelled": return "bg-red-100 text-red-700 border-red-200";
       default: return "bg-zinc-100 text-zinc-600 border-zinc-200";
     }
@@ -153,9 +162,12 @@ export default function AdminOrderDetailPage({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "draft": return <AlertCircle className="h-4 w-4" />;
-      case "pending_payment": return <CreditCard className="h-4 w-4" />;
+      case "pending_half_payment": return <CreditCard className="h-4 w-4" />;
+      case "half_payment_received": return <CheckCircle2 className="h-4 w-4" />;
       case "paid": return <CheckCircle2 className="h-4 w-4" />;
       case "shipped": return <Truck className="h-4 w-4" />;
+      case "received": return <CheckCircle2 className="h-4 w-4" />;
+      case "pending_rest_payment": return <CreditCard className="h-4 w-4" />;
       case "cancelled": return <AlertCircle className="h-4 w-4" />;
       default: return null;
     }
@@ -195,8 +207,8 @@ export default function AdminOrderDetailPage({
         <div className="flex gap-2">
           <button 
             onClick={() => handleDownload("pdf")}
-            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
-            title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
@@ -204,8 +216,8 @@ export default function AdminOrderDetailPage({
           </button>
           <button 
             onClick={() => handleDownload("png")}
-            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
-            title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className={`h-3.5 w-3.5 ${downloading === 'png' ? 'animate-pulse' : ''}`} />
@@ -264,39 +276,50 @@ export default function AdminOrderDetailPage({
                 </div>
               )}
               
-              {/* Admin Actions */}
-              <div className="flex flex-wrap gap-2 justify-end">
-                {order.status === "pending_payment" && (
-                  <button 
-                    onClick={() => handleStatusUpdate("paid")}
-                    disabled={!!updating}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    {updating === "paid" ? t("marking") : t("markAsPaid")}
-                  </button>
-                )}
-                {order.status === "paid" && (
-                  <button 
-                    onClick={() => handleStatusUpdate("shipped")}
-                    disabled={!!updating}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
-                  >
-                    <ShippedIcon className="h-3.5 w-3.5" />
-                    {updating === "shipped" ? t("marking") : t("markAsShipped")}
-                  </button>
-                )}
-                {order.status !== "cancelled" && order.status !== "shipped" && (
-                  <button 
-                    onClick={() => handleStatusUpdate("cancelled")}
-                    disabled={!!updating}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                    {updating === "cancelled" ? t("cancelling") : t("cancelOrder")}
-                  </button>
-                )}
-              </div>
+              {/* Admin Actions — Step 2: Confirm half payment */}
+              {order.status === "pending_half_payment" && (
+                <button 
+                  onClick={() => handleStatusUpdate("half_payment_received")}
+                  disabled={!!updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  {updating === "half_payment_received" ? t("marking") : t("markAsHalfPaid")}
+                </button>
+              )}
+              {/* Admin Actions — Step 3: Mark as shipped */}
+              {order.status === "half_payment_received" && (
+                <button 
+                  onClick={() => handleStatusUpdate("shipped")}
+                  disabled={!!updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
+                >
+                  <ShippedIcon className="h-3.5 w-3.5" />
+                  {updating === "shipped" ? t("marking") : t("markAsShipped")}
+                </button>
+              )}
+              {/* Admin Actions — Step 6: Mark as paid */}
+              {order.status === "pending_rest_payment" && (
+                <button 
+                  onClick={() => handleStatusUpdate("paid")}
+                  disabled={!!updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 disabled:opacity-50"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  {updating === "paid" ? t("marking") : t("markAsPaid")}
+                </button>
+              )}
+              {/* Cancel — available for any non-terminal status */}
+              {order.status !== "cancelled" && order.status !== "paid" && (
+                <button 
+                  onClick={() => handleStatusUpdate("cancelled")}
+                  disabled={!!updating}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-zinc-400 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  {updating === "cancelled" ? t("cancelling") : t("cancelOrder")}
+                </button>
+              )}
             </div>
           </div>
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
@@ -408,6 +431,35 @@ export default function AdminOrderDetailPage({
                 <span className="text-2xl font-black text-red-600 font-mono tracking-tighter">{formatPrice(Number(order.totalAmount))}</span>
              </div>
           </div>
+        </div>
+
+        {/* Order Logs */}
+        <div className="bg-white border border-zinc-200 rounded-3xl p-6 md:p-8 shadow-sm">
+          <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 mb-6 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-zinc-500" />
+            {t("notes") || "Order Logs"}
+          </h3>
+          
+          {/* Stale Shipment Alert */}
+          {order.status === 'shipped' && isBefore(new Date(order.updatedAt), subMonths(new Date(), 3)) && (
+            <div className="mb-6 flex gap-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 animate-pulse">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <div className="text-sm font-bold leading-tight">
+                {t("staleOrderAlert")}
+              </div>
+            </div>
+          )}
+
+          {order.notes && (
+            <div className="space-y-4 font-mono text-zinc-600 text-sm whitespace-pre-wrap">
+              {order.notes.split('\n').filter(Boolean).map((note, i) => (
+                <div key={i} className="flex gap-4 p-4 rounded-xl bg-zinc-50 border border-zinc-100">
+                  <div className="w-1.5 rounded-full bg-zinc-300" />
+                  <p className="flex-1 leading-relaxed">{note}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <ConfirmDialog

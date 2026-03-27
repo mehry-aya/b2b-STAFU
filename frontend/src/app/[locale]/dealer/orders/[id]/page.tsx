@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use, useRef } from "react";
 import { fetchOrderById, updateOrderStatus } from "@/lib/api/orders";
-import { Order } from "@/lib/types/order";
+import { Order, OrderStatus } from "@/lib/types/order";
 import { 
   ChevronLeft, 
   Calendar, 
@@ -114,27 +114,27 @@ export default function DealerOrderDetailPage({
     }
   };
 
-  const handleSubmitForPayment = async () => {
+  const handleUpdateStatus = async (newStatus: OrderStatus) => {
     if (!order) return;
     setSubmitting(true);
     try {
-      const result = await updateOrderStatus(order.id, "pending_payment");
+      const result = await updateOrderStatus(order.id, newStatus);
       if (result && result.error) {
         toast({
-          title: "Submission Failed",
+          title: t("updateFailed") || "Update Failed",
           description: result.error,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Order Submitted",
-          description: "Your order has been submitted for payment processing.",
+          title: t("statusUpdated") || "Status Updated",
+          description: t("statusDescription", { status: newStatus.replace('_', ' ') }) || `Order status changed to ${newStatus.replace('_', ' ')}.`,
         });
         await loadOrder(); // Refresh data
       }
     } catch (err: any) {
       toast({
-        title: "Submission Failed",
+        title: t("updateFailed") || "Update Failed",
         description: err.message || "An error occurred.",
         variant: "destructive",
       });
@@ -146,9 +146,12 @@ export default function DealerOrderDetailPage({
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "draft": return "bg-zinc-100 text-zinc-600 border-zinc-200";
-      case "pending_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "pending_half_payment": return "bg-amber-100 text-amber-700 border-amber-200";
+      case "half_payment_received": return "bg-emerald-100 text-emerald-700 border-emerald-200";
       case "paid": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "pending_rest_payment": return "bg-purple-100 text-purple-700 border-purple-200";
       case "shipped": return "bg-blue-100 text-blue-700 border-blue-200";
+      case "received": return "bg-indigo-100 text-indigo-700 border-indigo-200";
       case "cancelled": return "bg-red-100 text-red-700 border-red-200";
       default: return "bg-zinc-100 text-zinc-600 border-zinc-200";
     }
@@ -157,9 +160,12 @@ export default function DealerOrderDetailPage({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "draft": return <AlertCircle className="h-4 w-4" />;
-      case "pending_payment": return <CreditCard className="h-4 w-4" />;
+      case "pending_half_payment": return <CreditCard className="h-4 w-4" />;
+      case "half_payment_received": return <CheckCircle2 className="h-4 w-4" />;
       case "paid": return <CheckCircle2 className="h-4 w-4" />;
       case "shipped": return <Truck className="h-4 w-4" />;
+      case "received": return <CheckCircle2 className="h-4 w-4" />;
+      case "pending_rest_payment": return <CreditCard className="h-4 w-4" />;
       case "cancelled": return <AlertCircle className="h-4 w-4" />;
       default: return null;
     }
@@ -199,8 +205,8 @@ export default function DealerOrderDetailPage({
         <div className="flex gap-2">
           <button 
             onClick={() => handleDownload("pdf")}
-            disabled={!!downloading || !["paid", "shipped"].includes(order.status)}
-            title={!["paid", "shipped"].includes(order.status) ? t("invoiceNote") : ""}
+            disabled={!!downloading || !["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status)}
+            title={!["half_payment_received", "shipped", "received", "pending_rest_payment", "paid"].includes(order.status) ? t("invoiceNote") : ""}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Printer className={`h-3.5 w-3.5 ${downloading === 'pdf' ? 'animate-pulse' : ''}`} />
@@ -208,6 +214,8 @@ export default function DealerOrderDetailPage({
           </button>
         </div>
       </div>
+
+
 
         {/* Hidden Invoice Template for Export */}
         <div style={{ position: 'absolute', top: '-10000px', left: '-10000px' }}>
@@ -243,17 +251,71 @@ export default function DealerOrderDetailPage({
               </div>
               {order.status === "draft" && (
                 <button 
-                  onClick={handleSubmitForPayment}
+                  onClick={() => handleUpdateStatus("pending_half_payment")}
                   disabled={submitting}
                   className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95 disabled:opacity-50"
                 >
                   {submitting ? "Processing..." : (
                     <>
-                      Submit for Payment
+                      {t("markAsHalfPaid") || "Submit & Pay Half"}
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}
                 </button>
+              )}
+              {order.status === "shipped" && (
+                <button 
+                  onClick={() => handleUpdateStatus("received")}
+                  disabled={submitting}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95 disabled:opacity-50"
+                >
+                  {submitting ? "Processing..." : (
+                    <>
+                      {t("markAsReceived") || "Confirm Receipt"}
+                      <Package className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              )}
+              {order.status === "received" && (
+                <button 
+                  onClick={() => handleUpdateStatus("pending_rest_payment")}
+                  disabled={submitting}
+                  className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95 disabled:opacity-50"
+                >
+                  {submitting ? "Processing..." : (
+                    <>
+                      {t("markAsPaidByDealer") || "Pay Remaining Balance"}
+                      <CreditCard className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              )}
+              {/* Waiting state — half payment submitted, admin hasn't confirmed yet */}
+              {order.status === "pending_half_payment" && (
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <div className="flex items-center gap-2 px-6 py-3 bg-amber-50 text-amber-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-amber-100 shadow-sm whitespace-nowrap">
+                    <Clock className="h-3 w-3 text-amber-500" />
+                    {t("waitingForShipment") || "Waiting for Admin Confirmation"}
+                  </div>
+                  <div className="flex items-center gap-2 px-6 py-3 bg-zinc-50 text-zinc-400 rounded-xl font-black text-[10px] uppercase tracking-widest border border-zinc-100 opacity-60 whitespace-nowrap">
+                    <X className="h-3 w-3 text-zinc-300" />
+                    {t("restPaymentBlocked") || "Rest payment — BLOCKED"}
+                  </div>
+                </div>
+              )}
+              {/* Waiting state — half payment confirmed by admin, waiting for shipment */}
+              {order.status === "half_payment_received" && (
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <div className="flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-emerald-100 shadow-sm whitespace-nowrap">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                    {t("waitingForShipment") || "Half Payment Confirmed — Awaiting Shipment"}
+                  </div>
+                  <div className="flex items-center gap-2 px-6 py-3 bg-zinc-50 text-zinc-400 rounded-xl font-black text-[10px] uppercase tracking-widest border border-zinc-100 opacity-60 whitespace-nowrap">
+                    <X className="h-3 w-3 text-zinc-300" />
+                    {t("restPaymentBlocked") || "Rest payment — BLOCKED"}
+                  </div>
+                </div>
               )}
             </div>
           </div>
